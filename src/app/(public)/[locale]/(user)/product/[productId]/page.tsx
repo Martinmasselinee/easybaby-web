@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { AvailabilityChecker } from "@/components/ui/availability-checker";
+
 
 // Traductions statiques
 const translations = {
@@ -111,7 +111,8 @@ export default function ProductDetailPage({
   // États pour la disponibilité
   const [availableHotels, setAvailableHotels] = useState<any[]>([]);
   const [isProductAvailable, setIsProductAvailable] = useState<boolean | null>(null);
-  const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
+  const [availableDates, setAvailableDates] = useState<{start: string, end: string}[]>([]);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
 
   const product = demoProducts[productId as keyof typeof demoProducts];
   const hotels = availableHotels.length > 0 
@@ -121,18 +122,58 @@ export default function ProductDetailPage({
       }))
     : demoHotels[citySlug as keyof typeof demoHotels] || [];
     
-  // Gérer le changement de disponibilité
-  const handleAvailabilityChange = (isAvailable: boolean, hotels: any[]) => {
-    setIsProductAvailable(isAvailable);
-    setAvailableHotels(hotels);
+  // Vérifier la disponibilité lorsqu'un hôtel est sélectionné
+  const checkAvailabilityForHotel = async (hotelId: string) => {
+    if (!hotelId) return;
     
-    // Si des hôtels sont disponibles, présélectionner le premier
-    if (hotels.length > 0) {
-      setPickupHotelId(hotels[0].hotelId);
-      setDropHotelId(hotels[0].hotelId);
-    } else {
-      setPickupHotelId("");
-      setDropHotelId("");
+    setIsCheckingAvailability(true);
+    
+    try {
+      // Appel à l'API pour obtenir les dates disponibles pour ce produit dans cet hôtel
+      const response = await fetch(`/api/inventory/availability?productId=${productId}&hotelId=${hotelId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Mettre à jour la disponibilité
+      setIsProductAvailable(data.available);
+      
+      // Si le produit est disponible, mettre à jour les dates disponibles
+      if (data.available) {
+        // Dans une vraie implémentation, nous récupérerions les dates disponibles depuis l'API
+        // Pour la démo, nous utilisons les 14 prochains jours
+        const availableDates = [];
+        const today = new Date();
+        
+        for (let i = 0; i < 14; i++) {
+          const startDate = new Date(today);
+          startDate.setDate(today.getDate() + i);
+          
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 1);
+          
+          availableDates.push({
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0]
+          });
+        }
+        
+        setAvailableDates(availableDates);
+        
+        // Sélectionner la première date disponible
+        if (availableDates.length > 0) {
+          setPickupDate(availableDates[0].start);
+          setDropDate(availableDates[0].end);
+        }
+      }
+    } catch (err) {
+      console.error("Erreur lors de la vérification de la disponibilité:", err);
+      setIsProductAvailable(false);
+    } finally {
+      setIsCheckingAvailability(false);
     }
   };
 
@@ -242,22 +283,9 @@ export default function ProductDetailPage({
             </p>
           </div>
           
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => setShowAvailabilityChecker(!showAvailabilityChecker)}
-          >
-            {showAvailabilityChecker ? "Masquer la disponibilité" : "Vérifier la disponibilité"}
-          </Button>
-          
-          {showAvailabilityChecker && (
-            <div className="mt-4">
-              <AvailabilityChecker 
-                productId={productId}
-                cityId={citySlug}
-                locale={locale}
-                onAvailabilityChange={handleAvailabilityChange}
-              />
+          {isCheckingAvailability && (
+            <div className="mt-4 text-sm text-blue-600">
+              Vérification des disponibilités...
             </div>
           )}
           
@@ -303,7 +331,14 @@ export default function ProductDetailPage({
               <select
                 className="w-full border rounded-md p-2"
                 value={pickupHotelId}
-                onChange={(e) => setPickupHotelId(e.target.value)}
+                onChange={(e) => {
+                  const hotelId = e.target.value;
+                  setPickupHotelId(hotelId);
+                  setDropHotelId(hotelId); // Synchroniser l'hôtel de dépôt
+                  if (hotelId) {
+                    checkAvailabilityForHotel(hotelId);
+                  }
+                }}
                 required
               >
                 <option value="">{t.selectHotel}</option>
@@ -319,14 +354,20 @@ export default function ProductDetailPage({
               <label className="block text-sm font-medium mb-1">
                 {t.date}
               </label>
-              <input
-                type="date"
+              <select
                 className="w-full border rounded-md p-2"
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
                 required
-              />
+                disabled={!pickupHotelId || availableDates.length === 0}
+              >
+                <option value="">Sélectionnez une date</option>
+                {availableDates.map((date, index) => (
+                  <option key={index} value={date.start}>
+                    {new Date(date.start).toLocaleDateString(locale)}
+                  </option>
+                ))}
+              </select>
             </div>
             
             <div>
@@ -370,14 +411,22 @@ export default function ProductDetailPage({
               <label className="block text-sm font-medium mb-1">
                 {t.date}
               </label>
-              <input
-                type="date"
+              <select
                 className="w-full border rounded-md p-2"
                 value={dropDate}
                 onChange={(e) => setDropDate(e.target.value)}
-                min={pickupDate || new Date().toISOString().split("T")[0]}
                 required
-              />
+                disabled={!pickupDate || availableDates.length === 0}
+              >
+                <option value="">Sélectionnez une date</option>
+                {availableDates
+                  .filter(date => !pickupDate || date.start >= pickupDate)
+                  .map((date, index) => (
+                    <option key={index} value={date.end}>
+                      {new Date(date.end).toLocaleDateString(locale)}
+                    </option>
+                  ))}
+              </select>
             </div>
             
             <div>
