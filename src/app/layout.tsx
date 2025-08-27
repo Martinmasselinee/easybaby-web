@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { setupGlobalErrorHandling } from "@/lib/logger";
+
+// Initialiser la gestion globale des erreurs
+if (typeof window === 'undefined') {
+  setupGlobalErrorHandling();
+}
 
 export const metadata: Metadata = {
   title: "EasyBaby",

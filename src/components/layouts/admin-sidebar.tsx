@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const navItems = [
   {
@@ -31,7 +32,12 @@ const navItems = [
   },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
 
   // Fonction pour vérifier si un lien est actif, même pour les sous-pages
@@ -49,24 +55,46 @@ export function AdminSidebar() {
     return false;
   };
 
+  const handleLinkClick = () => {
+    // Fermer le sidebar sur mobile après avoir cliqué sur un lien
+    if (onClose && window.innerWidth < 768) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="w-64 border-r bg-gray-50 min-h-[calc(100vh-4rem)]">
-      <nav className="flex flex-col gap-2 p-4">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-              isActive(item.href)
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-gray-100"
-            )}
-          >
-            {item.title}
-          </Link>
-        ))}
-      </nav>
-    </aside>
+    <>
+      {/* Overlay pour mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={cn(
+        "fixed top-16 left-0 z-50 w-64 h-[calc(100vh-4rem)] border-r bg-gray-50 transform transition-transform duration-300 ease-in-out md:relative md:top-0 md:translate-x-0 md:z-auto",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <nav className="flex flex-col gap-2 p-4">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={handleLinkClick}
+              className={cn(
+                "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                isActive(item.href)
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-gray-100"
+              )}
+            >
+              {item.title}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 }

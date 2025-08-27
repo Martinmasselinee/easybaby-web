@@ -1,56 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllCities, createCity } from '@/lib/db';
 import { invalidateCitiesCache } from '@/lib/cache';
+import { withErrorHandling, createSuccessResponse } from '@/lib/api-middleware';
+import { createError, errorCodes } from '@/lib/error-handler';
+import { z } from 'zod';
 
-export async function GET() {
-  try {
-    const cities = await getAllCities();
-    return NextResponse.json(cities);
-  } catch (error) {
-    console.error('Error fetching cities:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch cities' },
-      { status: 500 }
-    );
-  }
-}
+const citySchema = z.object({
+  name: z.string().min(1, 'Le nom est obligatoire'),
+  slug: z.string().min(1, 'Le slug est obligatoire').regex(/^[a-z0-9-]+$/, 'Le slug doit contenir uniquement des lettres minuscules, chiffres et tirets')
+});
 
-export async function POST(request: NextRequest) {
+export const GET = withErrorHandling(async () => {
+  const cities = await getAllCities();
+  return createSuccessResponse(cities);
+});
+
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const body = await request.json();
+  
+  // Validation avec Zod
+  const validatedData = citySchema.parse(body);
+  
   try {
-    const body = await request.json();
-    
-    // Validation basique
-    if (!body.name || !body.slug) {
-      return NextResponse.json(
-        { error: 'Name and slug are required' },
-        { status: 400 }
-      );
-    }
-    
     // Créer la ville
-    const city = await createCity({
-      name: body.name,
-      slug: body.slug,
-    });
+    const city = await createCity(validatedData);
     
     // Invalider le cache des villes
     invalidateCitiesCache();
     
-    return NextResponse.json(city, { status: 201 });
-  } catch (error) {
-    console.error('Error creating city:', error);
-    
+    return NextResponse.json(createSuccessResponse(city), { status: 201 });
+  } catch (error: any) {
     // Gérer l'erreur de clé unique (slug déjà utilisé)
-    if ((error as unknown).code === 'P2002') {
-      return NextResponse.json(
-        { error: 'A city with this slug already exists' },
-        { status: 409 }
-      );
+    if (error.code === 'P2002') {
+      throw createError(errorCodes.ALREADY_EXISTS, 'Une ville avec ce slug existe déjà');
     }
     
-    return NextResponse.json(
-      { error: 'Failed to create city' },
-      { status: 500 }
-    );
+    throw createError(errorCodes.DATABASE_ERROR, 'Erreur lors de la création de la ville');
   }
-}
+});

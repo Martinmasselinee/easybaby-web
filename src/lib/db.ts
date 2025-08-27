@@ -16,6 +16,34 @@ export async function getAllCities() {
   });
 }
 
+// Version optimisée pour la page publique avec comptage des produits
+export async function getAllCitiesWithProductCount() {
+  return await prisma.city.findMany({
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      _count: {
+        select: {
+          hotels: true,
+        },
+      },
+      hotels: {
+        select: {
+          inventory: {
+            select: {
+              productId: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      name: 'asc',
+    },
+  });
+}
+
 export async function getCityBySlug(slug: string) {
   return await prisma.city.findUnique({
     where: {
@@ -263,16 +291,141 @@ export async function deleteInventoryItem(id: string) {
 export async function getAllReservations() {
   return await prisma.reservation.findMany({
     include: {
-      city: true,
-      pickupHotel: true,
-      dropHotel: true,
-      product: true,
-      discountCode: true,
+      city: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      pickupHotel: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      dropHotel: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+        },
+      },
+      discountCode: {
+        select: {
+          id: true,
+          code: true,
+          kind: true,
+        },
+      },
     },
     orderBy: {
       createdAt: 'desc',
     },
   });
+}
+
+// Version paginée optimisée
+export async function getReservationsPaginated(
+  page: number = 1,
+  limit: number = 10,
+  filters?: {
+    status?: string;
+    productId?: string;
+    hotelId?: string;
+    search?: string;
+  }
+) {
+  const skip = (page - 1) * limit;
+  
+  const where: any = {};
+  
+  if (filters?.status && filters.status !== 'all') {
+    where.status = filters.status;
+  }
+  
+  if (filters?.productId && filters.productId !== 'all') {
+    where.productId = filters.productId;
+  }
+  
+  if (filters?.hotelId) {
+    where.OR = [
+      { pickupHotelId: filters.hotelId },
+      { dropHotelId: filters.hotelId },
+    ];
+  }
+  
+  if (filters?.search) {
+    where.OR = [
+      { code: { contains: filters.search, mode: 'insensitive' } },
+      { userEmail: { contains: filters.search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [reservations, totalCount] = await Promise.all([
+    prisma.reservation.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        city: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        pickupHotel: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        dropHotel: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        product: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        },
+        discountCode: {
+          select: {
+            id: true,
+            code: true,
+            kind: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
+    prisma.reservation.count({ where }),
+  ]);
+
+  return {
+    reservations,
+    pagination: {
+      page,
+      limit,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      hasNextPage: page < Math.ceil(totalCount / limit),
+      hasPreviousPage: page > 1,
+    },
+  };
 }
 
 export async function getReservationById(id: string) {
@@ -337,6 +490,63 @@ export async function updateReservationStatus(
   });
 }
 
+// Fonction pour marquer un produit comme endommagé avec déduction de caution
+export async function markReservationAsDamaged(
+  reservationId: string,
+  adminNotes?: string
+) {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+  });
+
+  if (!reservation) {
+    throw new Error('Réservation non trouvée');
+  }
+
+  // Marquer comme endommagé et déduire la caution
+  return await prisma.reservation.update({
+    where: { id: reservationId },
+    data: {
+      status: 'DAMAGED',
+      // Note: Dans un vrai système, on créerait une entrée dans une table de transactions
+      // pour traquer la déduction de caution
+    },
+  });
+}
+
+// Fonction pour marquer un produit comme volé avec déduction de caution
+export async function markReservationAsStolen(
+  reservationId: string,
+  adminNotes?: string
+) {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+  });
+
+  if (!reservation) {
+    throw new Error('Réservation non trouvée');
+  }
+
+  // Marquer comme volé (utilise NO_SHOW) et déduire la caution
+  return await prisma.reservation.update({
+    where: { id: reservationId },
+    data: {
+      status: 'NO_SHOW', // Représente le vol dans notre système
+      // Note: Dans un vrai système, on créerait une entrée dans une table de transactions
+      // pour traquer la déduction de caution
+    },
+  });
+}
+
+// Fonction pour obtenir les réservations avec statuts calculés dynamiquement
+export async function getReservationsWithDynamicStatus() {
+  const reservations = await getAllReservations();
+  
+  // Le calcul du statut dynamique sera fait côté client
+  // pour éviter les problèmes de timezone et permettre le real-time
+  return reservations;
+}
+
 // Fonction pour vérifier la disponibilité d'un produit
 export async function checkProductAvailability(
   productId: string,
@@ -389,6 +599,153 @@ export async function checkProductAvailability(
     totalQuantity: inventoryItem.quantity,
     availableQuantity,
   };
+}
+
+// Version optimisée pour vérifier la disponibilité de plusieurs produits/hôtels
+export async function checkMultipleProductAvailability(
+  checks: Array<{
+    productId: string;
+    hotelId: string;
+    startAt: Date;
+    endAt: Date;
+  }>
+) {
+  if (checks.length === 0) return [];
+
+  // 1. Obtenir tous les inventaires en une seule requête
+  const inventoryItems = await prisma.inventoryItem.findMany({
+    where: {
+      OR: checks.map(check => ({
+        hotelId: check.hotelId,
+        productId: check.productId,
+      })),
+    },
+  });
+
+  // 2. Obtenir toutes les réservations qui pourraient chevaucher en une seule requête
+  const allReservations = await prisma.reservation.findMany({
+    where: {
+      OR: checks.map(check => ({
+        productId: check.productId,
+        pickupHotelId: check.hotelId,
+        status: {
+          in: ['PENDING', 'CONFIRMED'],
+        },
+        AND: [
+          { startAt: { lt: check.endAt } },
+          { endAt: { gt: check.startAt } },
+        ],
+      })),
+    },
+    select: {
+      productId: true,
+      pickupHotelId: true,
+      startAt: true,
+      endAt: true,
+    },
+  });
+
+  // 3. Calculer la disponibilité pour chaque vérification
+  return checks.map(check => {
+    const inventory = inventoryItems.find(
+      item => item.hotelId === check.hotelId && item.productId === check.productId
+    );
+
+    if (!inventory) {
+      return {
+        ...check,
+        available: false,
+        totalQuantity: 0,
+        availableQuantity: 0,
+      };
+    }
+
+    const overlappingCount = allReservations.filter(
+      reservation =>
+        reservation.productId === check.productId &&
+        reservation.pickupHotelId === check.hotelId &&
+        reservation.startAt < check.endAt &&
+        reservation.endAt > check.startAt
+    ).length;
+
+    const availableQuantity = Math.max(0, inventory.quantity - overlappingCount);
+
+    return {
+      ...check,
+      available: availableQuantity > 0,
+      totalQuantity: inventory.quantity,
+      availableQuantity,
+    };
+  });
+}
+
+// Fonction pour obtenir les dates disponibles pour un produit dans un hôtel
+export async function getAvailableDatesForProduct(
+  productId: string,
+  hotelId: string,
+  startDate?: Date,
+  endDate?: Date
+) {
+  const now = startDate || new Date();
+  const maxDate = endDate || new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 jours
+
+  // Obtenir l'inventaire
+  const inventoryItem = await prisma.inventoryItem.findUnique({
+    where: {
+      hotelId_productId: {
+        hotelId,
+        productId,
+      },
+    },
+  });
+
+  if (!inventoryItem || inventoryItem.quantity === 0) {
+    return [];
+  }
+
+  // Obtenir toutes les réservations dans la période
+  const reservations = await prisma.reservation.findMany({
+    where: {
+      productId,
+      pickupHotelId: hotelId,
+      status: {
+        in: ['PENDING', 'CONFIRMED'],
+      },
+      startAt: { gte: now },
+      endAt: { lte: maxDate },
+    },
+    select: {
+      startAt: true,
+      endAt: true,
+    },
+    orderBy: {
+      startAt: 'asc',
+    },
+  });
+
+  // Générer les dates disponibles (logique simplifiée)
+  const availableDates: Array<{ start: string; end: string }> = [];
+  const currentDate = new Date(now);
+  
+  for (let i = 0; i < 90; i++) {
+    const checkDate = new Date(currentDate.getTime() + i * 24 * 60 * 60 * 1000);
+    const nextDay = new Date(checkDate.getTime() + 24 * 60 * 60 * 1000);
+    
+    // Vérifier s'il y a des réservations qui chevauchent cette date
+    const hasConflict = reservations.some(
+      reservation =>
+        checkDate < reservation.endAt && nextDay > reservation.startAt
+    );
+    
+    if (!hasConflict) {
+      availableDates.push({
+        start: checkDate.toISOString().split('T')[0],
+        end: nextDay.toISOString().split('T')[0],
+      });
+    }
+  }
+
+  return availableDates;
 }
 
 // Fonction pour obtenir les statistiques du tableau de bord

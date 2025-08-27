@@ -1,9 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
+import { 
+  processReservationsWithDynamicStatus, 
+  filterReservationsByStatus,
+  getStatusLabel,
+  getStatusColor,
+  SimpleReservationStatus,
+  ReservationWithDynamicStatus
+} from "@/lib/reservation-status";
+import { useNotification } from "@/components/ui/notification";
 
 // Données de démonstration pour la V1
 // Générons plus de données pour tester la pagination
@@ -90,12 +99,12 @@ export default function AdminReservationsPage() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <input
               type="text"
               placeholder="Rechercher par code, email, hôtel..."
-              className="w-full rounded-md border px-4 py-2 pl-10"
+              className="w-full rounded-md border px-4 py-2 pl-10 text-sm"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -117,9 +126,9 @@ export default function AdminReservationsPage() {
               />
             </svg>
           </div>
-          <div>
+          <div className="sm:w-48">
             <select
-              className="w-full rounded-md border px-4 py-2"
+              className="w-full rounded-md border px-4 py-2 text-sm"
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value);
@@ -135,9 +144,9 @@ export default function AdminReservationsPage() {
               <option value="DAMAGED">Endommagé</option>
             </select>
           </div>
-          <div>
+          <div className="sm:w-48">
             <select
-              className="w-full rounded-md border px-4 py-2"
+              className="w-full rounded-md border px-4 py-2 text-sm"
               value={filterProduct}
               onChange={(e) => {
                 setFilterProduct(e.target.value);
