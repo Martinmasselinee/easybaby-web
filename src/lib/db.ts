@@ -1,4 +1,4 @@
-import prisma from './prisma';
+import { prisma } from './prisma-client';
 
 // Fonctions City
 export async function getAllCities() {

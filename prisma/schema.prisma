@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model City {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  hotels      Hotel[]
+  reservations Reservation[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Hotel {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  phone       String?
+  email       String
+  cityId      String
+  city        City     @relation(fields: [cityId], references: [id])
+  contactName String?
+  discountCode DiscountCode?
+  inventory   InventoryItem[]
+  pickupReservations Reservation[] @relation("pickupHotel")
+  dropReservations Reservation[] @relation("dropHotel")
+  revenueAgreements RevenueAgreement[]
+  claims     Claim[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String   // e.g., "Poussette", "Lit parapluie"
+  description String?
+  imageUrl    String?
+  pricePerHour Int     // cents per hour
+  pricePerDay  Int     // cents per day
+  deposit     Int      // cents (caution)
+  inventory   InventoryItem[]
+  reservations Reservation[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model InventoryItem {
+  id          String   @id @default(cuid())
+  hotelId     String
+  hotel       Hotel    @relation(fields: [hotelId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int      // total units at this hotel
+  active      Boolean  @default(true)
+  // derived fields via queries:
+  // available = quantity - activeReservations in time window
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Reservation {
+  id            String   @id @default(cuid())
+  code          String   @unique // for lookup
+  userEmail     String
+  userPhone     String?
+  cityId        String
+  pickupHotelId String
+  dropHotelId   String
+  productId     String
+  startAt       DateTime // pickup datetime
+  endAt         DateTime // dropoff datetime
+  status        ReservationStatus @default(CONFIRMED)
+  durationHours Int      // total duration in hours
+  durationDays  Int      // total duration in days (rounded up)
+  pricingType   PricingType @default(DAILY) // whether hourly or daily pricing was used
+  priceCents    Int      @default(0) // final price charged
+  depositCents  Int
+  stripePaymentIntentId String?
+  stripeSetupIntentId   String?
+  discountCodeId String?
+  revenueShareApplied ShareType @default(PLATFORM_70)
+  revenueComputedCents Int @default(0) // total for hotel + platform
+
+  city         City    @relation(fields: [cityId], references: [id])
+  pickupHotel  Hotel   @relation("pickupHotel", fields: [pickupHotelId], references: [id])
+  dropHotel    Hotel   @relation("dropHotel", fields: [dropHotelId], references: [id])
+  product      Product @relation(fields: [productId], references: [id])
+  discountCode DiscountCode? @relation(fields: [discountCodeId], references: [id])
+  claim        Claim?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum ReservationStatus { 
+  PENDING 
+  CONFIRMED 
+  COMPLETED 
+  NO_SHOW 
+  DAMAGED 
+  CANCELLED 
+}
+
+enum ShareType { 
+  PLATFORM_70 
+  HOTEL_70 
+}
+
+model DiscountCode {
+  id         String @id @default(cuid())
+  code       String @unique // hotel reduction code entered by user
+  hotelId    String @unique
+  hotel      Hotel  @relation(fields: [hotelId], references: [id])
+  kind       ShareType // when used, flips revenue split accordingly
+  active     Boolean @default(true)
+  reservations Reservation[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model RevenueAgreement {
+  id        String @id @default(cuid())
+  hotelId   String
+  hotel     Hotel @relation(fields: [hotelId], references: [id])
+  defaultShare ShareType @default(PLATFORM_70) // base split without code
+  startsAt  DateTime @default(now())
+  endsAt    DateTime?
+}
+
+model PaymentAudit {
+  id        String @id @default(cuid())
+  reservationId String
+  event      String
+  data       Json
+  createdAt  DateTime @default(now())
+}
+
+model Claim {
+  id        String @id @default(cuid())
+  reservationId String @unique
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+  hotelId   String
+  hotel     Hotel @relation(fields: [hotelId], references: [id])
+  reason    String // not returned, damaged, etc.
+  amountCents Int
+  status    ClaimStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ClaimStatus { 
+  OPEN 
+  CHARGED 
+  DISMISSED 
+}
+
+enum PricingType {
+  HOURLY
+  DAILY
+}
+
+model AdminUser {
+  id        String @id @default(cuid())
+  email     String @unique
+  passwordHash String
+  role      String @default("admin")
+  createdAt DateTime @default(now())
+}
