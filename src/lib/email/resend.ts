@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { env } from '../../../env.mjs';
+import { env } from '@/env.mjs';
 import ical from 'ical-generator';
 
 // Initialiser Resend avec la clé API

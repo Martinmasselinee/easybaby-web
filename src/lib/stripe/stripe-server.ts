@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { env } from '../../../env.mjs';
+import { env } from '@/env.mjs';
 
 // Cette fonction initialise l'instance Stripe avec la clé secrète
 export const getStripeInstance = () => {

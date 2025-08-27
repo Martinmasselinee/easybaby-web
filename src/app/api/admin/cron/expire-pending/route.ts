@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient, ReservationStatus } from "@prisma/client";
-import { env } from "../../../../../../env.mjs";
+import { env } from "@/env.mjs";
 
 const prisma = new PrismaClient();
 

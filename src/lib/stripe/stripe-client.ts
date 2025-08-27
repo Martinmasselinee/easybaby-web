@@ -1,5 +1,5 @@
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-import { env } from '../../../env.mjs';
+import { env } from '@/env.mjs';
 
 // Singleton pour éviter de charger Stripe plusieurs fois
 let stripePromise: Promise<Stripe | null>;

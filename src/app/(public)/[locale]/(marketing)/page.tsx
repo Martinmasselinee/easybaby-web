@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { env } from "../../../../env.mjs";
+import { env } from "@/env.mjs";
 
 export default function HomePage({
   params,
