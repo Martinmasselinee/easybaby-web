@@ -64,10 +64,10 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
 
   return (
     <>
-      {/* Overlay pour mobile */}
+      {/* Overlay pour mobile avec opacité réduite */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-20 z-40 md:hidden"
           onClick={onClose}
         />
       )}

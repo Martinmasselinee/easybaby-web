@@ -108,15 +108,11 @@ export function NotificationBell({ className }: NotificationBellProps) {
       >
         <svg 
           className="w-6 h-6 text-gray-600" 
-          fill="none" 
-          stroke="currentColor" 
+          fill="currentColor" 
           viewBox="0 0 24 24"
         >
           <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 17h5l-5-5V9c0-3.314-2.686-6-6-6S3 5.686 3 9v3l-5 5h5m12 0v1a3 3 0 01-6 0v-1m6 0H9" 
+            d="M12 2C10.346 2 9 3.346 9 5v3.586l-1.707 1.707A1 1 0 007 11v1a1 1 0 001 1h8a1 1 0 001-1v-1a1 1 0 00-.293-.707L15 8.586V5c0-1.654-1.346-3-3-3zM10 19a2 2 0 104 0h-4z"
           />
         </svg>
         {unreadCount > 0 && (
@@ -127,7 +123,9 @@ export function NotificationBell({ className }: NotificationBellProps) {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-80 md:right-0 sm:top-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto
+                        sm:absolute sm:right-0 sm:top-full sm:mt-2
+                        fixed sm:fixed top-16 right-0 left-0 sm:left-auto sm:w-80 w-full sm:rounded-lg rounded-none sm:shadow-lg shadow-md">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="font-semibold text-gray-900">Notifications</h3>
             {unreadCount > 0 && (
@@ -193,7 +191,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
       {/* Overlay pour fermer le menu */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-40 bg-black bg-opacity-20 sm:bg-transparent"
           onClick={() => setIsOpen(false)}
         />
       )}
