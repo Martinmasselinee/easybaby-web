@@ -123,9 +123,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-80 md:right-0 sm:top-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto
-                        sm:absolute sm:right-0 sm:top-full sm:mt-2
-                        fixed sm:fixed top-16 right-0 left-0 sm:left-auto sm:w-80 w-full sm:rounded-lg rounded-none sm:shadow-lg shadow-md">
+        <div className="fixed sm:absolute top-16 sm:top-full right-0 left-0 sm:left-auto sm:right-0 w-full sm:w-80 mt-0 sm:mt-2 bg-white border border-gray-200 rounded-none sm:rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="font-semibold text-gray-900">Notifications</h3>
             {unreadCount > 0 && (
@@ -188,10 +186,10 @@ export function NotificationBell({ className }: NotificationBellProps) {
         </div>
       )}
 
-      {/* Overlay pour fermer le menu */}
+      {/* Overlay pour fermer le menu - seulement sur mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-20 sm:bg-transparent"
+          className="fixed inset-0 z-40 bg-black bg-opacity-20 sm:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
