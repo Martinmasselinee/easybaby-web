@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -89,7 +89,8 @@ const demoHotels = {
   },
 };
 
-export default function CheckoutPage() {
+// Composant qui utilise useSearchParams, enveloppé dans Suspense
+function CheckoutContent() {
   const routeParams = useParams<{ locale: string }>();
   const locale = routeParams?.locale || 'fr';
   const searchParams = useSearchParams();
@@ -344,5 +345,23 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Composant principal qui enveloppe le contenu dans un Suspense
+export default function CheckoutPage() {
+  // Fallback pour le chargement
+  const LoadingFallback = () => (
+    <div className="flex items-center justify-center min-h-[300px]">
+      <div className="text-center">
+        <p className="text-lg font-medium">Chargement...</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
