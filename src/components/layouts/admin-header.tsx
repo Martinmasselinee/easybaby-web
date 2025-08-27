@@ -35,19 +35,46 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">
       <div className="px-4 md:px-8 lg:px-16 flex h-16 items-center justify-between">
-        <Link href="/admin/dashboard" className="flex items-center space-x-2">
-          <span className="text-xl font-bold">EasyBaby</span>
-          <span className="text-sm text-gray-500">Admin</span>
-        </Link>
-        
         <div className="flex items-center space-x-4">
+          {/* Bouton menu mobile */}
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-gray-100"
+            onClick={onMenuToggle}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+
+          <Link href="/admin/dashboard" className="flex items-center space-x-2">
+            <span className="text-xl font-bold">EasyBaby</span>
+            <span className="text-sm text-gray-500 hidden sm:inline">Admin</span>
+          </Link>
+        </div>
+        
+        <div className="flex items-center space-x-2 md:space-x-4">
           <NotificationBell />
-          <span className="text-sm text-gray-600">{adminEmail}</span>
+          <span className="text-sm text-gray-600 hidden sm:inline">{adminEmail}</span>
           <button 
             onClick={handleLogout}
-            className="text-sm text-gray-600 hover:text-gray-900"
+            className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1 rounded"
           >
-            Déconnexion
+            <span className="hidden sm:inline">Déconnexion</span>
+            <span className="sm:hidden">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </span>
           </button>
         </div>
       </div>

@@ -56,12 +56,25 @@ export default function AdminLayout({
     return <>{children}</>;
   }
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
-      <AdminHeader />
-      <div className="flex flex-1">
-        <AdminSidebar />
-        <main className="flex-1 px-4 md:px-8 lg:px-16 py-8">{children}</main>
+      <AdminHeader onMenuToggle={toggleSidebar} />
+      <div className="flex flex-1 relative">
+        <AdminSidebar 
+          isOpen={sidebarOpen} 
+          onClose={closeSidebar} 
+        />
+        <main className="flex-1 px-4 md:px-8 lg:px-16 py-8 md:ml-0 transition-all duration-300 overflow-auto">
+          {children}
+        </main>
       </div>
     </div>
   );
