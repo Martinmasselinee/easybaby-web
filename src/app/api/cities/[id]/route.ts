@@ -66,7 +66,7 @@ export async function PUT(
     console.error('Error updating city:', error);
     
     // Gérer l'erreur d'entité non trouvée
-    if ((error as any).code === 'P2025') {
+    if ((error as unknown).code === 'P2025') {
       return NextResponse.json(
         { error: 'City not found' },
         { status: 404 }
@@ -74,7 +74,7 @@ export async function PUT(
     }
     
     // Gérer l'erreur de clé unique (slug déjà utilisé)
-    if ((error as any).code === 'P2002') {
+    if ((error as unknown).code === 'P2002') {
       return NextResponse.json(
         { error: 'A city with this slug already exists' },
         { status: 409 }
@@ -103,7 +103,7 @@ export async function DELETE(
     console.error('Error deleting city:', error);
     
     // Gérer l'erreur d'entité non trouvée
-    if ((error as any).code === 'P2025') {
+    if ((error as unknown).code === 'P2025') {
       return NextResponse.json(
         { error: 'City not found' },
         { status: 404 }
@@ -111,7 +111,7 @@ export async function DELETE(
     }
     
     // Gérer l'erreur de contrainte de clé étrangère
-    if ((error as any).code === 'P2003') {
+    if ((error as unknown).code === 'P2003') {
       return NextResponse.json(
         { error: 'Cannot delete city because it has related records' },
         { status: 409 }

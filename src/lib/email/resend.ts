@@ -191,14 +191,36 @@ export async function sendHotelNotificationEmail(options: {
 }
 
 import { render } from '@react-email/render';
+import React from 'react';
 import UserConfirmationEmail from '@/components/emails/user-confirmation-email';
 import HotelNotificationEmail from '@/components/emails/hotel-notification-email';
 
+// Types pour les templates d'emails
+type UserConfirmationEmailProps = {
+  reservationCode: string;
+  productName: string;
+  pickupHotel: string;
+  pickupDate: string;
+  dropoffHotel: string;
+  dropoffDate: string;
+  depositAmount: string;
+  discountCode?: string;
+};
+
+type HotelNotificationEmailProps = {
+  reservationCode: string;
+  productName: string;
+  userEmail: string;
+  userPhone: string;
+  pickupDate: string;
+  dropoffDate: string;
+};
+
 // Templates d'emails
-function UserConfirmationEmailTemplate(props: any) {
+function UserConfirmationEmailTemplate(props: UserConfirmationEmailProps) {
   return render(<UserConfirmationEmail {...props} />);
 }
 
-function HotelNotificationEmailTemplate(props: any) {
+function HotelNotificationEmailTemplate(props: HotelNotificationEmailProps) {
   return render(<HotelNotificationEmail {...props} />);
 }

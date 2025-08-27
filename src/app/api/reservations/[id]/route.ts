@@ -59,7 +59,7 @@ export async function PATCH(
     console.error('Error updating reservation status:', error);
     
     // Gérer l'erreur d'entité non trouvée
-    if ((error as any).code === 'P2025') {
+    if ((error as unknown).code === 'P2025') {
       return NextResponse.json(
         { error: 'Reservation not found' },
         { status: 404 }

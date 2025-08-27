@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Gestionnaire pour payment_intent.succeeded
-async function handlePaymentIntentSucceeded(paymentIntent: any) {
+async function handlePaymentIntentSucceeded(paymentIntent: unknown) {
   const { metadata } = paymentIntent;
   
   if (!metadata?.reservationId) {
@@ -70,7 +70,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: any) {
 }
 
 // Gestionnaire pour payment_intent.payment_failed
-async function handlePaymentIntentFailed(paymentIntent: any) {
+async function handlePaymentIntentFailed(paymentIntent: unknown) {
   const { metadata } = paymentIntent;
   
   if (!metadata?.reservationId) {
@@ -98,7 +98,7 @@ async function handlePaymentIntentFailed(paymentIntent: any) {
 }
 
 // Gestionnaire pour setup_intent.succeeded
-async function handleSetupIntentSucceeded(setupIntent: any) {
+async function handleSetupIntentSucceeded(setupIntent: unknown) {
   const { metadata } = setupIntent;
   
   if (!metadata?.reservationId) {
@@ -120,7 +120,7 @@ async function handleSetupIntentSucceeded(setupIntent: any) {
 }
 
 // Gestionnaire pour setup_intent.setup_failed
-async function handleSetupIntentFailed(setupIntent: any) {
+async function handleSetupIntentFailed(setupIntent: unknown) {
   const { metadata } = setupIntent;
   
   if (!metadata?.reservationId) {

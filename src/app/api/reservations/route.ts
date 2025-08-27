@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating reservation:', error);
     
     // Gérer les erreurs de clé étrangère
-    if ((error as any).code === 'P2003') {
+    if ((error as unknown).code === 'P2003') {
       return NextResponse.json(
         { error: 'Invalid foreign key reference' },
         { status: 400 }

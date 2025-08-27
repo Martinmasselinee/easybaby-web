@@ -16,7 +16,7 @@ export async function DELETE(
     console.error('Error deleting inventory item:', error);
     
     // Gérer l'erreur d'entité non trouvée
-    if ((error as any).code === 'P2025') {
+    if ((error as unknown).code === 'P2025') {
       return NextResponse.json(
         { error: 'Inventory item not found' },
         { status: 404 }
@@ -24,7 +24,7 @@ export async function DELETE(
     }
     
     // Gérer l'erreur de contrainte de clé étrangère
-    if ((error as any).code === 'P2003') {
+    if ((error as unknown).code === 'P2003') {
       return NextResponse.json(
         { error: 'Cannot delete inventory item because it has related records' },
         { status: 409 }

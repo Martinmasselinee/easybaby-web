@@ -191,7 +191,7 @@ export default function ReservationDetailPage({ params }: { params: { id: string
             Retour
           </Button>
           <Button onClick={() => setIsEmailDialogOpen(true)}>
-            Renvoyer l'email
+            Renvoyer l&apos;email
           </Button>
         </div>
       </div>
@@ -380,7 +380,7 @@ export default function ReservationDetailPage({ params }: { params: { id: string
             <DialogTitle>Annuler la réservation</DialogTitle>
           </DialogHeader>
           <p className="py-4">
-            Êtes-vous sûr de vouloir annuler cette réservation ? Un email d'annulation sera envoyé au client.
+            Êtes-vous sûr de vouloir annuler cette réservation ? Un email d&apos;annulation sera envoyé au client.
           </p>
           <DialogFooter>
             <DialogClose asChild>
@@ -427,7 +427,7 @@ export default function ReservationDetailPage({ params }: { params: { id: string
             <DialogTitle>Marquer comme non présenté</DialogTitle>
           </DialogHeader>
           <p className="py-4">
-            Confirmez-vous que le client ne s'est pas présenté pour récupérer le produit ?
+            Confirmez-vous que le client ne s&apos;est pas présenté pour récupérer le produit ?
           </p>
           <DialogFooter>
             <DialogClose asChild>
@@ -471,10 +471,10 @@ export default function ReservationDetailPage({ params }: { params: { id: string
       <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Renvoyer l'email de confirmation</DialogTitle>
+            <DialogTitle>Renvoyer l&apos;email de confirmation</DialogTitle>
           </DialogHeader>
           <p className="py-4">
-            Voulez-vous renvoyer l'email de confirmation avec le code de réservation à {reservation.user.email} ?
+            Voulez-vous renvoyer l&apos;email de confirmation avec le code de réservation à {reservation.user.email} ?
           </p>
           <DialogFooter>
             <DialogClose asChild>

@@ -10,7 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose
+  DialogClose,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +33,7 @@ type Hotel = {
     kind: "PLATFORM_70" | "HOTEL_70";
     active: boolean;
   };
-  inventory?: any[];
+  inventory?: InventoryItem[];
 };
 
 type InventoryItem = {

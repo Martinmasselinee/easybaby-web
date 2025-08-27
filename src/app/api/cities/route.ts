@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating city:', error);
     
     // Gérer l'erreur de clé unique (slug déjà utilisé)
-    if ((error as any).code === 'P2002') {
+    if ((error as unknown).code === 'P2002') {
       return NextResponse.json(
         { error: 'A city with this slug already exists' },
         { status: 409 }

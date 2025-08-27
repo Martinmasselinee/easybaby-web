@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     
     // Construire la requête
-    const where: any = {};
+    const where: unknown = {};
     
     if (search) {
       where.OR = [

@@ -46,7 +46,7 @@ export async function POST(
     console.error('Error creating/updating discount code:', error);
     
     // Gérer l'erreur de clé unique (code déjà utilisé)
-    if ((error as any).code === 'P2002') {
+    if ((error as unknown).code === 'P2002') {
       return NextResponse.json(
         { error: 'This discount code is already used by another hotel' },
         { status: 409 }

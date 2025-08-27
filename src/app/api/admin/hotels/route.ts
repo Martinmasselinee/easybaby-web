@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const cityId = searchParams.get("cityId");
     
     // Construire la requête
-    const where: any = {};
+    const where: unknown = {};
     
     if (search) {
       where.OR = [

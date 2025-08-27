@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating hotel:', error);
     
     // Gérer l'erreur de clé étrangère (cityId invalide)
-    if ((error as any).code === 'P2003') {
+    if ((error as unknown).code === 'P2003') {
       return NextResponse.json(
         { error: 'Invalid cityId' },
         { status: 400 }

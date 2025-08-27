@@ -57,7 +57,7 @@ export async function PUT(
     console.error('Error updating hotel:', error);
     
     // Gérer l'erreur d'entité non trouvée
-    if ((error as any).code === 'P2025') {
+    if ((error as unknown).code === 'P2025') {
       return NextResponse.json(
         { error: 'Hotel not found' },
         { status: 404 }
@@ -65,7 +65,7 @@ export async function PUT(
     }
     
     // Gérer l'erreur de clé étrangère (cityId invalide)
-    if ((error as any).code === 'P2003') {
+    if ((error as unknown).code === 'P2003') {
       return NextResponse.json(
         { error: 'Invalid cityId' },
         { status: 400 }
@@ -94,7 +94,7 @@ export async function DELETE(
     console.error('Error deleting hotel:', error);
     
     // Gérer l'erreur d'entité non trouvée
-    if ((error as any).code === 'P2025') {
+    if ((error as unknown).code === 'P2025') {
       return NextResponse.json(
         { error: 'Hotel not found' },
         { status: 404 }
@@ -102,7 +102,7 @@ export async function DELETE(
     }
     
     // Gérer l'erreur de contrainte de clé étrangère
-    if ((error as any).code === 'P2003') {
+    if ((error as unknown).code === 'P2003') {
       return NextResponse.json(
         { error: 'Cannot delete hotel because it has related records' },
         { status: 409 }

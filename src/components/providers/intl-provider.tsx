@@ -9,7 +9,7 @@ export function IntlProvider({
   children,
 }: {
   locale: string;
-  messages: any;
+  messages: unknown;
   children: ReactNode;
 }) {
   return (

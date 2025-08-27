@@ -51,17 +51,17 @@ export const UserConfirmationEmail = ({
               Votre réservation est confirmée !
             </Heading>
             
-            <Text style={paragraph}>
-              Merci d'avoir choisi EasyBaby pour votre location d'équipement.
-              Voici les détails de votre réservation :
-            </Text>
+                          <Text style={paragraph}>
+                Merci d&apos;avoir choisi EasyBaby pour votre location d&apos;équipement.
+                Voici les détails de votre réservation :
+              </Text>
 
             <Section style={codeSection}>
               <Text style={codeText}>
                 {reservationCode}
               </Text>
               <Text style={codeInstructions}>
-                Présentez ce code à l'hôtel pour récupérer votre équipement
+                Présentez ce code à l&apos;hôtel pour récupérer votre équipement
               </Text>
             </Section>
 
@@ -123,12 +123,12 @@ export const UserConfirmationEmail = ({
             <Hr style={hr} />
             
             <Text style={paragraph}>
-              <strong>Important :</strong> Aucun montant n'a été prélevé pour le moment. 
-              La caution sera débitée uniquement en cas de non-retour ou de dommage sur l'équipement.
+              <strong>Important :</strong> Aucun montant n&apos;a été prélevé pour le moment. 
+              La caution sera débitée uniquement en cas de non-retour ou de dommage sur l&apos;équipement.
             </Text>
             
             <Text style={paragraph}>
-              Si vous avez des questions, n'hésitez pas à nous contacter à{' '}
+              Si vous avez des questions, n&apos;hésitez pas à nous contacter à{' '}
               <Link href="mailto:support@easybaby.io" style={link}>
                 support@easybaby.io
               </Link>
