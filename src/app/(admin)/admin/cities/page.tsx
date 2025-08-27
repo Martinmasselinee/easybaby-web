@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useNotification } from "@/components/ui/notification";
+import { ButtonSpinner, Spinner } from "@/components/ui/spinner";
 
 type City = {
   id: string;
@@ -33,6 +35,8 @@ export default function CitiesPage() {
   const [currentCity, setCurrentCity] = useState<City | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showNotification, NotificationsContainer } = useNotification();
 
   // Fonction pour charger les villes
   const fetchCities = async () => {
@@ -65,6 +69,7 @@ export default function CitiesPage() {
     const name = formData.get("name") as string;
     const slug = formData.get("slug") as string;
 
+    setIsSubmitting(true);
     try {
       const response = await fetch("/api/cities", {
         method: "POST",
@@ -82,9 +87,13 @@ export default function CitiesPage() {
       // Recharger les villes après l'ajout
       fetchCities();
       setIsAddDialogOpen(false);
-    } catch (err) {
+      showNotification("success", `La ville ${name} a été créée avec succès.`);
+    } catch (err: any) {
       console.error("Erreur lors de la création de la ville:", err);
       setError(err.message || "Une erreur est survenue lors de la création de la ville.");
+      showNotification("error", err.message || "Une erreur est survenue lors de la création de la ville.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -97,6 +106,7 @@ export default function CitiesPage() {
     const name = formData.get("name") as string;
     const slug = formData.get("slug") as string;
 
+    setIsSubmitting(true);
     try {
       const response = await fetch(`/api/cities/${currentCity.id}`, {
         method: "PUT",
@@ -114,9 +124,13 @@ export default function CitiesPage() {
       // Recharger les villes après la mise à jour
       fetchCities();
       setIsEditDialogOpen(false);
-    } catch (err) {
+      showNotification("success", `La ville ${name} a été mise à jour avec succès.`);
+    } catch (err: any) {
       console.error("Erreur lors de la mise à jour de la ville:", err);
       setError(err.message || "Une erreur est survenue lors de la mise à jour de la ville.");
+      showNotification("error", err.message || "Une erreur est survenue lors de la mise à jour de la ville.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -124,6 +138,7 @@ export default function CitiesPage() {
   const handleDeleteCity = async () => {
     if (!currentCity) return;
 
+    setIsSubmitting(true);
     try {
       const response = await fetch(`/api/cities/${currentCity.id}`, {
         method: "DELETE",
@@ -135,11 +150,16 @@ export default function CitiesPage() {
       }
 
       // Recharger les villes après la suppression
+      const cityName = currentCity.name;
       fetchCities();
       setIsDeleteDialogOpen(false);
-    } catch (err) {
+      showNotification("success", `La ville ${cityName} a été supprimée avec succès.`);
+    } catch (err: any) {
       console.error("Erreur lors de la suppression de la ville:", err);
       setError(err.message || "Une erreur est survenue lors de la suppression de la ville.");
+      showNotification("error", err.message || "Une erreur est survenue lors de la suppression de la ville.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,6 +171,7 @@ export default function CitiesPage() {
 
   return (
     <div className="space-y-8">
+      <NotificationsContainer />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Villes</h1>
@@ -190,7 +211,10 @@ export default function CitiesPage() {
                 <DialogClose asChild>
                   <Button type="button" variant="outline">Annuler</Button>
                 </DialogClose>
-                <Button type="submit">Ajouter</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <ButtonSpinner />}
+                  Ajouter
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -231,7 +255,10 @@ export default function CitiesPage() {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-8">
+          <div className="text-center py-8 flex flex-col items-center">
+            <div className="mb-4">
+              <Spinner size="lg" />
+            </div>
             <p>Chargement des villes...</p>
           </div>
         ) : filteredCities.length === 0 ? (
@@ -301,7 +328,10 @@ export default function CitiesPage() {
                                   <DialogClose asChild>
                                     <Button type="button" variant="outline">Annuler</Button>
                                   </DialogClose>
-                                  <Button type="submit">Enregistrer</Button>
+                                  <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting && <ButtonSpinner />}
+                                    Enregistrer
+                                  </Button>
                                 </DialogFooter>
                               </form>
                             )}
@@ -342,7 +372,9 @@ export default function CitiesPage() {
                               <Button 
                                 variant="destructive" 
                                 onClick={handleDeleteCity}
+                                disabled={isSubmitting}
                               >
+                                {isSubmitting && <ButtonSpinner />}
                                 Supprimer
                               </Button>
                             </DialogFooter>

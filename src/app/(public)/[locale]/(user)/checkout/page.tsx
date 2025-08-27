@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { StripePaymentFormWrapper } from "@/components/checkout/stripe-payment-form";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 // Traductions statiques
 const translations = {
@@ -29,6 +30,7 @@ const translations = {
     consent: "Je comprends que le prix de location sera prélevé maintenant et qu'en cas de non-retour ou d'article endommagé, EasyBaby pourra débiter ma carte à hauteur de la caution indiquée.",
     terms: "J'accepte les conditions générales d'utilisation",
     checkout: "Payer",
+    processing: "Traitement en cours...",
     pricingType: {
       hourly: "Tarification horaire",
       daily: "Tarification journalière"
@@ -55,6 +57,7 @@ const translations = {
     consent: "I understand that the rental price will be charged now and in case of non-return or damaged item, EasyBaby may charge my card up to the indicated deposit amount.",
     terms: "I agree to the terms and conditions",
     checkout: "Checkout",
+    processing: "Processing...",
     pricingType: {
       hourly: "Hourly pricing",
       daily: "Daily pricing"
@@ -124,6 +127,7 @@ function CheckoutContent() {
   const [paymentStep, setPaymentStep] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
   const [setupIntentSecret, setSetupIntentSecret] = useState("");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const product = demoProducts[productId as keyof typeof demoProducts];
   const pickupHotel = demoHotels[pickupHotelId as keyof typeof demoHotels];
@@ -134,10 +138,16 @@ function CheckoutContent() {
 
   const isFormValid = email && phone && consentTerms && consentDeposit;
 
+  // Réinitialiser les erreurs lors de la modification du formulaire
+  const resetErrors = () => {
+    setCheckoutError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
     
+    resetErrors();
     setIsSubmitting(true);
     
     try {
@@ -178,8 +188,9 @@ function CheckoutContent() {
       // Passer à l'étape de paiement
       setPaymentStep(true);
       setIsSubmitting(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de la création de la réservation", error);
+      setCheckoutError(error.message || "Une erreur est survenue lors de la création de la réservation");
       setIsSubmitting(false);
     }
   };
@@ -208,14 +219,16 @@ function CheckoutContent() {
       
       // Rediriger vers la page de confirmation
       window.location.href = `/${locale}/reservation/${data.reservationCode}`;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de la confirmation de la réservation", error);
+      setCheckoutError(error.message || "Une erreur est survenue lors de la confirmation de la réservation");
     }
   };
   
   // Gérer l'erreur de paiement
   const handlePaymentError = (error: string) => {
     console.error("Erreur de paiement:", error);
+    setCheckoutError(`Erreur de paiement: ${error}`);
     setPaymentStep(false);
   };
 
@@ -339,6 +352,11 @@ function CheckoutContent() {
 
         <div className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {checkoutError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
+                {checkoutError}
+              </div>
+            )}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
@@ -348,7 +366,10 @@ function CheckoutContent() {
                   type="email"
                   className="w-full border rounded-md p-2"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    resetErrors();
+                  }}
                   required
                 />
               </div>
@@ -361,7 +382,10 @@ function CheckoutContent() {
                   type="tel"
                   className="w-full border rounded-md p-2"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    resetErrors();
+                  }}
                   required
                 />
               </div>
@@ -420,7 +444,7 @@ function CheckoutContent() {
                       }
                     }}
                   >
-                    {discountLoading ? "..." : discountValid ? "✓" : t.applyCode}
+                    {discountLoading ? <ButtonSpinner /> : discountValid ? "✓" : t.applyCode}
                   </Button>
                 </div>
                 {discountError && (
@@ -439,7 +463,10 @@ function CheckoutContent() {
                   id="consent-deposit"
                   className="mt-1"
                   checked={consentDeposit}
-                  onChange={(e) => setConsentDeposit(e.target.checked)}
+                  onChange={(e) => {
+                    setConsentDeposit(e.target.checked);
+                    resetErrors();
+                  }}
                   required
                 />
                 <label htmlFor="consent-deposit" className="text-sm">
@@ -453,7 +480,10 @@ function CheckoutContent() {
                   id="consent-terms"
                   className="mt-1"
                   checked={consentTerms}
-                  onChange={(e) => setConsentTerms(e.target.checked)}
+                  onChange={(e) => {
+                    setConsentTerms(e.target.checked);
+                    resetErrors();
+                  }}
                   required
                 />
                 <label htmlFor="consent-terms" className="text-sm">
@@ -471,7 +501,8 @@ function CheckoutContent() {
                 </Link>
               </Button>
               <Button type="submit" disabled={!isFormValid || isSubmitting}>
-                {isSubmitting ? "..." : t.checkout}
+                {isSubmitting && <ButtonSpinner />}
+                {isSubmitting ? t.processing : t.checkout}
               </Button>
             </div>
             

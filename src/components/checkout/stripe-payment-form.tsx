@@ -108,7 +108,7 @@ const PaymentForm = ({
     } finally {
       setIsProcessing(false);
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -170,7 +170,7 @@ const PaymentForm = ({
       </Button>
     </form>
   );
-};
+}
 
 // Wrapper qui fournit le contexte Stripe
 export const StripePaymentFormWrapper = ({
