@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { StripePaymentFormWrapper } from "@/components/checkout/stripe-payment-form";
 
 // Traductions statiques
 const translations = {
@@ -120,6 +121,9 @@ function CheckoutContent() {
   const [consentDeposit, setConsentDeposit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalPrice, setFinalPrice] = useState(rentalPrice);
+  const [paymentStep, setPaymentStep] = useState(false);
+  const [clientSecret, setClientSecret] = useState("");
+  const [setupIntentSecret, setSetupIntentSecret] = useState("");
 
   const product = demoProducts[productId as keyof typeof demoProducts];
   const pickupHotel = demoHotels[pickupHotelId as keyof typeof demoHotels];
@@ -136,12 +140,7 @@ function CheckoutContent() {
     
     setIsSubmitting(true);
     
-    // Dans une vraie application, nous enverrions une requête à l'API pour créer une réservation
-    // et initialiser le paiement Stripe
     try {
-      // Simuler un appel API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
       // Dans une implémentation réelle, nous enverrions ces données à l'API
       const reservationData = {
         userEmail: email,
@@ -156,16 +155,68 @@ function CheckoutContent() {
         finalPrice: finalPrice,
       };
       
-      console.log("Données de réservation:", reservationData);
+      // Appel à l'API pour créer une réservation et initialiser le paiement Stripe
+      const response = await fetch('/api/public/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reservationData),
+      });
       
-      // Rediriger vers la page de confirmation avec un code de réservation fictif
-      // Dans une vraie implémentation, nous utiliserions le code retourné par l'API
-      const reservationCode = discountValid ? "DEMO123456-DISC" : "DEMO123456";
-      window.location.href = `/${locale}/reservation/${reservationCode}`;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la création de la réservation');
+      }
+      
+      const data = await response.json();
+      
+      // Stocker les secrets pour Stripe
+      setClientSecret(data.clientSecret);
+      setSetupIntentSecret(data.setupIntentSecret);
+      
+      // Passer à l'étape de paiement
+      setPaymentStep(true);
+      setIsSubmitting(false);
     } catch (error) {
-      console.error("Erreur lors du paiement", error);
+      console.error("Erreur lors de la création de la réservation", error);
       setIsSubmitting(false);
     }
+  };
+  
+  // Gérer le succès du paiement
+  const handlePaymentSuccess = async (paymentIntentId: string, setupIntentId: string) => {
+    try {
+      // Appel à l'API pour confirmer la réservation
+      const response = await fetch('/api/public/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentIntentId,
+          setupIntentId,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la confirmation de la réservation');
+      }
+      
+      const data = await response.json();
+      
+      // Rediriger vers la page de confirmation
+      window.location.href = `/${locale}/reservation/${data.reservationCode}`;
+    } catch (error) {
+      console.error("Erreur lors de la confirmation de la réservation", error);
+    }
+  };
+  
+  // Gérer l'erreur de paiement
+  const handlePaymentError = (error: string) => {
+    console.error("Erreur de paiement:", error);
+    setPaymentStep(false);
   };
 
   if (!product || !pickupHotel || !dropHotel) {
@@ -423,6 +474,21 @@ function CheckoutContent() {
                 {isSubmitting ? "..." : t.checkout}
               </Button>
             </div>
+            
+            {paymentStep && clientSecret && setupIntentSecret && (
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="text-xl font-semibold mb-4">Paiement</h3>
+                <StripePaymentFormWrapper
+                  clientSecret={clientSecret}
+                  setupIntentSecret={setupIntentSecret}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                  depositAmount={product.deposit}
+                  currency="EUR"
+                  locale={locale}
+                />
+              </div>
+            )}
           </form>
         </div>
       </div>
