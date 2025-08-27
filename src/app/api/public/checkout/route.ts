@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, ReservationStatus } from "@prisma/client";
+import { PrismaClient, ReservationStatus, ShareType } from "@prisma/client";
 import { z } from "zod";
 import { createPaymentIntent, createSetupIntent } from "@/lib/stripe/stripe-server";
+import { getDiscountCodeByCode } from "@/lib/db";
 import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
@@ -17,6 +18,7 @@ const checkoutSchema = z.object({
   startAt: z.string().datetime(),
   endAt: z.string().datetime(),
   discountCode: z.string().optional(),
+  finalPrice: z.number().optional(), // Prix final après réduction
 });
 
 export async function POST(request: NextRequest) {
@@ -66,6 +68,38 @@ export async function POST(request: NextRequest) {
 
     // Générer un code unique pour la réservation
     const reservationCode = generateReservationCode();
+    
+    // Calculer la durée en heures et en jours
+    const durationMs = endAt.getTime() - startAt.getTime();
+    const durationHours = Math.ceil(durationMs / (1000 * 60 * 60));
+    const durationDays = Math.ceil(durationHours / 24);
+    
+    // Déterminer le type de tarification (horaire ou journalière)
+    const pricingType = durationHours <= 24 ? "HOURLY" : "DAILY";
+    
+    // Calculer le prix et vérifier le code de réduction
+    let finalPriceCents = validatedData.finalPrice || (pricingType === "HOURLY" ? 
+      product.pricePerHour * durationHours : 
+      product.pricePerDay * durationDays);
+    
+    let revenueShareType = ShareType.PLATFORM_70; // Par défaut, 70% pour la plateforme
+    let discountCodeId = null;
+    
+    // Si un code de réduction est fourni, on le vérifie et on l'applique
+    if (validatedData.discountCode) {
+      const discountCode = await getDiscountCodeByCode(validatedData.discountCode);
+      
+      if (discountCode && discountCode.active) {
+        discountCodeId = discountCode.id;
+        revenueShareType = discountCode.kind; // Utiliser le type de partage défini dans le code
+        
+        // Pour la V1, on applique une réduction de 10% (à titre d'exemple)
+        // Dans une vraie implémentation, le prix final serait déjà calculé côté client
+        if (!validatedData.finalPrice) {
+          finalPriceCents = Math.round(finalPriceCents * 0.9);
+        }
+      }
+    }
 
     // Créer une réservation en attente
     const reservation = await prisma.reservation.create({
@@ -80,14 +114,17 @@ export async function POST(request: NextRequest) {
         startAt,
         endAt,
         status: ReservationStatus.PENDING,
-        priceCents: product.basePrice,
+        priceCents: finalPriceCents,
         depositCents: product.deposit,
-        // Si un code de réduction est fourni, on le vérifie et on l'applique
-        ...(validatedData.discountCode
+        durationHours,
+        durationDays,
+        pricingType,
+        revenueShareApplied: revenueShareType,
+        ...(discountCodeId
           ? {
               discountCode: {
                 connect: {
-                  code: validatedData.discountCode,
+                  id: discountCodeId,
                 },
               },
             }

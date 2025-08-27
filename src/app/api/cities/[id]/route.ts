@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCityBySlug, updateCity, deleteCity } from '@/lib/db';
+import { invalidateCitiesCache } from '@/lib/cache';
 
 export async function GET(
   request: NextRequest,
@@ -61,6 +62,9 @@ export async function PUT(
       slug: body.slug,
     });
     
+    // Invalider le cache des villes
+    invalidateCitiesCache(id);
+    
     return NextResponse.json(city);
   } catch (error) {
     console.error('Error updating city:', error);
@@ -97,6 +101,9 @@ export async function DELETE(
     
     // Supprimer la ville
     await deleteCity(id);
+    
+    // Invalider le cache des villes
+    invalidateCitiesCache(id);
     
     return new NextResponse(null, { status: 204 });
   } catch (error) {

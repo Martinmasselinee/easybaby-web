@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const [adminData, setAdminData] = useState<{
@@ -40,11 +41,12 @@ export default function DashboardPage() {
               <p className="text-sm text-gray-500 mt-1">Total des réservations</p>
             </div>
             
-            <div className="border border-gray-200 p-4 rounded-lg">
+            <Link href="/admin/dashboard/revenue" className="block border border-gray-200 p-4 rounded-lg hover:bg-gray-50">
               <h3 className="font-semibold text-black">Revenus</h3>
               <p className="text-2xl font-bold mt-2">0 €</p>
               <p className="text-sm text-gray-500 mt-1">Revenus totaux</p>
-            </div>
+              <p className="text-xs text-blue-600 mt-2">Voir le détail →</p>
+            </Link>
             
             <div className="border border-gray-200 p-4 rounded-lg">
               <h3 className="font-semibold text-black">Produits</h3>

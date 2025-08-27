@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllProducts, createProduct } from '@/lib/db';
+import { invalidateProductsCache } from '@/lib/cache';
 
 export async function GET() {
   try {
@@ -43,6 +44,9 @@ export async function POST(request: NextRequest) {
       pricePerDay: body.pricePerDay,
       deposit: body.deposit,
     });
+    
+    // Invalider le cache des produits
+    invalidateProductsCache(product.id);
     
     return NextResponse.json(product, { status: 201 });
   } catch (error) {

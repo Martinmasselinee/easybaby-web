@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,23 @@ const translations = {
   }
 };
 
-// Données de démonstration pour la V1
-const demoProducts = [
+// Type pour les produits
+type Product = {
+  id: string;
+  name: string;
+  description: string;
+  deposit: number;
+  pricePerHour: number;
+  pricePerDay: number;
+  availability: {
+    total: number;
+    available: number;
+    hotelsCount?: number;
+  };
+};
+
+// Données de démonstration pour la V1 (utilisées comme fallback)
+const demoProducts: Product[] = [
   {
     id: "poussette",
     name: "Poussette",
@@ -39,6 +54,7 @@ const demoProducts = [
     availability: {
       total: 5,
       available: 3,
+      hotelsCount: 1,
     },
   },
   {
@@ -51,6 +67,7 @@ const demoProducts = [
     availability: {
       total: 5,
       available: 4,
+      hotelsCount: 1,
     },
   },
 ];
@@ -68,18 +85,70 @@ export default function CityProductsPage({
   // Get translations for current locale
   const t = translations[locale as keyof typeof translations] || translations.fr;
 
-  // Dans une vraie application, nous chargerions les données de la ville et des produits ici
-  const cityName = citySlug === "paris" ? "Paris" : citySlug;
+  // États pour stocker les produits et la ville
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cityName, setCityName] = useState(citySlug === "paris" ? "Paris" : citySlug);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Charger les produits au chargement de la page
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Récupérer les produits disponibles dans cette ville
+        const response = await fetch(`/api/products/city/${citySlug}`);
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Si aucun produit n'est retourné, utiliser les données de démo
+        if (data.length === 0) {
+          setProducts(demoProducts);
+        } else {
+          setProducts(data);
+        }
+        
+        // Récupérer également les informations de la ville
+        const cityResponse = await fetch(`/api/cities/${citySlug}`);
+        if (cityResponse.ok) {
+          const cityData = await cityResponse.json();
+          setCityName(cityData.name);
+        }
+      } catch (err) {
+        console.error("Erreur lors du chargement des produits:", err);
+        setError("Impossible de charger les produits. Utilisation des données de démo.");
+        setProducts(demoProducts);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, [citySlug]);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">{cityName}</h1>
         <p className="text-muted-foreground">{t.productsTitle}</p>
+        {error && (
+          <p className="text-sm text-red-500 mt-2">{error}</p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {demoProducts.map((product) => (
+      {isLoading ? (
+        <div className="text-center py-12">
+          <p>Chargement des produits...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {products.map((product) => (
           <div
             key={product.id}
             className="border rounded-lg overflow-hidden shadow-sm"
@@ -132,6 +201,7 @@ export default function CityProductsPage({
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

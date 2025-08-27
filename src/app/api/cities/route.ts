@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllCities, createCity } from '@/lib/db';
+import { invalidateCitiesCache } from '@/lib/cache';
 
 export async function GET() {
   try {
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest) {
       name: body.name,
       slug: body.slug,
     });
+    
+    // Invalider le cache des villes
+    invalidateCitiesCache();
     
     return NextResponse.json(city, { status: 201 });
   } catch (error) {

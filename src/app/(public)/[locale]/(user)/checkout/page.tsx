@@ -112,9 +112,14 @@ function CheckoutContent() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState("");
+  const [discountValid, setDiscountValid] = useState(false);
+  const [discountError, setDiscountError] = useState("");
+  const [discountLoading, setDiscountLoading] = useState(false);
   const [consentTerms, setConsentTerms] = useState(false);
   const [consentDeposit, setConsentDeposit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [finalPrice, setFinalPrice] = useState(rentalPrice);
 
   const product = demoProducts[productId as keyof typeof demoProducts];
   const pickupHotel = demoHotels[pickupHotelId as keyof typeof demoHotels];
@@ -137,8 +142,26 @@ function CheckoutContent() {
       // Simuler un appel API
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
+      // Dans une implémentation réelle, nous enverrions ces données à l'API
+      const reservationData = {
+        userEmail: email,
+        userPhone: phone,
+        cityId: citySlug,
+        pickupHotelId: pickupHotelId,
+        dropHotelId: dropHotelId,
+        productId: productId,
+        startAt: pickupDateTime.toISOString(),
+        endAt: dropDateTime.toISOString(),
+        discountCode: appliedDiscountCode || undefined,
+        finalPrice: finalPrice,
+      };
+      
+      console.log("Données de réservation:", reservationData);
+      
       // Rediriger vers la page de confirmation avec un code de réservation fictif
-      window.location.href = `/${locale}/reservation/DEMO123456`;
+      // Dans une vraie implémentation, nous utiliserions le code retourné par l'API
+      const reservationCode = discountValid ? "DEMO123456-DISC" : "DEMO123456";
+      window.location.href = `/${locale}/reservation/${reservationCode}`;
     } catch (error) {
       console.error("Erreur lors du paiement", error);
       setIsSubmitting(false);
@@ -225,13 +248,24 @@ function CheckoutContent() {
               <div className="border-t my-2"></div>
               
               {/* Total */}
+              {discountValid && (
+                <div className="flex justify-between text-sm">
+                  <span>{t.total}</span>
+                  <span className="line-through text-gray-500">
+                    {new Intl.NumberFormat(locale, {
+                      style: "currency",
+                      currency: "EUR",
+                    }).format(rentalPrice / 100)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between font-bold">
-                <span>{t.total}</span>
+                <span>{discountValid ? "Total avec réduction" : t.total}</span>
                 <span>
                   {new Intl.NumberFormat(locale, {
                     style: "currency",
                     currency: "EUR",
-                  }).format(rentalPrice / 100)}
+                  }).format(finalPrice / 100)}
                 </span>
               </div>
               
@@ -288,14 +322,62 @@ function CheckoutContent() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    className="flex-1 border rounded-md p-2"
+                    className={`flex-1 border rounded-md p-2 ${
+                      discountError ? "border-red-500" : discountValid ? "border-green-500" : ""
+                    }`}
                     value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value)}
+                    onChange={(e) => {
+                      setDiscountCode(e.target.value);
+                      setDiscountError("");
+                      setDiscountValid(false);
+                    }}
                   />
-                  <Button type="button" variant="outline">
-                    {t.applyCode}
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    disabled={discountLoading || !discountCode.trim() || appliedDiscountCode === discountCode}
+                    onClick={async () => {
+                      if (!discountCode.trim()) return;
+                      
+                      setDiscountLoading(true);
+                      setDiscountError("");
+                      
+                      try {
+                        // Vérifier le code de réduction
+                        const response = await fetch(`/api/discounts/verify?code=${encodeURIComponent(discountCode)}`);
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                          throw new Error(data.error || "Code invalide");
+                        }
+                        
+                        if (data.valid) {
+                          setDiscountValid(true);
+                          setAppliedDiscountCode(discountCode);
+                          
+                          // Appliquer la réduction (pour la démo, 10% de réduction)
+                          const discountAmount = Math.round(rentalPrice * 0.1);
+                          setFinalPrice(rentalPrice - discountAmount);
+                        } else {
+                          setDiscountError("Code invalide");
+                        }
+                      } catch (error) {
+                        console.error("Erreur lors de la vérification du code:", error);
+                        setDiscountError(error.message || "Erreur lors de la vérification");
+                      } finally {
+                        setDiscountLoading(false);
+                      }
+                    }}
+                  >
+                    {discountLoading ? "..." : discountValid ? "✓" : t.applyCode}
                   </Button>
                 </div>
+                {discountError && (
+                  <p className="text-xs text-red-500 mt-1">{discountError}</p>
+                )}
+                {discountValid && (
+                  <p className="text-xs text-green-600 mt-1">Code appliqué: 10% de réduction</p>
+                )}
               </div>
             </div>
             

@@ -13,6 +13,7 @@ import {
   DialogClose,
   DialogTrigger
 } from "@/components/ui/dialog";
+import { DiscountCodeManager } from "@/components/admin/discount-code-manager";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -381,61 +382,31 @@ export default function AdminHotelDetailPage({
                 </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Code de réduction</label>
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  className="flex-1 bg-gray-50"
-                  value={hotel.discountCode?.code || "Non défini"}
-                  readOnly
-                />
-                <Dialog open={isDiscountDialogOpen} onOpenChange={setIsDiscountDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">Modifier</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Modifier le code de réduction</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="discount-code">Code de réduction</Label>
-                        <Input 
-                          id="discount-code" 
-                          value={discountCode}
-                          onChange={(e) => setDiscountCode(e.target.value)}
-                          placeholder="ex: HOTEL123"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="discount-type">Type de répartition</Label>
-                        <select 
-                          id="discount-type"
-                          className="w-full border rounded-md p-2"
-                          value={discountKind}
-                          onChange={(e) => setDiscountKind(e.target.value as "PLATFORM_70" | "HOTEL_70")}
-                        >
-                          <option value="HOTEL_70">70% hôtel / 30% plateforme</option>
-                          <option value="PLATFORM_70">30% hôtel / 70% plateforme</option>
-                        </select>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button type="button" variant="outline">Annuler</Button>
-                      </DialogClose>
-                      <Button onClick={handleUpdateDiscountCode}>Enregistrer</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {discountKind === "HOTEL_70" 
-                  ? "Ce code permet à l'hôtel de bénéficier d'une répartition des revenus 70/30 en sa faveur."
-                  : "Ce code applique une répartition des revenus 30/70 en faveur de la plateforme."}
-              </p>
-            </div>
+            <DiscountCodeManager 
+              hotelId={params.hotelId}
+              initialCode={hotel.discountCode?.code || ""}
+              initialType={hotel.discountCode?.kind || "HOTEL_70"}
+              onUpdate={(success) => {
+                if (success) {
+                  // Recharger les données de l'hôtel pour afficher le code mis à jour
+                  fetch(`/api/hotels/${params.hotelId}`)
+                    .then(response => {
+                      if (response.ok) return response.json();
+                      throw new Error(`Erreur HTTP: ${response.status}`);
+                    })
+                    .then(data => {
+                      setHotel(data);
+                      if (data.discountCode) {
+                        setDiscountCode(data.discountCode.code);
+                        setDiscountKind(data.discountCode.kind);
+                      }
+                    })
+                    .catch(error => {
+                      console.error("Erreur lors du rechargement des données de l'hôtel:", error);
+                    });
+                }
+              }}
+            />
             <div className="flex justify-end space-x-2">
               {isEditMode ? (
                 <>

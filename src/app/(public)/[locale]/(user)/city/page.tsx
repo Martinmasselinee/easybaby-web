@@ -1,10 +1,20 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-// Données de démonstration pour la V1
+// Type pour les villes
+type City = {
+  id: string;
+  slug: string;
+  name: string;
+  hotelsCount: number;
+  productsCount: number;
+};
+
+// Données de démonstration pour la V1 (utilisées comme fallback)
 const demoCities = [
   {
     id: "paris",
@@ -52,6 +62,44 @@ export default function CitiesPage() {
   // Get translations for current locale
   const t = translations[locale as keyof typeof translations] || translations.fr;
 
+  // État pour stocker les villes
+  const [cities, setCities] = useState<City[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Charger les villes au chargement de la page
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/cities/counts');
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Si aucune ville n'est retournée, utiliser les données de démo
+        if (data.length === 0) {
+          setCities(demoCities);
+        } else {
+          setCities(data);
+        }
+      } catch (err) {
+        console.error("Erreur lors du chargement des villes:", err);
+        setError("Impossible de charger les villes. Utilisation des données de démo.");
+        setCities(demoCities);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCities();
+  }, []);
+
   return (
     <div className="space-y-8">
       <div>
@@ -59,10 +107,18 @@ export default function CitiesPage() {
         <p className="text-muted-foreground">
           {t.tagline}
         </p>
+        {error && (
+          <p className="text-sm text-red-500 mt-2">{error}</p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {demoCities.map((city) => (
+      {isLoading ? (
+        <div className="text-center py-12">
+          <p>Chargement des villes...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cities.map((city) => (
           <div
             key={city.id}
             className="border rounded-lg overflow-hidden shadow-sm"
@@ -86,6 +142,7 @@ export default function CitiesPage() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

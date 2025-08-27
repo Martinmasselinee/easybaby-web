@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { AvailabilityChecker } from "@/components/ui/availability-checker";
 
 // Traductions statiques
 const translations = {
@@ -103,12 +104,37 @@ export default function ProductDetailPage({
   const [pickupHotelId, setPickupHotelId] = useState<string>("");
   const [dropHotelId, setDropHotelId] = useState<string>("");
   const [pickupDate, setPickupDate] = useState<string>("");
-  const [pickupTime, setPickupTime] = useState<string>("");
+  const [pickupTime, setPickupTime] = useState<string>("10:00");
   const [dropDate, setDropDate] = useState<string>("");
-  const [dropTime, setDropTime] = useState<string>("");
+  const [dropTime, setDropTime] = useState<string>("14:00");
+  
+  // États pour la disponibilité
+  const [availableHotels, setAvailableHotels] = useState<any[]>([]);
+  const [isProductAvailable, setIsProductAvailable] = useState<boolean | null>(null);
+  const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
 
   const product = demoProducts[productId as keyof typeof demoProducts];
-  const hotels = demoHotels[citySlug as keyof typeof demoHotels] || [];
+  const hotels = availableHotels.length > 0 
+    ? availableHotels.map(hotel => ({
+        id: hotel.hotelId,
+        name: hotel.hotelName,
+      }))
+    : demoHotels[citySlug as keyof typeof demoHotels] || [];
+    
+  // Gérer le changement de disponibilité
+  const handleAvailabilityChange = (isAvailable: boolean, hotels: any[]) => {
+    setIsProductAvailable(isAvailable);
+    setAvailableHotels(hotels);
+    
+    // Si des hôtels sont disponibles, présélectionner le premier
+    if (hotels.length > 0) {
+      setPickupHotelId(hotels[0].hotelId);
+      setDropHotelId(hotels[0].hotelId);
+    } else {
+      setPickupHotelId("");
+      setDropHotelId("");
+    }
+  };
 
   // Calcul de la durée de location et du prix total
   const calculateRentalDuration = () => {
@@ -159,7 +185,8 @@ export default function ProductDetailPage({
     pickupDate &&
     pickupTime &&
     dropDate &&
-    dropTime;
+    dropTime &&
+    (isProductAvailable === null || isProductAvailable === true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +241,25 @@ export default function ProductDetailPage({
               }).format(product.pricePerDay / 100))}
             </p>
           </div>
+          
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => setShowAvailabilityChecker(!showAvailabilityChecker)}
+          >
+            {showAvailabilityChecker ? "Masquer la disponibilité" : "Vérifier la disponibilité"}
+          </Button>
+          
+          {showAvailabilityChecker && (
+            <div className="mt-4">
+              <AvailabilityChecker 
+                productId={productId}
+                cityId={citySlug}
+                locale={locale}
+                onAvailabilityChange={handleAvailabilityChange}
+              />
+            </div>
+          )}
           
           {pickupDate && dropDate && pickupTime && dropTime && (
             <div className="mt-3 p-3 bg-gray-50 rounded-md">

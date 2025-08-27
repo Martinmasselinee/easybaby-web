@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { ReservationStatusManager } from "@/components/admin/reservation-status-manager";
 
 // Données de démonstration pour la V1
 const demoReservations = {
@@ -163,12 +164,27 @@ export default function ReservationDetailPage({ params }: { params: { id: string
     setIsUpdating(true);
     
     try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Appel à l'API pour renvoyer les emails
+      const response = await fetch(`/api/emails/resend`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reservationId: reservation.id,
+        }),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `Erreur HTTP: ${response.status}`);
+      }
+      
       setIsEmailDialogOpen(false);
-      alert("Email de confirmation envoyé avec succès");
+      alert("Emails de confirmation renvoyés avec succès");
     } catch (error) {
-      console.error("Erreur lors de l'envoi de l'email", error);
+      console.error("Erreur lors de l'envoi des emails", error);
+      alert(`Erreur: ${error.message || "Une erreur est survenue"}`);
     } finally {
       setIsUpdating(false);
     }
@@ -204,9 +220,16 @@ export default function ReservationDetailPage({ params }: { params: { id: string
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="font-medium">Statut</span>
-              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(reservation.status)}`}>
-                {getStatusTranslation(reservation.status)}
-              </span>
+              <ReservationStatusManager 
+                reservationId={reservation.id}
+                currentStatus={reservation.status as any}
+                onStatusChange={(newStatus) => {
+                  setReservation({
+                    ...reservation,
+                    status: newStatus
+                  });
+                }}
+              />
             </div>
             
             <div className="flex justify-between">
@@ -320,33 +343,12 @@ export default function ReservationDetailPage({ params }: { params: { id: string
         <h2 className="text-xl font-semibold mb-4">Actions</h2>
         
         <div className="flex flex-wrap gap-3">
-          {reservation.status === "PENDING" && (
-            <Button onClick={() => setIsConfirmDialogOpen(true)}>
-              Confirmer la réservation
-            </Button>
-          )}
-          
-          {(reservation.status === "PENDING" || reservation.status === "CONFIRMED") && (
-            <Button variant="outline" onClick={() => setIsCancelDialogOpen(true)}>
-              Annuler la réservation
-            </Button>
-          )}
-          
-          {reservation.status === "CONFIRMED" && (
-            <>
-              <Button onClick={() => setIsCompleteDialogOpen(true)}>
-                Marquer comme terminée
-              </Button>
-              
-              <Button variant="outline" onClick={() => setIsNoShowDialogOpen(true)}>
-                Marquer comme non présenté
-              </Button>
-              
-              <Button variant="outline" onClick={() => setIsDamagedDialogOpen(true)}>
-                Signaler un dommage
-              </Button>
-            </>
-          )}
+          <Button 
+            onClick={() => setIsEmailDialogOpen(true)}
+            variant="outline"
+          >
+            Renvoyer les emails de confirmation
+          </Button>
         </div>
       </div>
       
