@@ -64,19 +64,34 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
 
   return (
     <>
-      {/* Overlay pour mobile avec opacité réduite */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-20 z-40 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      
-      {/* Sidebar */}
+      {/* Sidebar plein écran sur mobile */}
       <aside className={cn(
-        "fixed top-16 left-0 z-50 w-64 h-[calc(100vh-4rem)] border-r bg-gray-50 transform transition-transform duration-300 ease-in-out md:relative md:top-0 md:translate-x-0 md:z-auto",
+        "fixed inset-0 z-50 bg-gray-50 transform transition-transform duration-300 ease-in-out md:relative md:top-0 md:inset-auto md:w-64 md:h-[calc(100vh-4rem)] md:border-r md:translate-x-0 md:z-auto",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
+        {/* Header avec bouton X (mobile uniquement) */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 md:hidden">
+          <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
         <nav className="flex flex-col gap-2 p-4">
           {navItems.map((item) => (
             <Link

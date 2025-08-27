@@ -123,19 +123,40 @@ export function NotificationBell({ className }: NotificationBellProps) {
       </Button>
 
       {isOpen && (
-        <div className="fixed sm:absolute top-16 sm:top-full right-0 left-0 sm:left-auto sm:right-0 w-full sm:w-80 mt-0 sm:mt-2 bg-white border border-gray-200 rounded-none sm:rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="fixed inset-0 sm:absolute sm:top-full sm:right-0 sm:left-auto sm:inset-auto sm:w-80 sm:mt-2 bg-white border-0 sm:border border-gray-200 rounded-none sm:rounded-lg shadow-lg z-50 sm:max-h-96 overflow-y-auto">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="font-semibold text-gray-900">Notifications</h3>
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={markAllAsRead}
-                className="text-sm text-blue-600 hover:text-blue-800"
+            <div className="flex items-center space-x-2">
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={markAllAsRead}
+                  className="text-sm text-blue-600 hover:text-blue-800 hidden sm:inline-flex"
+                >
+                  Tout marquer comme lu
+                </Button>
+              )}
+              {/* Bouton X pour mobile */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 rounded-md hover:bg-gray-100 transition-colors sm:hidden"
               >
-                Tout marquer comme lu
-              </Button>
-            )}
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className="divide-y divide-gray-100">
@@ -172,11 +193,22 @@ export function NotificationBell({ className }: NotificationBellProps) {
           </div>
 
           {notifications.length > 0 && (
-            <div className="p-3 border-t border-gray-200">
+            <div className="p-3 border-t border-gray-200 space-y-2">
+              {/* Bouton "Tout marquer comme lu" pour mobile */}
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={markAllAsRead}
+                  className="w-full text-sm text-blue-600 hover:text-blue-800 sm:hidden"
+                >
+                  Tout marquer comme lu
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full text-sm text-gray-600 hover:text-gray-800"
+                className="w-full text-sm text-gray-600 hover:text-gray-800 hidden sm:block"
                 onClick={() => setIsOpen(false)}
               >
                 Voir toutes les notifications
@@ -186,13 +218,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
         </div>
       )}
 
-      {/* Overlay pour fermer le menu - seulement sur mobile */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-20 sm:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+
     </div>
   );
 }
