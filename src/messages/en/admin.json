@@ -1,0 +1,55 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "kpis": {
+      "total_reservations": "Total Reservations",
+      "revenue": "Revenue",
+      "failed_availability": "Failed Requests"
+    }
+  },
+  "hotels": {
+    "title": "Hotels",
+    "create": "Create Hotel",
+    "details": "Hotel Details",
+    "tabs": {
+      "info": "Information",
+      "stock": "Stock",
+      "reservations": "Reservations",
+      "revenue": "Revenue"
+    }
+  },
+  "stock": {
+    "title": "Stock",
+    "total": "Total",
+    "in_use": "In Use",
+    "available": "Available",
+    "failed_demand": "Failed Demand",
+    "add_units": "Add Units"
+  },
+  "reservations": {
+    "title": "Reservations",
+    "filters": {
+      "status": "Status",
+      "date": "Date",
+      "hotel": "Hotel",
+      "product": "Product"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "export": "Export",
+    "date_range": "Date Range",
+    "types": {
+      "revenue": "Revenue",
+      "stock": "Stock",
+      "reservations": "Reservations"
+    }
+  },
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Login",
+    "error": "Invalid email or password"
+  }
+}

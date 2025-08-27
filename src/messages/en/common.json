@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "EasyBaby",
+    "tagline": "Baby equipment rental at your hotel"
+  },
+  "navigation": {
+    "home": "Home",
+    "cities": "Cities",
+    "products": "Products",
+    "checkout": "Checkout",
+    "reservation": "Reservation",
+    "admin": "Admin"
+  },
+  "actions": {
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "book": "Book",
+    "checkout": "Checkout",
+    "confirm": "Confirm"
+  },
+  "cities": {
+    "title": "Choose a city",
+    "available_products": "{count, plural, =0 {No products} one {# product} other {# products}} available",
+    "available_hotels": "{count, plural, =0 {No hotels} one {# hotel} other {# hotels}} available"
+  },
+  "products": {
+    "title": "Available Equipment",
+    "deposit": "Deposit: {amount}",
+    "availability": "Availability: {count} of {total}",
+    "not_available": "Not available",
+    "select": "Select"
+  },
+  "booking": {
+    "pickup": "Pickup",
+    "dropoff": "Return",
+    "hotel": "Hotel",
+    "date": "Date",
+    "time": "Time",
+    "summary": "Summary",
+    "deposit_notice": "€0 charged now. In case of non-return or damage, we may charge the deposit amount.",
+    "consent": "I understand that €0 is charged now. In case of non-return or damaged item, EasyBaby may charge my card up to the indicated deposit amount.",
+    "terms": "I agree to the terms and conditions",
+    "code": "Discount code",
+    "apply_code": "Apply"
+  },
+  "reservation": {
+    "title": "Your Reservation",
+    "code": "Code: {code}",
+    "status": "Status: {status}",
+    "details": "Details",
+    "code_instructions": "Present this code at the hotel to pick up your equipment"
+  },
+  "contact": {
+    "email": "Email",
+    "phone": "Phone",
+    "required": "Required field"
+  },
+  "errors": {
+    "not_found": "Page not found",
+    "server_error": "Server error",
+    "unavailable": "Unavailable for selected dates",
+    "required_field": "This field is required",
+    "invalid_email": "Invalid email",
+    "invalid_phone": "Invalid phone number",
+    "payment_failed": "Payment failed"
+  },
+  "status": {
+    "PENDING": "Pending",
+    "CONFIRMED": "Confirmed",
+    "COMPLETED": "Completed",
+    "NO_SHOW": "No Show",
+    "DAMAGED": "Damaged",
+    "CANCELLED": "Cancelled"
+  }
+}

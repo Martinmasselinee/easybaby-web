@@ -1,0 +1,55 @@
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "kpis": {
+      "total_reservations": "Réservations totales",
+      "revenue": "Chiffre d'affaires",
+      "failed_availability": "Demandes échouées"
+    }
+  },
+  "hotels": {
+    "title": "Hôtels",
+    "create": "Créer un hôtel",
+    "details": "Détails de l'hôtel",
+    "tabs": {
+      "info": "Informations",
+      "stock": "Stock",
+      "reservations": "Réservations",
+      "revenue": "Revenus"
+    }
+  },
+  "stock": {
+    "title": "Stock",
+    "total": "Total",
+    "in_use": "En utilisation",
+    "available": "Disponible",
+    "failed_demand": "Demandes échouées",
+    "add_units": "Ajouter des unités"
+  },
+  "reservations": {
+    "title": "Réservations",
+    "filters": {
+      "status": "Statut",
+      "date": "Date",
+      "hotel": "Hôtel",
+      "product": "Produit"
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "export": "Exporter",
+    "date_range": "Période",
+    "types": {
+      "revenue": "Revenus",
+      "stock": "Stock",
+      "reservations": "Réservations"
+    }
+  },
+  "login": {
+    "title": "Connexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "error": "Email ou mot de passe incorrect"
+  }
+}

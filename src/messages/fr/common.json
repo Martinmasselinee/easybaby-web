@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "EasyBaby",
+    "tagline": "Location d'équipements pour bébé dans votre hôtel"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "cities": "Villes",
+    "products": "Produits",
+    "checkout": "Paiement",
+    "reservation": "Réservation",
+    "admin": "Administration"
+  },
+  "actions": {
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Valider",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "book": "Réserver",
+    "checkout": "Payer",
+    "confirm": "Confirmer"
+  },
+  "cities": {
+    "title": "Choisissez une ville",
+    "available_products": "{count, plural, =0 {Aucun produit} one {# produit} other {# produits}} disponible(s)",
+    "available_hotels": "{count, plural, =0 {Aucun hôtel} one {# hôtel} other {# hôtels}} partenaire(s)"
+  },
+  "products": {
+    "title": "Équipements disponibles",
+    "deposit": "Caution : {amount}",
+    "availability": "Disponibilité : {count} sur {total}",
+    "not_available": "Indisponible",
+    "select": "Sélectionner"
+  },
+  "booking": {
+    "pickup": "Retrait",
+    "dropoff": "Retour",
+    "hotel": "Hôtel",
+    "date": "Date",
+    "time": "Heure",
+    "summary": "Récapitulatif",
+    "deposit_notice": "Prélèvement de 0€ maintenant. En cas de non-retour ou dommage, nous pourrons débiter la caution.",
+    "consent": "Je comprends que 0€ est prélevé maintenant. En cas de non-retour ou d'article endommagé, EasyBaby pourra débiter ma carte à hauteur de la caution indiquée.",
+    "terms": "J'accepte les conditions générales d'utilisation",
+    "code": "Code de réduction",
+    "apply_code": "Appliquer"
+  },
+  "reservation": {
+    "title": "Votre réservation",
+    "code": "Code : {code}",
+    "status": "Statut : {status}",
+    "details": "Détails",
+    "code_instructions": "Présentez ce code à l'hôtel pour récupérer votre équipement"
+  },
+  "contact": {
+    "email": "Email",
+    "phone": "Téléphone",
+    "required": "Champ obligatoire"
+  },
+  "errors": {
+    "not_found": "Page non trouvée",
+    "server_error": "Erreur serveur",
+    "unavailable": "Indisponible pour les dates sélectionnées",
+    "required_field": "Ce champ est obligatoire",
+    "invalid_email": "Email invalide",
+    "invalid_phone": "Numéro de téléphone invalide",
+    "payment_failed": "Le paiement a échoué"
+  },
+  "status": {
+    "PENDING": "En attente",
+    "CONFIRMED": "Confirmée",
+    "COMPLETED": "Terminée",
+    "NO_SHOW": "Non présenté",
+    "DAMAGED": "Endommagé",
+    "CANCELLED": "Annulée"
+  }
+}
