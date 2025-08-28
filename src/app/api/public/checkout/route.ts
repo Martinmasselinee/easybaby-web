@@ -3,7 +3,7 @@ import { PrismaClient, ReservationStatus, ShareType } from "@prisma/client";
 import { z } from "zod";
 import { createPaymentIntent, createSetupIntent } from "@/lib/stripe/stripe-server";
 import { getDiscountCodeByCode } from "@/lib/db";
-import { randomUUID } from "crypto";
+import { withErrorHandling } from "@/lib/api-middleware";
 
 const prisma = new PrismaClient();
 
@@ -21,23 +21,22 @@ const checkoutSchema = z.object({
   finalPrice: z.number().optional(), // Prix final après réduction
 });
 
-export async function POST(request: NextRequest) {
-  try {
-    // Extraire et valider les données de la requête
-    const body = await request.json();
-    const validatedData = checkoutSchema.parse(body);
-    
-    // Convertir les dates
-    const startAt = new Date(validatedData.startAt);
-    const endAt = new Date(validatedData.endAt);
-    
-    // Vérifier que la date de début est avant la date de fin
-    if (startAt >= endAt) {
-      return NextResponse.json(
-        { error: "La date de début doit être avant la date de fin" },
-        { status: 400 }
-      );
-    }
+async function handlePost(request: NextRequest) {
+  // Extraire et valider les données de la requête
+  const body = await request.json();
+  const validatedData = checkoutSchema.parse(body);
+  
+  // Convertir les dates
+  const startAt = new Date(validatedData.startAt);
+  const endAt = new Date(validatedData.endAt);
+  
+  // Vérifier que la date de début est avant la date de fin
+  if (startAt >= endAt) {
+    return NextResponse.json(
+      { error: "La date de début doit être avant la date de fin" },
+      { status: 400 }
+    );
+  }
 
     // Récupérer le produit pour obtenir le montant du dépôt
     const product = await prisma.product.findUnique({
@@ -191,22 +190,9 @@ export async function POST(request: NextRequest) {
       clientSecret: paymentIntent.client_secret,
       setupIntentSecret: setupIntent.client_secret,
     });
-  } catch (error) {
-    console.error("Erreur lors du checkout:", error);
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Données invalides", details: error.errors },
-        { status: 400 }
-      );
-    }
-    
-    return NextResponse.json(
-      { error: "Erreur lors du traitement de la demande" },
-      { status: 500 }
-    );
-  }
 }
+
+export const POST = withErrorHandling(handlePost);
 
 // Fonction pour vérifier la disponibilité
 async function checkAvailability(

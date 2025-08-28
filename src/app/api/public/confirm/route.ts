@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient, ReservationStatus } from "@prisma/client";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe/stripe-server";
+import { sendUserConfirmationEmail, sendHotelNotificationEmail } from "@/lib/email/resend";
+import { withErrorHandling } from "@/lib/api-middleware";
 
 const prisma = new PrismaClient();
 
@@ -181,16 +183,8 @@ export async function POST(request: NextRequest) {
       // Enregistrer l'erreur mais ne pas bloquer la confirmation
       console.error("Erreur lors de l'envoi des emails:", emailError);
       
-      // Enregistrer l'audit de l'erreur
-      await prisma.paymentAudit.create({
-        data: {
-          reservationId: reservation.id,
-          event: "emails_error",
-          data: {
-            error: emailError.message || "Erreur inconnue",
-          },
-        },
-      });
+      // Log simple de l'erreur (suppression PaymentAudit over-engineered)
+      console.error("Email error for reservation:", reservation.code, emailError.message);
     }
 
     return NextResponse.json({

@@ -101,7 +101,7 @@ const PaymentForm = ({
       } else {
         throw new Error("Informations de paiement manquantes");
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Erreur de paiement:", error);
       setErrorMessage(error.message || "Une erreur est survenue lors du paiement");
       onError(error.message || "Une erreur est survenue lors du paiement");

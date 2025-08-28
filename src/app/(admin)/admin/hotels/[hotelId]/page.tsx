@@ -14,6 +14,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { DiscountCodeManager } from "@/components/admin/discount-code-manager";
+import { AddProductToStockForm } from "@/components/admin/add-product-to-stock-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -254,13 +255,50 @@ export default function AdminHotelDetailPage({
 
   return (
     <div className="space-y-8">
+      {/* Breadcrumbs */}
+      <nav className="flex" aria-label="Breadcrumb">
+        <ol className="inline-flex items-center space-x-1 md:space-x-3">
+          <li className="inline-flex items-center">
+            <Link
+              href="/admin/cities"
+              className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
+            >
+              Villes
+            </Link>
+          </li>
+          <li>
+            <div className="flex items-center">
+              <svg className="w-3 h-3 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <Link
+                href={`/admin/cities/${hotel.city.id}/hotels`}
+                className="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2"
+              >
+                {hotel.city.name} - Hôtels
+              </Link>
+            </div>
+          </li>
+          <li>
+            <div className="flex items-center">
+              <svg className="w-3 h-3 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+                {hotel.name}
+              </span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">{hotel.name}</h1>
           <p className="text-muted-foreground">{hotel.city.name}</p>
         </div>
         <Button asChild variant="outline">
-          <Link href="/admin/hotels">Retour</Link>
+          <Link href={`/admin/cities/${hotel.city.id}/hotels`}>Retour aux hôtels</Link>
         </Button>
       </div>
 
@@ -459,7 +497,26 @@ export default function AdminHotelDetailPage({
               </div>
             )}
             <div className="flex justify-end">
-              <Button>Ajouter un produit</Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>Ajouter un produit</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Ajouter un produit au stock</DialogTitle>
+                  </DialogHeader>
+                  <AddProductToStockForm 
+                    hotelId={params.hotelId} 
+                    onSuccess={() => {
+                      // Recharger l'inventaire
+                      fetch(`/api/inventory/hotel/${params.hotelId}`)
+                        .then(response => response.json())
+                        .then(data => setInventory(data))
+                        .catch(error => console.error("Erreur lors du rechargement de l'inventaire:", error));
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         )}

@@ -143,6 +143,41 @@ function CheckoutContent() {
     setCheckoutError(null);
   };
 
+  // Gestion du succès du paiement
+  const handlePaymentSuccess = async (paymentIntentId: string, setupIntentId: string) => {
+    try {
+      // Confirmer la réservation avec les IDs de paiement
+      const response = await fetch('/api/public/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentIntentId,
+          setupIntentId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la confirmation de la réservation');
+      }
+
+      const data = await response.json();
+      
+      // Rediriger vers la page de confirmation
+      window.location.href = `/${locale}/reservation/${data.reservationCode}`;
+    } catch (error: any) {
+      console.error('Erreur lors de la confirmation:', error);
+      setCheckoutError(error.message || 'Erreur lors de la confirmation de la réservation');
+    }
+  };
+
+  // Gestion de l'erreur de paiement
+  const handlePaymentError = (error: string) => {
+    setCheckoutError(error);
+    setPaymentStep(false); // Retour au formulaire
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
@@ -431,6 +466,7 @@ function CheckoutContent() {
                           setAppliedDiscountCode(discountCode);
                           
                           // Appliquer la réduction (pour la démo, 10% de réduction)
+                          // Le vrai revenue sharing 70/30 est géré côté serveur
                           const discountAmount = Math.round(rentalPrice * 0.1);
                           setFinalPrice(rentalPrice - discountAmount);
                         } else {
@@ -451,7 +487,7 @@ function CheckoutContent() {
                   <p className="text-xs text-red-500 mt-1">{discountError}</p>
                 )}
                 {discountValid && (
-                  <p className="text-xs text-green-600 mt-1">Code appliqué: 10% de réduction</p>
+                  <p className="text-xs text-green-600 mt-1">Code appliqué: 10% de réduction + Revenue sharing optimisé</p>
                 )}
               </div>
             </div>
