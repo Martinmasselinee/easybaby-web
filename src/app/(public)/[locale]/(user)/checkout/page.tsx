@@ -143,40 +143,7 @@ function CheckoutContent() {
     setCheckoutError(null);
   };
 
-  // Gestion du succès du paiement
-  const handlePaymentSuccess = async (paymentIntentId: string, setupIntentId: string) => {
-    try {
-      // Confirmer la réservation avec les IDs de paiement
-      const response = await fetch('/api/public/confirm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentIntentId,
-          setupIntentId,
-        }),
-      });
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la confirmation de la réservation');
-      }
-
-      const data = await response.json();
-      
-      // Rediriger vers la page de confirmation
-      window.location.href = `/${locale}/reservation/${data.reservationCode}`;
-    } catch (error: any) {
-      console.error('Erreur lors de la confirmation:', error);
-      setCheckoutError(error.message || 'Erreur lors de la confirmation de la réservation');
-    }
-  };
-
-  // Gestion de l'erreur de paiement
-  const handlePaymentError = (error: string) => {
-    setCheckoutError(error);
-    setPaymentStep(false); // Retour au formulaire
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

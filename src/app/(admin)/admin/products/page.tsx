@@ -116,6 +116,39 @@ export default function ProductsPage() {
                 Ajouter un produit
               </Button>
             </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ajouter un produit</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleAddProduct} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nom</Label>
+                  <Input id="name" name="name" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea id="description" name="description" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deposit">Caution (€)</Label>
+                  <Input id="deposit" name="deposit" type="number" min="0" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pricePerHour">Prix par heure (€)</Label>
+                  <Input id="pricePerHour" name="pricePerHour" type="number" min="0" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pricePerDay">Prix par jour (€)</Label>
+                  <Input id="pricePerDay" name="pricePerDay" type="number" min="0" required />
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline">Annuler</Button>
+                  </DialogClose>
+                  <Button type="submit">Ajouter</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
           </Dialog>
         </div>
       </div>
@@ -137,42 +170,7 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ajouter un produit</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleAddProduct} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom</Label>
-                <Input id="name" name="name" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="deposit">Caution (€)</Label>
-                <Input id="deposit" name="deposit" type="number" min="0" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pricePerHour">Prix par heure (€)</Label>
-                <Input id="pricePerHour" name="pricePerHour" type="number" min="0" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pricePerDay">Prix par jour (€)</Label>
-                <Input id="pricePerDay" name="pricePerDay" type="number" min="0" required />
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">Annuler</Button>
-                </DialogClose>
-                <Button type="submit">Ajouter</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+
       
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
