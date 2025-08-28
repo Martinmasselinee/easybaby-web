@@ -64,14 +64,9 @@ export default function AdminHotelsPage() {
             Gérez les hôtels partenaires
           </p>
         </div>
-        <div className="flex space-x-4">
-          <Button asChild variant="outline">
-            <Link href="/admin/cities">Ajouter une ville</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/admin/hotels/new">Ajouter un hôtel</Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link href="/admin/hotels/new">Ajouter un hôtel</Link>
+        </Button>
       </div>
 
       {isLoading ? (

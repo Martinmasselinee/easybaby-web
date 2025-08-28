@@ -114,75 +114,57 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Produits & Stock</h1>
-        <div className="flex space-x-2">
-          <Button asChild variant="outline">
-            <Link href="/admin/stock">
-              <PackageIcon className="h-4 w-4 mr-2" />
-              Vue Stock Global
-            </Link>
-          </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Ajouter un produit
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Ajouter un produit</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddProduct} className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom</Label>
-                  <Input id="name" name="name" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="deposit">Caution (€)</Label>
-                  <Input id="deposit" name="deposit" type="number" min="0" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerHour">Prix par heure (€)</Label>
-                  <Input id="pricePerHour" name="pricePerHour" type="number" min="0" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerDay">Prix par jour (€)</Label>
-                  <Input id="pricePerDay" name="pricePerDay" type="number" min="0" required />
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline">Annuler</Button>
-                  </DialogClose>
-                  <Button type="submit">Ajouter</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Produits</h1>
+          <p className="text-muted-foreground">
+            Gérez votre catalogue de produits
+          </p>
         </div>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Ajouter un produit
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un produit</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddProduct} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom</Label>
+                <Input id="name" name="name" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" name="description" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deposit">Caution (€)</Label>
+                <Input id="deposit" name="deposit" type="number" min="0" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pricePerHour">Prix par heure (€)</Label>
+                <Input id="pricePerHour" name="pricePerHour" type="number" min="0" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pricePerDay">Prix par jour (€)</Label>
+                <Input id="pricePerDay" name="pricePerDay" type="number" min="0" required />
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">Annuler</Button>
+                </DialogClose>
+                <Button type="submit">Ajouter</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
       
-      <div className="mb-6">
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">Navigation rapide</h3>
-              <p className="text-sm text-gray-600">Gérez vos produits et consultez le stock par hôtel</p>
-            </div>
-            <div className="flex space-x-2">
-              <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Produits</span>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/admin/stock">Stock Global</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
 
       

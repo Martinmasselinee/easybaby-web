@@ -11,16 +11,24 @@ const navItems = [
     href: "/admin/dashboard",
   },
   {
-    title: "Villes",
-    href: "/admin/cities",
+    title: "Hôtels",
+    href: "/admin/hotels",
   },
   {
-    title: "Produits & Stock",
+    title: "Produits",
     href: "/admin/products",
   },
   {
-    title: "Réservations & Rapports",
+    title: "Stock",
+    href: "/admin/stock",
+  },
+  {
+    title: "Réservations",
     href: "/admin/reservations",
+  },
+  {
+    title: "Rapports",
+    href: "/admin/reports",
   },
 ];
 
