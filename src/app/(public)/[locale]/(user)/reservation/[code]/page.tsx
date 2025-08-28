@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -69,44 +69,34 @@ const translations = {
   }
 };
 
-// Données de démonstration pour la V1
-const demoReservation = {
-  code: "DEMO123456",
-  status: "CONFIRMED",
+// Types pour les données réelles
+interface Reservation {
+  id: string;
+  code: string;
+  status: string;
+  userEmail: string;
+  userPhone?: string;
+  startAt: string;
+  endAt: string;
+  priceCents: number;
+  depositCents: number;
+  durationDays: number;
+  discountCodeId?: string;
   product: {
-    name: "Poussette",
-    deposit: 15000, // 150€ en centimes
-    pricePerDay: 1500, // 15€ par jour en centimes
-  },
-  pickup: {
-    hotel: "Hôtel Demo Paris",
-    date: new Date("2023-07-15T10:00:00"),
-    hotelDiscountCode: "HOTELDEMO10",
-  },
-  dropoff: {
-    hotel: "Hôtel Demo Paris",
-    date: new Date("2023-07-20T14:00:00"),
-  },
-  user: {
-    email: "client@example.com",
-    phone: "+33612345678",
-  },
-  rentalDays: 5,
-  rentalPrice: 7500, // 5 jours * 15€ = 75€ en centimes
-  discountApplied: false,
-  originalPrice: 7500, // Prix avant réduction
-  revenueShare: "PLATFORM_70", // ou "HOTEL_70" si un code de réduction a été utilisé
-};
-
-// Données de démonstration avec code de réduction appliqué
-const demoReservationWithDiscount = {
-  ...demoReservation,
-  code: "DEMO123456-DISC",
-  discountApplied: true,
-  originalPrice: 7500,
-  rentalPrice: 6750, // 7500 - 10% = 6750
-  revenueShare: "HOTEL_70", // Partage inversé en faveur de l'hôtel
-};
+    name: string;
+    deposit: number;
+  };
+  pickupHotel: {
+    name: string;
+  };
+  dropHotel: {
+    name: string;
+  };
+  discountCode?: {
+    code: string;
+    discountPercent: number;
+  };
+}
 
 export default function ReservationPage({
   params,
@@ -125,9 +115,44 @@ export default function ReservationPage({
   const [reservationCodeCopied, setReservationCodeCopied] = useState(false);
   const [hotelCodeCopied, setHotelCodeCopied] = useState(false);
 
-  // Dans une vraie application, nous chargerions les données de la réservation ici
-  // Pour la démo, on utilise une version différente selon le code
-  const reservation = code.includes("-DISC") ? demoReservationWithDiscount : demoReservation;
+  // États pour les données réelles
+  const [reservation, setReservation] = useState<Reservation | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Charger la réservation au montage
+  useEffect(() => {
+    const loadReservation = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/reservations/code/${code}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Réservation non trouvée');
+          } else {
+            throw new Error('Erreur lors du chargement');
+          }
+          return;
+        }
+
+        const data = await response.json();
+        setReservation(data);
+
+      } catch (error: any) {
+        console.error('Erreur chargement réservation:', error);
+        setError('Impossible de charger la réservation');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (code) {
+      loadReservation();
+    }
+  }, [code]);
   
   // Fonction pour copier du texte dans le presse-papier
   const copyToClipboard = (text: string, setCopied: (copied: boolean) => void) => {
@@ -142,10 +167,22 @@ export default function ReservationPage({
     );
   };
 
-  if (!reservation) {
+  // États de chargement et d'erreur
+  if (isLoading) {
     return (
       <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p>Chargement de votre réservation...</p>
+      </div>
+    );
+  }
+
+  if (error || !reservation) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">🔍</div>
         <h1 className="text-2xl font-bold mb-4">{t.notFound}</h1>
+        <p className="text-gray-500 mb-6">{error || 'Réservation introuvable'}</p>
         <Button asChild>
           <Link href={`/${locale}/city`}>{t.back}</Link>
         </Button>
@@ -189,12 +226,12 @@ export default function ReservationPage({
                   {new Intl.DateTimeFormat(locale, {
                     dateStyle: "medium",
                     timeStyle: "short",
-                  }).format(reservation.pickup.date)}
+                  }).format(new Date(reservation.startAt))}
                 </span>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">
-                  {reservation.pickup.hotel}
+                  {reservation.pickupHotel.name}
                 </span>
               </div>
               
@@ -204,12 +241,12 @@ export default function ReservationPage({
                   {new Intl.DateTimeFormat(locale, {
                     dateStyle: "medium",
                     timeStyle: "short",
-                  }).format(reservation.dropoff.date)}
+                  }).format(new Date(reservation.endAt))}
                 </span>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">
-                  {reservation.dropoff.hotel}
+                  {reservation.dropHotel.name}
                 </span>
               </div>
             </div>
@@ -222,40 +259,40 @@ export default function ReservationPage({
                   {new Intl.NumberFormat(locale, {
                     style: "currency",
                     currency: "EUR",
-                  }).format(reservation.rentalPrice / 100)}
+                  }).format(reservation.priceCents / 100)}
                 </span>
               </div>
               <div className="text-sm text-muted-foreground">
-                {t.rentalDuration(reservation.rentalDays)}
+                {t.rentalDuration(reservation.durationDays)}
               </div>
               
               {/* Ligne de séparation */}
               <div className="border-t my-2"></div>
               
               {/* Total */}
-              {reservation.discountApplied && (
+              {reservation.discountCode && (
                 <div className="flex justify-between text-sm">
                   <span>Prix original</span>
                   <span className="line-through text-gray-500">
                     {new Intl.NumberFormat(locale, {
                       style: "currency",
                       currency: "EUR",
-                    }).format(reservation.originalPrice / 100)}
+                    }).format((reservation.priceCents * 100) / (100 - reservation.discountCode.discountPercent) / 100)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between font-bold">
-                <span>{reservation.discountApplied ? "Total avec réduction" : t.total}</span>
+                <span>{reservation.discountCode ? "Total avec réduction" : t.total}</span>
                 <span>
                   {new Intl.NumberFormat(locale, {
                     style: "currency",
                     currency: "EUR",
-                  }).format(reservation.rentalPrice / 100)}
+                  }).format(reservation.priceCents / 100)}
                 </span>
               </div>
-              {reservation.discountApplied && (
+              {reservation.discountCode && (
                 <div className="text-xs text-green-600">
-                  Code de réduction appliqué
+                  Code de réduction appliqué ({reservation.discountCode.discountPercent}%)
                 </div>
               )}
               
@@ -266,7 +303,7 @@ export default function ReservationPage({
                   {new Intl.NumberFormat(locale, {
                     style: "currency",
                     currency: "EUR",
-                  }).format(reservation.product.deposit / 100)}
+                  }).format(reservation.depositCents / 100)}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -277,8 +314,8 @@ export default function ReservationPage({
 
           <div className="border rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">{t.email}</h2>
-            <p>{reservation.user.email}</p>
-            <p className="mt-2">{reservation.user.phone}</p>
+            <p>{reservation.userEmail}</p>
+            {reservation.userPhone && <p className="mt-2">{reservation.userPhone}</p>}
           </div>
         </div>
 
@@ -304,19 +341,19 @@ export default function ReservationPage({
             <h2 className="text-xl font-bold mb-4">{t.hotelDiscountTitle}</h2>
             <div className="bg-blue-50 border border-blue-200 w-64 mx-auto flex items-center justify-center p-6 rounded-md">
               <p className="text-2xl font-bold tracking-wider text-blue-700">
-                {reservation.pickup.hotelDiscountCode || t.hotelDiscountCode}
+                {reservation.discountCode?.code || t.hotelDiscountCode}
               </p>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
               {t.hotelDiscountInstructions}
             </p>
             <p className="mt-2 text-xs text-blue-600">
-              Pour l'hôtel: {reservation.pickup.hotel}
+              Pour l'hôtel: {reservation.pickupHotel.name}
             </p>
             <Button 
               className="mt-4"
               variant="outline"
-              onClick={() => copyToClipboard(reservation.pickup.hotelDiscountCode || t.hotelDiscountCode, setHotelCodeCopied)}
+              onClick={() => copyToClipboard(reservation.discountCode?.code || t.hotelDiscountCode, setHotelCodeCopied)}
             >
               {hotelCodeCopied ? t.hotelCodeCopied : t.copyHotelCode}
             </Button>

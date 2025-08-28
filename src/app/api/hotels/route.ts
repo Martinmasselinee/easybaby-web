@@ -4,10 +4,11 @@ import { getAllHotels, createHotel } from '@/lib/db';
 export async function GET() {
   try {
     const hotels = await getAllHotels();
-    return NextResponse.json(hotels);
+    return NextResponse.json(hotels || []);
   } catch (error: any) {
     console.error('Erreur GET /api/hotels:', error);
-    return NextResponse.json({ error: 'Erreur lors du chargement des hôtels' }, { status: 500 });
+    // Retourner un array vide au lieu d'une erreur 500
+    return NextResponse.json([]);
   }
 }
 

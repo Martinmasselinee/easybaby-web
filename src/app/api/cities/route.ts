@@ -10,10 +10,11 @@ const citySchema = z.object({
 export async function GET() {
   try {
     const cities = await getAllCities();
-    return NextResponse.json(cities);
+    return NextResponse.json(cities || []);
   } catch (error: any) {
     console.error('Erreur GET /api/cities:', error);
-    return NextResponse.json({ error: 'Erreur lors du chargement des villes' }, { status: 500 });
+    // Retourner un array vide au lieu d'une erreur 500
+    return NextResponse.json([]);
   }
 }
 

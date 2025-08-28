@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -65,33 +65,21 @@ const translations = {
   }
 };
 
-// Données de démonstration pour la V1
-const demoProducts = {
-  "poussette": {
-    id: "poussette",
-    name: "Poussette",
-    description: "Poussette confortable et facile à plier",
-    deposit: 15000, // 150€ en centimes
-    pricePerHour: 300, // 3€ par heure en centimes
-    pricePerDay: 1500, // 15€ par jour en centimes
-  },
-  "lit-parapluie": {
-    id: "lit-parapluie",
-    name: "Lit parapluie",
-    description: "Lit parapluie confortable et sécurisé",
-    deposit: 20000, // 200€ en centimes
-    pricePerHour: 200, // 2€ par heure en centimes
-    pricePerDay: 1000, // 10€ par jour en centimes
-  },
-};
+// Types pour les données réelles
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  deposit: number;
+  pricePerHour: number;
+  pricePerDay: number;
+}
 
-const demoHotels = {
-  "hotel-demo-paris": {
-    id: "hotel-demo-paris",
-    name: "Hôtel Demo Paris",
-    address: "123 Avenue des Champs-Élysées, 75008 Paris",
-  },
-};
+interface Hotel {
+  id: string;
+  name: string;
+  address: string;
+}
 
 // Composant qui utilise useSearchParams, enveloppé dans Suspense
 function CheckoutContent() {
@@ -128,15 +116,62 @@ function CheckoutContent() {
   const [clientSecret, setClientSecret] = useState("");
   const [setupIntentSecret, setSetupIntentSecret] = useState("");
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-
-  const product = demoProducts[productId as keyof typeof demoProducts];
-  const pickupHotel = demoHotels[pickupHotelId as keyof typeof demoHotels];
-  const dropHotel = demoHotels[dropHotelId as keyof typeof demoHotels];
+  
+  // États pour les données réelles
+  const [product, setProduct] = useState<Product | null>(null);
+  const [pickupHotel, setPickupHotel] = useState<Hotel | null>(null);
+  const [dropHotel, setDropHotel] = useState<Hotel | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   const pickupDateTime = new Date(pickupDate);
   const dropDateTime = new Date(dropDate);
 
   const isFormValid = email && phone && consentTerms && consentDeposit;
+
+  // Charger les données réelles au montage
+  useEffect(() => {
+    const loadCheckoutData = async () => {
+      try {
+        setIsLoadingData(true);
+        setDataError(null);
+
+        // Charger produit et hôtels en parallèle
+        const [productRes, pickupHotelRes, dropHotelRes] = await Promise.all([
+          fetch(`/api/products/${productId}`),
+          fetch(`/api/hotels/${pickupHotelId}`),
+          fetch(`/api/hotels/${dropHotelId}`)
+        ]);
+
+        if (!productRes.ok || !pickupHotelRes.ok || !dropHotelRes.ok) {
+          throw new Error('Erreur lors du chargement des données');
+        }
+
+        const [productData, pickupHotelData, dropHotelData] = await Promise.all([
+          productRes.json(),
+          pickupHotelRes.json(),
+          dropHotelRes.json()
+        ]);
+
+        setProduct(productData);
+        setPickupHotel(pickupHotelData);
+        setDropHotel(dropHotelData);
+
+      } catch (error: any) {
+        console.error('Erreur chargement checkout:', error);
+        setDataError('Impossible de charger les données de réservation');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    if (productId && pickupHotelId && dropHotelId) {
+      loadCheckoutData();
+    } else {
+      setDataError('Paramètres de réservation manquants');
+      setIsLoadingData(false);
+    }
+  }, [productId, pickupHotelId, dropHotelId]);
 
   // Réinitialiser les erreurs lors de la modification du formulaire
   const resetErrors = () => {
@@ -234,10 +269,35 @@ function CheckoutContent() {
     setPaymentStep(false);
   };
 
+  // États de chargement et d'erreur
+  if (isLoadingData) {
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p>Chargement des données de réservation...</p>
+      </div>
+    );
+  }
+
+  if (dataError) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">❌</div>
+        <h1 className="text-2xl font-bold mb-4">Erreur</h1>
+        <p className="text-red-600 mb-6">{dataError}</p>
+        <Button asChild>
+          <Link href={`/${locale}/city`}>{t.back}</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (!product || !pickupHotel || !dropHotel) {
     return (
       <div className="text-center py-12">
+        <div className="text-6xl mb-4">🚫</div>
         <h1 className="text-2xl font-bold mb-4">{t.missingInfo}</h1>
+        <p className="text-gray-500 mb-6">Données de réservation incomplètes</p>
         <Button asChild>
           <Link href={`/${locale}/city`}>{t.back}</Link>
         </Button>

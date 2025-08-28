@@ -21,37 +21,28 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Simuler des notifications pour la démo
+  // Charger les vraies notifications depuis l'API (pour l'instant vide)
   useEffect(() => {
-    const demoNotifications: Notification[] = [
-      {
-        id: '1',
-        type: 'new_reservation',
-        message: 'Nouvelle réservation DEMO100001 - Poussette à Nice',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-        read: false,
-        reservationId: 'DEMO100001'
-      },
-      {
-        id: '2',
-        type: 'payment',
-        message: 'Paiement confirmé pour la réservation DEMO100002',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-        read: false,
-        reservationId: 'DEMO100002'
-      },
-      {
-        id: '3',
-        type: 'cancellation',
-        message: 'Annulation de la réservation DEMO100003',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        read: true,
-        reservationId: 'DEMO100003'
+    const loadNotifications = async () => {
+      try {
+        const response = await fetch('/api/admin/notifications');
+        if (response.ok) {
+          const notifications = await response.json();
+          setNotifications(notifications);
+          setUnreadCount(notifications.filter((n: Notification) => !n.read).length);
+        } else {
+          // Pas d'erreur visible, juste pas de notifications
+          setNotifications([]);
+          setUnreadCount(0);
+        }
+      } catch (error) {
+        // En cas d'erreur, ne pas afficher d'erreur visible
+        setNotifications([]);
+        setUnreadCount(0);
       }
-    ];
+    };
 
-    setNotifications(demoNotifications);
-    setUnreadCount(demoNotifications.filter(n => !n.read).length);
+    loadNotifications();
   }, []);
 
   const markAsRead = (notificationId: string) => {

@@ -7,26 +7,25 @@ export async function GET() {
     
     // Transformer les données pour inclure le comptage des produits
     const citiesWithCounts = cities.map(city => {
-      // Calculer le nombre de produits uniques via l'inventaire des hôtels
-      const uniqueProductIds = new Set();
-      city.hotels.forEach(hotel => {
-        hotel.inventory.forEach(item => {
-          uniqueProductIds.add(item.productId);
-        });
-      });
+      const uniqueProductIds = new Set(
+        city.hotels.flatMap(hotel => 
+          hotel.inventory.map(inv => inv.productId)
+        )
+      );
       
       return {
         id: city.id,
-        name: city.name,
         slug: city.slug,
-        hotelsCount: city._count.hotels, // Correction du nom pour correspondre à l'interface
-        productsCount: uniqueProductIds.size, // Correction du nom pour correspondre à l'interface
+        name: city.name,
+        hotelsCount: city._count.hotels,
+        productsCount: uniqueProductIds.size,
       };
     });
     
     return NextResponse.json(citiesWithCounts);
   } catch (error: any) {
     console.error('Erreur GET /api/cities/counts:', error);
-    return NextResponse.json({ error: 'Erreur lors du chargement des villes avec compteurs' }, { status: 500 });
+    // Retourner un array vide au lieu d'une erreur 500
+    return NextResponse.json([]);
   }
 }

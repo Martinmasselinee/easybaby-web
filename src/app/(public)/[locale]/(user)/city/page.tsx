@@ -73,16 +73,12 @@ export default function CitiesPage() {
         
         const data = await response.json();
         
-        // Si aucune ville n'est retournée, utiliser les données de démo
-        if (data.length === 0) {
-          setCities(demoCities);
-        } else {
-          setCities(data);
-        }
+        // Plus de fallback - app 100% data-driven
+        setCities(data || []);
       } catch (err) {
         console.error("Erreur lors du chargement des villes:", err);
-        setError("Impossible de charger les villes. Utilisation des données de démo.");
-        setCities(demoCities);
+        setError("Impossible de charger les villes depuis l'API.");
+        setCities([]);
       } finally {
         setIsLoading(false);
       }
@@ -106,6 +102,19 @@ export default function CitiesPage() {
       {isLoading ? (
         <div className="text-center py-12">
           <p>Chargement des villes...</p>
+        </div>
+      ) : cities.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🏙️</div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            Aucune ville disponible
+          </h3>
+          <p className="text-gray-500 mb-6">
+            L'administrateur doit d'abord créer des villes avec des hôtels et produits.
+          </p>
+          <p className="text-sm text-gray-400">
+            Accédez à l'interface admin pour configurer les destinations.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
