@@ -34,7 +34,7 @@ export function PublicFooter() {
           &copy; {year} EasyBaby. {t.tagline}
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <Link href={`/${currentLocale}/admin`} className="hover:underline">
+          <Link href="/admin" className="hover:underline">
             {t.admin}
           </Link>
         </div>

@@ -60,6 +60,20 @@ export async function getCityBySlug(slug: string) {
   });
 }
 
+export async function getCityById(id: string) {
+  return await prisma.city.findUnique({
+    where: { id },
+    include: {
+      hotels: true,
+      _count: {
+        select: {
+          hotels: true,
+        },
+      },
+    },
+  });
+}
+
 export async function createCity(data: { name: string; slug: string }) {
   return await prisma.city.create({
     data,
