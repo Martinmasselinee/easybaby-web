@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, PencilIcon, TrashIcon, PackageIcon } from "lucide-react";
@@ -16,35 +16,49 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
 
-// Données de démonstration pour la V1
-const demoProducts = [
-  {
-    id: "1",
-    name: "Poussette",
-    description: "Poussette légère et confortable pour bébé",
-    imageUrl: "/placeholder-product.svg",
-    basePrice: 0,
-    deposit: 15000,
-    pricePerHour: 500,
-    pricePerDay: 2000,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "Lit parapluie",
-    description: "Lit pliant facile à transporter",
-    imageUrl: "/placeholder-product.svg",
-    basePrice: 0,
-    deposit: 20000,
-    pricePerHour: 400,
-    pricePerDay: 1500,
-    createdAt: new Date().toISOString(),
-  },
-];
+type Product = {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  basePrice: number;
+  deposit: number;
+  pricePerHour: number;
+  pricePerDay: number;
+  createdAt: string;
+};
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState(demoProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Charger les produits depuis l'API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch("/api/products");
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setProducts(data);
+      } catch (err: any) {
+        console.error("Erreur lors du chargement des produits:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
