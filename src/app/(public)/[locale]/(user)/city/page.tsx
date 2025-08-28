@@ -14,16 +14,7 @@ type City = {
   productsCount: number;
 };
 
-// Données de démonstration pour la V1 (utilisées comme fallback)
-const demoCities = [
-  {
-    id: "paris",
-    slug: "paris",
-    name: "Paris",
-    hotelsCount: 1,
-    productsCount: 2,
-  },
-];
+// Plus de données de démonstration - app 100% fonctionnelle
 
 // Traductions statiques
 const translations = {
