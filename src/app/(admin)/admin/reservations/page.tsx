@@ -91,38 +91,7 @@ export default function AdminReservationsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Section Rapports en haut */}
-      <div className="border rounded-lg p-6 bg-gray-50">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Rapports & Revenus</h2>
-          <Button asChild variant="outline">
-            <Link href="/admin/reports">Vue détaillée</Link>
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-blue-600">0€</div>
-            <div className="text-sm text-gray-600">Revenus totaux</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-green-600">0€</div>
-            <div className="text-sm text-gray-600">Part EasyBaby</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-purple-600">0€</div>
-            <div className="text-sm text-gray-600">Part Hôtels</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-orange-600">{demoReservations.length}</div>
-            <div className="text-sm text-gray-600">Total réservations</div>
-          </div>
-        </div>
-        
-        <div className="mt-4 text-sm text-gray-500">
-          Note: Revenus en mode pilote gratuit. Les calculs seront activés avec les vrais paiements.
-        </div>
-      </div>
+
 
       <div>
         <h1 className="text-3xl font-bold mb-2">Réservations & Rapports</h1>
