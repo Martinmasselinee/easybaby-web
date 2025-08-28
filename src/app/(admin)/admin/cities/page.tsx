@@ -164,10 +164,10 @@ export default function CitiesPage() {
   };
 
   // Filtrer les villes selon le terme de recherche
-  const filteredCities = cities.filter(city => 
+  const filteredCities = Array.isArray(cities) ? cities.filter(city => 
     city.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     city.slug.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   return (
     <div className="space-y-8">

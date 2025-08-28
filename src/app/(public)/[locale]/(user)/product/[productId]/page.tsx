@@ -114,6 +114,39 @@ export default function ProductDetailPage({
   const [availableDates, setAvailableDates] = useState<{start: string, end: string}[]>([]);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
 
+  // Charger les dates disponibles au démarrage
+  useEffect(() => {
+    // Générer les 14 prochains jours comme dates disponibles par défaut
+    const generateAvailableDates = () => {
+      const dates = [];
+      const today = new Date();
+      
+      for (let i = 0; i < 14; i++) {
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() + i);
+        
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1);
+        
+        dates.push({
+          start: startDate.toISOString().split('T')[0],
+          end: endDate.toISOString().split('T')[0]
+        });
+      }
+      
+      return dates;
+    };
+
+    const defaultDates = generateAvailableDates();
+    setAvailableDates(defaultDates);
+    
+    // Sélectionner la première date disponible
+    if (defaultDates.length > 0) {
+      setPickupDate(defaultDates[0].start);
+      setDropDate(defaultDates[0].end);
+    }
+  }, []);
+
   const product = demoProducts[productId as keyof typeof demoProducts];
   const hotels = availableHotels.length > 0 
     ? availableHotels.map(hotel => ({
@@ -129,45 +162,33 @@ export default function ProductDetailPage({
     setIsCheckingAvailability(true);
     
     try {
-      // Appel à l'API pour obtenir les dates disponibles pour ce produit dans cet hôtel
-      const response = await fetch(`/api/inventory/availability?productId=${productId}&hotelId=${hotelId}`);
+      // Pour la démo, nous simulons une disponibilité
+      // Dans une vraie implémentation, nous appellerions l'API avec les dates
+      setIsProductAvailable(true);
       
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+      // Générer les 14 prochains jours comme dates disponibles
+      const availableDates = [];
+      const today = new Date();
+      
+      for (let i = 0; i < 14; i++) {
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() + i);
+        
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1);
+        
+        availableDates.push({
+          start: startDate.toISOString().split('T')[0],
+          end: endDate.toISOString().split('T')[0]
+        });
       }
       
-      const data = await response.json();
+      setAvailableDates(availableDates);
       
-      // Mettre à jour la disponibilité
-      setIsProductAvailable(data.available);
-      
-      // Si le produit est disponible, mettre à jour les dates disponibles
-      if (data.available) {
-        // Dans une vraie implémentation, nous récupérerions les dates disponibles depuis l'API
-        // Pour la démo, nous utilisons les 14 prochains jours
-        const availableDates = [];
-        const today = new Date();
-        
-        for (let i = 0; i < 14; i++) {
-          const startDate = new Date(today);
-          startDate.setDate(today.getDate() + i);
-          
-          const endDate = new Date(startDate);
-          endDate.setDate(startDate.getDate() + 1);
-          
-          availableDates.push({
-            start: startDate.toISOString().split('T')[0],
-            end: endDate.toISOString().split('T')[0]
-          });
-        }
-        
-        setAvailableDates(availableDates);
-        
-        // Sélectionner la première date disponible
-        if (availableDates.length > 0) {
-          setPickupDate(availableDates[0].start);
-          setDropDate(availableDates[0].end);
-        }
+      // Sélectionner la première date disponible
+      if (availableDates.length > 0) {
+        setPickupDate(availableDates[0].start);
+        setDropDate(availableDates[0].end);
       }
     } catch (err) {
       console.error("Erreur lors de la vérification de la disponibilité:", err);

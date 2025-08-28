@@ -210,6 +210,49 @@ export async function getProductById(id: string) {
   });
 }
 
+export async function getAllProductsByCity(citySlug: string) {
+  return await prisma.product.findMany({
+    where: {
+      inventory: {
+        some: {
+          hotel: {
+            city: {
+              slug: citySlug,
+            },
+          },
+          active: true,
+          quantity: {
+            gt: 0,
+          },
+        },
+      },
+    },
+    include: {
+      inventory: {
+        where: {
+          hotel: {
+            city: {
+              slug: citySlug,
+            },
+          },
+          active: true,
+        },
+        include: {
+          hotel: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      name: 'asc',
+    },
+  });
+}
+
 export async function createProduct(data: {
   name: string;
   description?: string;
