@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, PencilIcon, TrashIcon, PackageIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -100,15 +101,44 @@ export default function ProductsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Produits</h1>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Ajouter un produit
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+        <h1 className="text-2xl font-bold">Produits & Stock</h1>
+        <div className="flex space-x-2">
+          <Button asChild variant="outline">
+            <Link href="/admin/stock">
+              <PackageIcon className="h-4 w-4 mr-2" />
+              Vue Stock Global
+            </Link>
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Ajouter un produit
+              </Button>
+            </DialogTrigger>
+          </Dialog>
+        </div>
+      </div>
+      
+      <div className="mb-6">
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Navigation rapide</h3>
+              <p className="text-sm text-gray-600">Gérez vos produits et consultez le stock par hôtel</p>
+            </div>
+            <div className="flex space-x-2">
+              <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Produits</span>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/admin/stock">Stock Global</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
             <DialogHeader>
               <DialogTitle>Ajouter un produit</DialogTitle>
             </DialogHeader>

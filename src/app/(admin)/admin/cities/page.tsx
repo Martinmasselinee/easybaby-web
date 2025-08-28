@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
 import {
@@ -284,6 +285,11 @@ export default function CitiesPage() {
                     <td className="px-4 py-3 text-sm">{city._count?.hotels || 0}</td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex space-x-2">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/admin/cities/${city.id}/hotels`}>
+                            Voir hôtels ({city._count?.hotels || 0})
+                          </Link>
+                        </Button>
                         <Dialog open={isEditDialogOpen && currentCity?.id === city.id} onOpenChange={(open) => {
                           setIsEditDialogOpen(open);
                           if (!open) setCurrentCity(null);
