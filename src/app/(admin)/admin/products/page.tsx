@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Edit, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -232,9 +233,13 @@ export default function ProductsPage() {
                       {product._count?.inventory || 0} unités
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-gray-600 hover:text-gray-900">
-                        Modifier
-                      </button>
+                      <div className="flex justify-end space-x-2">
+                        <Link href={`/admin/products/${product.id}`}>
+                          <Button variant="outline" size="sm" className="border-gray-200">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

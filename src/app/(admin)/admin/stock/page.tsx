@@ -6,7 +6,9 @@ import { NoProductsEmptyState, PrerequisiteEmptyState, GrayEmptyState, TableWrap
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { Search, Filter, BarChart3, Package, Building2, AlertTriangle, TrendingUp, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Search, Filter, BarChart3, Package, Building2, AlertTriangle, TrendingUp, Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 interface InventoryItem {
@@ -106,7 +108,7 @@ interface HotelStockView {
   }>;
 }
 
-type ViewMode = 'table' | 'product-centric' | 'hotel-centric';
+type ViewMode = 'product-centric' | 'hotel-centric';
 type FilterStatus = 'all' | 'available' | 'in-use' | 'fully-booked';
 type StockLevel = 'all' | 'low' | 'normal' | 'high' | 'high-demand';
 
@@ -119,13 +121,22 @@ export default function StockPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filter states
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>('product-centric');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string>('all');
   const [selectedHotelId, setSelectedHotelId] = useState<string>('all');
   const [selectedCityId, setSelectedCityId] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [stockLevel, setStockLevel] = useState<StockLevel>('all');
+
+  // Add stock popup states
+  const [isAddStockOpen, setIsAddStockOpen] = useState(false);
+  const [selectedCityIdForAdd, setSelectedCityIdForAdd] = useState<string>('');
+  const [selectedHotelIdForAdd, setSelectedHotelIdForAdd] = useState<string>('');
+  const [selectedProductIdForAdd, setSelectedProductIdForAdd] = useState<string>('');
+  const [quantityToAdd, setQuantityToAdd] = useState<string>('1');
+  const [isSubmittingStock, setIsSubmittingStock] = useState(false);
+  const [stockError, setStockError] = useState<string>('');
 
   const fetchData = async () => {
     try {
@@ -347,6 +358,61 @@ export default function StockPage() {
   const hasActiveFilters = searchQuery || selectedProductId !== 'all' || selectedHotelId !== 'all' || 
     selectedCityId !== 'all' || filterStatus !== 'all' || stockLevel !== 'all';
 
+  // Get filtered hotels for add stock popup
+  const filteredHotelsForAdd = useMemo(() => {
+    if (!selectedCityIdForAdd) return [];
+    return hotels.filter(hotel => hotel.city?.id === selectedCityIdForAdd);
+  }, [hotels, selectedCityIdForAdd]);
+
+  // Handle add stock submission
+  const handleAddStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCityIdForAdd || !selectedHotelIdForAdd || !selectedProductIdForAdd || !quantityToAdd) {
+      setStockError('Tous les champs sont requis');
+      return;
+    }
+
+    setIsSubmittingStock(true);
+    setStockError('');
+
+    try {
+      const response = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hotelId: selectedHotelIdForAdd,
+          productId: selectedProductIdForAdd,
+          quantity: parseInt(quantityToAdd),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'ajout du stock');
+      }
+
+      // Reset form and close popup
+      setSelectedCityIdForAdd('');
+      setSelectedHotelIdForAdd('');
+      setSelectedProductIdForAdd('');
+      setQuantityToAdd('1');
+      setIsAddStockOpen(false);
+      
+      // Refresh data
+      fetchData();
+    } catch (err: any) {
+      setStockError(err.message);
+    } finally {
+      setIsSubmittingStock(false);
+    }
+  };
+
+  // Reset hotel selection when city changes
+  useEffect(() => {
+    setSelectedHotelIdForAdd('');
+  }, [selectedCityIdForAdd]);
+
   if (isLoading) {
     return (
       <LoadingState 
@@ -373,7 +439,113 @@ export default function StockPage() {
         subtitle="Gérez le stock des produits par hôtel avec des vues intelligentes et des filtres avancés"
         actions={
           (products.length > 0 && hotels.length > 0) ? (
-            <Button>Ajouter du stock</Button>
+            <Dialog open={isAddStockOpen} onOpenChange={setIsAddStockOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gray-900 hover:bg-gray-800 text-white border-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter du stock
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Ajouter du stock</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleAddStock} className="space-y-4">
+                  {stockError && (
+                    <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded">
+                      {stockError}
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Ville *</Label>
+                    <select
+                      id="city"
+                      value={selectedCityIdForAdd}
+                      onChange={(e) => setSelectedCityIdForAdd(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      required
+                    >
+                      <option value="">Sélectionner une ville</option>
+                      {cities.map((city) => (
+                        <option key={city.id} value={city.id}>
+                          {city.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="hotel">Hôtel *</Label>
+                    <select
+                      id="hotel"
+                      value={selectedHotelIdForAdd}
+                      onChange={(e) => setSelectedHotelIdForAdd(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      required
+                      disabled={!selectedCityIdForAdd}
+                    >
+                      <option value="">Sélectionner un hôtel</option>
+                      {filteredHotelsForAdd.map((hotel) => (
+                        <option key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="product">Produit *</Label>
+                    <select
+                      id="product"
+                      value={selectedProductIdForAdd}
+                      onChange={(e) => setSelectedProductIdForAdd(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      required
+                    >
+                      <option value="">Sélectionner un produit</option>
+                      {products.map((product) => (
+                        <option key={product.id} value={product.id}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Quantité *</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      min="1"
+                      value={quantityToAdd}
+                      onChange={(e) => setQuantityToAdd(e.target.value)}
+                      placeholder="Nombre d'unités à ajouter"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddStockOpen(false)}
+                      disabled={isSubmittingStock}
+                      className="border-gray-200"
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingStock}
+                      className="bg-gray-900 hover:bg-gray-800 text-white border-0"
+                    >
+                      {isSubmittingStock ? 'Ajout...' : 'Ajouter'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           ) : null
         }
       />
@@ -399,73 +571,63 @@ export default function StockPage() {
       ) : (
         <div className="space-y-6">
           {/* Stock Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-white p-4 border border-gray-200">
               <div className="flex items-center">
-                <Package className="h-5 w-5 text-blue-600 mr-2" />
+                <Package className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Produits</p>
-                  <p className="text-2xl font-bold text-gray-900">{stockSummary.totalProducts}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Produits</p>
+                  <p className="text-xl font-semibold text-gray-900">{stockSummary.totalProducts}</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="bg-white p-4 border border-gray-200">
               <div className="flex items-center">
-                <Building2 className="h-5 w-5 text-green-600 mr-2" />
+                <Building2 className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Hôtels</p>
-                  <p className="text-2xl font-bold text-gray-900">{stockSummary.totalHotels}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Hôtels</p>
+                  <p className="text-xl font-semibold text-gray-900">{stockSummary.totalHotels}</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="bg-white p-4 border border-gray-200">
               <div className="flex items-center">
-                <BarChart3 className="h-5 w-5 text-purple-600 mr-2" />
+                <BarChart3 className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Stock Total</p>
-                  <p className="text-2xl font-bold text-gray-900">{stockSummary.totalStock}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Total</p>
+                  <p className="text-xl font-semibold text-gray-900">{stockSummary.totalStock}</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="bg-white p-4 border border-gray-200">
               <div className="flex items-center">
-                <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
+                <div className="h-4 w-4 bg-gray-800 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Disponible</p>
-                  <p className="text-2xl font-bold text-green-900">{stockSummary.currentlyAvailable}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Disponible</p>
+                  <p className="text-xl font-semibold text-gray-900">{stockSummary.currentlyAvailable}</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="bg-white p-4 border border-gray-200">
               <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-orange-600 mr-2" />
+                <div className="h-4 w-4 bg-gray-400 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">En Usage</p>
-                  <p className="text-2xl font-bold text-orange-600">{stockSummary.inUse}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">En Usage</p>
+                  <p className="text-xl font-semibold text-gray-900">{stockSummary.inUse}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="bg-white p-4 border border-gray-200">
               <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+                <AlertTriangle className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Stock Faible</p>
-                  <p className="text-2xl font-bold text-red-600">{stockSummary.lowStockItems}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <div className="flex items-center">
-                <BarChart3 className="h-5 w-5 text-purple-600 mr-2" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Utilisation</p>
-                  <p className="text-2xl font-bold text-purple-600">{stockSummary.averageUtilization}%</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Faible</p>
+                  <p className="text-xl font-semibold text-black">{stockSummary.lowStockItems}</p>
                 </div>
               </div>
             </div>
@@ -473,45 +635,34 @@ export default function StockPage() {
 
           {/* View Mode Selector */}
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex space-x-2">
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('table')}
-                className="flex items-center gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                Vue Tableau
-              </Button>
+            <div className="flex space-x-1 border border-gray-200 bg-white">
               <Button
                 variant={viewMode === 'product-centric' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('product-centric')}
-                className="flex items-center gap-2"
+                className="border-0 rounded-none"
               >
-                <Package className="h-4 w-4" />
                 Vue Produits
               </Button>
               <Button
                 variant={viewMode === 'hotel-centric' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('hotel-centric')}
-                className="flex items-center gap-2"
+                className="border-0 rounded-none"
               >
-                <Building2 className="h-4 w-4" />
                 Vue Hôtels
               </Button>
             </div>
 
             {hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={clearFilters}>
+              <Button variant="outline" size="sm" onClick={clearFilters} className="border-gray-200">
                 Effacer les filtres
               </Button>
             )}
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-white p-4 rounded-lg border shadow-sm">
+          <div className="bg-white p-4 border border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               {/* Search */}
               <div className="lg:col-span-2">
@@ -689,255 +840,152 @@ export default function StockPage() {
             </div>
           ) : (
             <>
-              {/* Table View */}
-              {viewMode === 'table' && (
-                <TableWrapper>
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Hôtel
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ville
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Produit
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Stock Total
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Disponible
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          En Usage
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredInventory.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {item.hotel.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.hotel.city.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.product.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <span className="text-gray-900 font-medium">{item.quantity}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              item.currentlyAvailable === 0
-                                ? 'bg-red-100 text-red-800' 
-                                : item.currentlyAvailable <= 2
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-green-100 text-green-800'
-                            }`}>
-                              {item.currentlyAvailable}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              item.inUse === 0
-                                ? 'bg-gray-100 text-gray-800'
-                                : 'bg-orange-100 text-orange-800'
-                            }`}>
-                              {item.inUse}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <Link 
-                              href={`/admin/hotels/${item.hotel.id}`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              Gérer
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </TableWrapper>
-              )}
-
               {/* Product-Centric View */}
               {viewMode === 'product-centric' && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                    <Package className="h-5 w-5 mr-2" />
-                    Vue par Produits ({productStockView.length})
-                  </h3>
-                  <div className="grid gap-4">
-                    {productStockView.map((product) => (
-                      <div key={product.productId} className="bg-white border rounded-lg p-6 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900">{product.productName}</h4>
-                            <div className="flex space-x-4 text-sm mt-1">
-                              <span className="text-gray-600">
-                                Stock Total: <span className="font-semibold text-gray-900">{product.totalStock}</span>
-                              </span>
-                              <span className="text-green-600">
-                                Disponible: <span className="font-semibold">{product.currentlyAvailable}</span>
-                              </span>
-                              <span className="text-orange-600">
-                                En Usage: <span className="font-semibold">{product.inUse}</span>
-                              </span>
-                              <span className="text-blue-600">
-                                Hôtels: <span className="font-semibold">{product.hotelsCount}</span>
-                              </span>
-                              <span className="text-purple-600">
-                                Utilisation: <span className="font-semibold">{product.averageUtilization}%</span>
-                              </span>
-                            </div>
-                          </div>
-                          <Link 
-                            href={`/admin/products/${product.productId}`}
-                            className="text-blue-600 hover:text-blue-900 font-medium"
-                          >
-                            Gérer Produit
-                          </Link>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {product.hotels.map((hotel) => (
-                            <div 
-                              key={hotel.hotelId} 
-                              className={`p-3 rounded border-l-4 ${
-                                hotel.currentlyAvailable > 0 ? 'border-green-400 bg-green-50' : 
-                                hotel.inUse > 0 ? 'border-orange-400 bg-orange-50' : 
-                                'border-gray-400 bg-gray-50'
-                              }`}
-                            >
-                              <div className="flex justify-between items-center">
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <p className="font-medium text-gray-900">{hotel.hotelName}</p>
-                                      <p className="text-sm text-gray-600">{hotel.cityName}</p>
-                                    </div>
-                                    <Link 
-                                      href={`/admin/hotels/${hotel.hotelId}`}
-                                      className="text-xs text-blue-600 hover:text-blue-800"
-                                    >
-                                      Gérer
-                                    </Link>
-                                  </div>
-                                  <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                                    <div>
-                                      <span className="text-gray-500">Total:</span>
-                                      <span className="font-semibold ml-1">{hotel.quantity}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-green-600">Dispo:</span>
-                                      <span className="font-semibold ml-1">{hotel.currentlyAvailable}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-orange-600">Usage:</span>
-                                      <span className="font-semibold ml-1">{hotel.inUse}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                <div className="bg-white border border-gray-200">
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-900">
+                      Vue par Produits ({productStockView.length})
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Produit
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Stock Total
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Disponible
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            En Usage
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Hôtels
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Utilisation
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {productStockView.map((product) => (
+                          <tr key={product.productId} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {product.productName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {product.totalStock}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {product.currentlyAvailable}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {product.inUse}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {product.hotelsCount}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {product.averageUtilization}%
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <Link 
+                                href={`/admin/products/${product.productId}`}
+                                className="text-gray-900 hover:text-gray-700"
+                              >
+                                Détails
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
 
               {/* Hotel-Centric View */}
               {viewMode === 'hotel-centric' && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                    <Building2 className="h-5 w-5 mr-2" />
-                    Vue par Hôtels ({hotelStockView.length})
-                  </h3>
-                  <div className="grid gap-4">
-                    {hotelStockView.map((hotel) => (
-                      <div key={hotel.hotelId} className="bg-white border rounded-lg p-6 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900">{hotel.hotelName}</h4>
-                            <p className="text-sm text-gray-600">{hotel.cityName}</p>
-                            <div className="flex space-x-4 text-sm mt-1">
-                              <span className="text-gray-600">
-                                Produits: <span className="font-semibold text-gray-900">{hotel.totalProducts}</span>
-                              </span>
-                              <span className="text-gray-600">
-                                Stock Total: <span className="font-semibold text-gray-900">{hotel.totalStock}</span>
-                              </span>
-                              <span className="text-green-600">
-                                Disponible: <span className="font-semibold">{hotel.currentlyAvailable}</span>
-                              </span>
-                              <span className="text-orange-600">
-                                En Usage: <span className="font-semibold">{hotel.inUse}</span>
-                              </span>
-                              <span className="text-purple-600">
-                                Utilisation: <span className="font-semibold">{hotel.averageUtilization}%</span>
-                              </span>
-                            </div>
-                          </div>
-                          <Link 
-                            href={`/admin/hotels/${hotel.hotelId}`}
-                            className="text-blue-600 hover:text-blue-900 font-medium"
-                          >
-                            Gérer Hôtel
-                          </Link>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {hotel.products.map((product) => (
-                            <div 
-                              key={product.productId} 
-                              className={`p-3 rounded border-l-4 ${
-                                product.currentlyAvailable > 0 ? 'border-blue-400 bg-blue-50' : 
-                                product.inUse > 0 ? 'border-orange-400 bg-orange-50' : 
-                                'border-gray-400 bg-gray-50'
-                              }`}
-                            >
-                              <div className="flex justify-between items-center">
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <p className="font-medium text-gray-900">{product.productName}</p>
-                                    </div>
-                                    <Link 
-                                      href={`/admin/products/${product.productId}`}
-                                      className="text-xs text-blue-600 hover:text-blue-800"
-                                    >
-                                      Gérer
-                                    </Link>
-                                  </div>
-                                  <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                                    <div>
-                                      <span className="text-gray-500">Total:</span>
-                                      <span className="font-semibold ml-1">{product.quantity}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-green-600">Dispo:</span>
-                                      <span className="font-semibold ml-1">{product.currentlyAvailable}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-orange-600">Usage:</span>
-                                      <span className="font-semibold ml-1">{product.inUse}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                <div className="bg-white border border-gray-200">
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-900">
+                      Vue par Hôtels ({hotelStockView.length})
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Hôtel
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Ville
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Produits
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Stock Total
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Disponible
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            En Usage
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Utilisation
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {hotelStockView.map((hotel) => (
+                          <tr key={hotel.hotelId} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {hotel.hotelName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {hotel.cityName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {hotel.totalProducts}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {hotel.totalStock}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {hotel.currentlyAvailable}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {hotel.inUse}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {hotel.averageUtilization}%
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <Link 
+                                href={`/admin/hotels/${hotel.hotelId}`}
+                                className="text-gray-900 hover:text-gray-700"
+                              >
+                                Gérer
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
