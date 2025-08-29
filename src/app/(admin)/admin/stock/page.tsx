@@ -662,7 +662,7 @@ export default function StockPage() {
                       Normal (3-10)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('high')}>
-                      Élevé (>10)
+                      Élevé (&gt;10)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('high-demand')}>
                       Forte Demande
