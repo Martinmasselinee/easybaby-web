@@ -66,9 +66,7 @@ async function handleGet(request: NextRequest) {
         totalAvailable,
         inUse,
         utilization: Math.round(utilization),
-        isFullyBooked: currentlyAvailable === 0,
-        isLowStock: currentlyAvailable <= 2 && currentlyAvailable > 0,
-        hasRecentDemand: totalReserved > currentlyInUse, // Future bookings exist
+        isFullyBooked: currentlyAvailable === 0
       };
     })
   );
@@ -79,8 +77,6 @@ async function handleGet(request: NextRequest) {
     totalProducts: new Set(enhancedInventory.map(item => item.productId)).size,
     totalHotels: new Set(enhancedInventory.map(item => item.hotelId)).size,
     fullyBookedItems: enhancedInventory.filter(item => item.isFullyBooked).length,
-    lowStockItems: enhancedInventory.filter(item => item.isLowStock).length,
-    highDemandItems: enhancedInventory.filter(item => item.hasRecentDemand).length,
     averageUtilization: Math.round(
       enhancedInventory.reduce((sum, item) => sum + item.utilization, 0) / enhancedInventory.length
     ),

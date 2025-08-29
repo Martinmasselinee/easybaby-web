@@ -20,8 +20,6 @@ interface InventoryItem {
   inUse: number;
   utilization: number;
   isFullyBooked: boolean;
-  isLowStock: boolean;
-  hasRecentDemand: boolean;
   hotel: {
     id: string;
     name: string;
@@ -65,7 +63,6 @@ interface StockSummary {
   totalStock: number;
   currentlyAvailable: number;
   inUse: number;
-  lowStockItems: number;
   fullyBookedItems: number;
   averageUtilization: number;
 }
@@ -223,10 +220,8 @@ export default function StockPage() {
     // Filter by stock level and demand
     if (stockLevel !== 'all') {
       filtered = filtered.filter(item => {
-        if (stockLevel === 'low') return item.isLowStock;
-        if (stockLevel === 'normal') return item.currentlyAvailable > 2 && item.currentlyAvailable <= 10;
+        if (stockLevel === 'normal') return item.currentlyAvailable > 0 && item.currentlyAvailable <= 10;
         if (stockLevel === 'high') return item.currentlyAvailable > 10;
-        if (stockLevel === 'high-demand') return item.hasRecentDemand;
         return true;
       });
     }
@@ -242,7 +237,6 @@ export default function StockPage() {
       totalStock: inventory.reduce((sum, item) => sum + item.quantity, 0),
       currentlyAvailable: inventory.reduce((sum, item) => sum + item.currentlyAvailable, 0),
       inUse: inventory.reduce((sum, item) => sum + item.inUse, 0),
-      lowStockItems: inventory.filter(item => item.isLowStock).length,
       fullyBookedItems: inventory.filter(item => item.isFullyBooked).length,
       averageUtilization: inventory.length > 0 ? Math.round(
         inventory.reduce((sum, item) => sum + item.utilization, 0) / inventory.length
@@ -626,8 +620,8 @@ export default function StockPage() {
               <div className="flex items-center">
                 <AlertTriangle className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Faible</p>
-                  <p className="text-xl font-semibold text-black">{stockSummary.lowStockItems}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Complet</p>
+                  <p className="text-xl font-semibold text-black">{stockSummary.fullyBookedItems}</p>
                 </div>
               </div>
             </div>
@@ -819,18 +813,14 @@ export default function StockPage() {
                     <DropdownMenuItem onClick={() => setStockLevel('all')}>
                       Tous les niveaux
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setStockLevel('low')}>
-                      Stock faible (≤2)
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={() => setStockLevel('normal')}>
-                      Stock normal (3-10)
+                      Stock normal (1-10)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('high')}>
                       Stock élevé (&gt;10)
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setStockLevel('high-demand')}>
-                      Forte demande
-                    </DropdownMenuItem>
+
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
