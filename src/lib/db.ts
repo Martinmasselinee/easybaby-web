@@ -1,4 +1,4 @@
-import { prisma, withPrismaRetry } from './prisma';
+import { prisma } from './prisma';
 
 // Fonctions City
 export async function getAllCities() {
@@ -75,10 +75,8 @@ export async function getCityById(id: string) {
 }
 
 export async function createCity(data: { name: string; slug: string }) {
-  return await withPrismaRetry(async () => {
-    return await prisma.city.create({
-      data,
-    });
+  return await prisma.city.create({
+    data,
   });
 }
 
@@ -277,10 +275,8 @@ export async function createProduct(data: {
   pricePerDay: number;
   deposit: number;
 }) {
-  return await withPrismaRetry(async () => {
-    return await prisma.product.create({
-      data,
-    });
+  return await prisma.product.create({
+    data,
   });
 }
 
