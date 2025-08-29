@@ -158,7 +158,7 @@ export default function HotelDetailPage() {
     fetchHotelData();
     }
   }, [hotelId]);
-
+  
   const handleEditHotel = async () => {
     try {
       setIsSubmitting(true);
@@ -170,7 +170,7 @@ export default function HotelDetailPage() {
         },
         body: JSON.stringify(editHotelForm),
       });
-
+      
       if (!response.ok) {
         throw new Error("Erreur lors de la mise à jour de l'hôtel");
       }
@@ -266,11 +266,11 @@ export default function HotelDetailPage() {
       if (action === 'increase') {
         // Add stock using the existing add stock endpoint
         const response = await fetch("/api/inventory", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
             hotelId: hotelId,
             productId: selectedProductForStock.id,
             quantity: quantity
@@ -540,7 +540,7 @@ export default function HotelDetailPage() {
         subtitle={`${hotel.city.name} • ${hotel.email}`}
         actions={
           <div className="flex space-x-3">
-            <Button asChild variant="outline">
+        <Button asChild variant="outline">
               <Link href="/admin/hotels">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour aux hôtels
@@ -552,8 +552,8 @@ export default function HotelDetailPage() {
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Supprimer l'hôtel
-            </Button>
-          </div>
+        </Button>
+      </div>
         }
       />
 
@@ -987,7 +987,7 @@ export default function HotelDetailPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   Commission moyenne sur les ventes
                 </p>
-              </div>
+                </div>
               
               <div className="bg-white p-6 rounded-lg border">
                 <h4 className="font-semibold text-gray-700 mb-2">Part de l'hôtel à reverser</h4>
