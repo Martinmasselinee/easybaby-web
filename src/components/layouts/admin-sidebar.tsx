@@ -7,10 +7,6 @@ import { useState } from "react";
 
 const navItems = [
   {
-    title: "Tableau de bord",
-    href: "/admin/dashboard",
-  },
-  {
     title: "Hôtels",
     href: "/admin/hotels",
   },
@@ -42,17 +38,7 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
 
   // Fonction pour vérifier si un lien est actif, même pour les sous-pages
   const isActive = (href: string) => {
-    if (href === "/admin/dashboard" && pathname === "/admin/dashboard") {
-      return true;
-    }
-    
-    // Pour les autres sections, vérifier si le pathname commence par le href
-    // mais pas pour le tableau de bord qui est un cas particulier
-    if (href !== "/admin/dashboard") {
-      return pathname.startsWith(href);
-    }
-    
-    return false;
+    return pathname.startsWith(href);
   };
 
   const handleLinkClick = () => {

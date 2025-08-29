@@ -162,13 +162,21 @@ export default function HotelsPage() {
         title="Hôtels"
         subtitle="Gérez les hôtels partenaires qui proposeront vos équipements"
         actions={
-          cities.length > 0 ? (
-            <Button onClick={() => setIsAddDialogOpen(true)}>Ajouter un hôtel</Button>
-          ) : (
-            <Button disabled title="Créez d'abord une ville">
-              Ajouter un hôtel
+          <div className="flex space-x-3">
+            <Button asChild variant="outline">
+              <Link href="/admin/cities">
+                <MapPin className="h-4 w-4 mr-2" />
+                Ajouter une ville
+              </Link>
             </Button>
-          )
+            {cities.length > 0 ? (
+              <Button onClick={() => setIsAddDialogOpen(true)}>Ajouter un hôtel</Button>
+            ) : (
+              <Button disabled title="Créez d'abord une ville">
+                Ajouter un hôtel
+              </Button>
+            )}
+          </div>
         }
       />
 

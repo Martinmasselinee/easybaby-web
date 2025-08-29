@@ -92,6 +92,7 @@ export default function HotelDetailPage() {
   const [isCautionDialogOpen, setIsCautionDialogOpen] = useState(false);
   const [isDamageDialogOpen, setIsDamageDialogOpen] = useState(false);
   const [isProcessingCaution, setIsProcessingCaution] = useState(false);
+  const [isDeleteHotelDialogOpen, setIsDeleteHotelDialogOpen] = useState(false);
   
   // Hotel edit states
   const [isEditHotelDialogOpen, setIsEditHotelDialogOpen] = useState(false);
@@ -194,6 +195,28 @@ export default function HotelDetailPage() {
         contactEmail: hotel.contactEmail || ''
       });
       setIsEditHotelDialogOpen(true);
+    }
+  };
+
+  const handleDeleteHotel = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/hotels/${hotelId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la suppression de l'hôtel");
+      }
+
+      // Redirect to hotels list after successful deletion
+      window.location.href = '/admin/hotels';
+    } catch (error: any) {
+      console.error("Erreur:", error);
+      alert(`Erreur: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -516,12 +539,21 @@ export default function HotelDetailPage() {
         title={hotel.name}
         subtitle={`${hotel.city.name} • ${hotel.email}`}
         actions={
-        <Button asChild variant="outline">
-            <Link href="/admin/hotels">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour aux hôtels
-            </Link>
-        </Button>
+          <div className="flex space-x-3">
+            <Button asChild variant="outline">
+              <Link href="/admin/hotels">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour aux hôtels
+              </Link>
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => setIsDeleteHotelDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Supprimer l'hôtel
+            </Button>
+          </div>
         }
       />
 
