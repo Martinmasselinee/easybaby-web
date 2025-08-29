@@ -225,7 +225,7 @@ export async function getProductById(id: string) {
 }
 
 export async function getAllProductsByCity(citySlug: string) {
-  return await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: {
       inventory: {
         some: {
@@ -265,6 +265,47 @@ export async function getAllProductsByCity(citySlug: string) {
       name: 'asc',
     },
   });
+
+  // Calculate availability for each product
+  const productsWithAvailability = await Promise.all(
+    products.map(async (product) => {
+      // Calculate total quantity across all hotels in this city
+      const totalQuantity = product.inventory.reduce((sum, item) => sum + item.quantity, 0);
+      
+      // Count overlapping reservations for this product across all hotels in the city
+      const overlappingReservations = await prisma.reservation.count({
+        where: {
+          productId: product.id,
+          pickupHotel: {
+            city: {
+              slug: citySlug,
+            },
+          },
+          status: {
+            in: ['PENDING', 'CONFIRMED'],
+          },
+          // For now, we'll consider all future reservations as unavailable
+          // In a more sophisticated implementation, we'd check date ranges
+          endAt: {
+            gt: new Date(),
+          },
+        },
+      });
+
+      const availableQuantity = Math.max(0, totalQuantity - overlappingReservations);
+
+      return {
+        ...product,
+        availability: {
+          total: totalQuantity,
+          available: availableQuantity,
+          hotelsCount: product.inventory.length,
+        },
+      };
+    })
+  );
+
+  return productsWithAvailability;
 }
 
 export async function createProduct(data: {

@@ -65,6 +65,8 @@ model InventoryItem {
   // available = quantity - activeReservations in time window
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([hotelId, productId])
 }
 
 model Reservation {
