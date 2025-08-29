@@ -5,13 +5,11 @@ import Link from "next/link";
 import { AdminPageWrapper, EmptyState, LoadingState, PrimaryButton } from "@/components/admin/admin-page-wrapper";
 
 type DashboardStats = {
-  cities: number;
-  hotels: number;
-  products: number;
-  reservations: number;
-  revenue: number;
-  revenueEasyBaby: number;
-  revenueHotels: number;
+  reservationsCount: number;
+  hotelsCount: number;
+  productsCount: number;
+  citiesCount: number;
+  totalRevenueCents: number;
 };
 
 export default function DashboardPage() {
@@ -33,38 +31,36 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Erreur lors de la récupération de la session admin", error);
     }
+  }, []);
 
-    // Récupérer les statistiques
+  useEffect(() => {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/admin/dashboard/stats");
+        const response = await fetch('/api/admin/dashboard/stats');
+        
         if (response.ok) {
           const data = await response.json();
           setStats(data);
         } else {
-          // Si l'API n'existe pas encore ou retourne une erreur, utiliser des stats vides
+          // Stats vides en cas d'erreur
           setStats({
-            cities: 0,
-            hotels: 0,
-            products: 0,
-            reservations: 0,
-            revenue: 0,
-            revenueEasyBaby: 0,
-            revenueHotels: 0
+            reservationsCount: 0,
+            hotelsCount: 0,
+            productsCount: 0,
+            citiesCount: 0,
+            totalRevenueCents: 0,
           });
         }
       } catch (error) {
-        console.error("Erreur lors du chargement des statistiques:", error);
+        console.error("Erreur lors du chargement des stats:", error);
         // Stats vides en cas d'erreur
         setStats({
-          cities: 0,
-          hotels: 0,
-          products: 0,
-          reservations: 0,
-          revenue: 0,
-          revenueEasyBaby: 0,
-          revenueHotels: 0
+          reservationsCount: 0,
+          hotelsCount: 0,
+          productsCount: 0,
+          citiesCount: 0,
+          totalRevenueCents: 0,
         });
       } finally {
         setIsLoading(false);
@@ -75,161 +71,149 @@ export default function DashboardPage() {
   }, []);
 
   // État de démarrage : tout est vide
-  const isEmpty = stats && stats.cities === 0 && stats.hotels === 0 && stats.products === 0;
+  const isEmpty = stats && stats.citiesCount === 0 && stats.hotelsCount === 0 && stats.productsCount === 0;
 
   if (isLoading) {
     return (
-      <div>
-        <h1 className="text-3xl font-bold mb-6">Tableau de bord</h1>
-        <div className="flex items-center justify-center py-8">
-          <p>Chargement des statistiques...</p>
-        </div>
-      </div>
+      <AdminPageWrapper 
+        title="Tableau de bord"
+        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+      >
+        <LoadingState message="Chargement des statistiques..." />
+      </AdminPageWrapper>
     );
   }
 
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
-        {adminData && (
-          <p className="text-muted-foreground">
-            Bienvenue, {adminData.email}
+  if (isEmpty) {
+    return (
+      <AdminPageWrapper 
+        title="Tableau de bord"
+        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+      >
+        <div className="text-center py-12 mb-8">
+          <div className="text-6xl mb-6">🎉</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Bienvenue dans EasyBaby Admin !</h2>
+          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            Votre plateforme est vide et prête à être configurée. Suivez ces étapes pour créer votre première configuration et recevoir vos premières réservations.
           </p>
-        )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Étape 1 */}
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+            <div className="text-4xl mb-4">🏙️</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Créer une ville</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Ajoutez votre première ville où les hôtels pourront proposer vos services
+            </p>
+            <PrimaryButton href="/admin/cities">
+              Créer une ville
+            </PrimaryButton>
+          </div>
+          
+          {/* Étape 2 */}
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+            <div className="text-4xl mb-4">🏨</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Ajouter un hôtel</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Configurez votre premier hôtel partenaire avec ses informations
+            </p>
+            <PrimaryButton disabled>
+              Après étape 1
+            </PrimaryButton>
+          </div>
+          
+          {/* Étape 3 */}
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+            <div className="text-4xl mb-4">📦</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Créer des produits</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Ajoutez les équipements bébé disponibles à la location
+            </p>
+            <PrimaryButton disabled>
+              Après étape 2
+            </PrimaryButton>
+          </div>
+          
+          {/* Étape 4 */}
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Gérer le stock</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Assignez les produits aux hôtels et gérez les quantités
+            </p>
+            <PrimaryButton disabled>
+              Après étape 3
+            </PrimaryButton>
+          </div>
+        </div>
+        
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-blue-700">
+            💡 <strong>Conseil :</strong> Une fois ces étapes terminées, vos clients pourront réserver des équipements sur votre site user !
+          </p>
+        </div>
+      </AdminPageWrapper>
+    );
+  }
+
+  // Affichage des stats quand il y a des données
+  return (
+    <AdminPageWrapper 
+      title="Tableau de bord"
+      subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600">Villes</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.citiesCount}</p>
+            </div>
+            <div className="text-3xl">🏙️</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600">Hôtels</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.hotelsCount}</p>
+            </div>
+            <div className="text-3xl">🏨</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600">Produits</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.productsCount}</p>
+            </div>
+            <div className="text-3xl">📦</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600">Réservations</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.reservationsCount}</p>
+            </div>
+            <div className="text-3xl">📅</div>
+          </div>
+        </div>
       </div>
 
-      {isEmpty ? (
-        // État vide : première utilisation
-        <div className="text-center py-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Bienvenue dans EasyBaby Admin ! 🎉
-          </h2>
-          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Votre plateforme est vide et prête à être configurée. 
-            Suivez ces étapes pour créer votre première configuration et recevoir vos premières réservations.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="text-3xl mb-4">🏙️</div>
-              <h3 className="font-semibold mb-2">1. Créer une ville</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Ajoutez votre première ville où les hôtels pourront proposer vos services
-              </p>
-              <Button asChild size="sm" className="w-full">
-                <Link href="/admin/cities">Créer une ville</Link>
-              </Button>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border opacity-60">
-              <div className="text-3xl mb-4">🏨</div>
-              <h3 className="font-semibold mb-2">2. Ajouter un hôtel</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Configurez votre premier hôtel partenaire avec ses informations
-              </p>
-              <Button disabled size="sm" className="w-full">
-                Après étape 1
-              </Button>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border opacity-60">
-              <div className="text-3xl mb-4">📦</div>
-              <h3 className="font-semibold mb-2">3. Créer des produits</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Ajoutez les équipements bébé disponibles à la location
-              </p>
-              <Button disabled size="sm" className="w-full">
-                Après étape 2
-              </Button>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border opacity-60">
-              <div className="text-3xl mb-4">📊</div>
-              <h3 className="font-semibold mb-2">4. Gérer le stock</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Assignez les produits aux hôtels et gérez les quantités
-              </p>
-              <Button disabled size="sm" className="w-full">
-                Après étape 3
-              </Button>
-            </div>
+      {stats?.totalRevenueCents ? (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Revenus</h3>
+          <div className="text-3xl font-bold text-green-600">
+            {(stats.totalRevenueCents / 100).toFixed(2)}€
           </div>
-
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-2xl mx-auto">
-            <p className="text-sm text-blue-800">
-              💡 <strong>Conseil :</strong> Une fois ces étapes terminées, 
-              vos clients pourront réserver des équipements sur votre site user !
-            </p>
-          </div>
+          <p className="text-sm text-gray-600 mt-2">Revenus totaux générés</p>
         </div>
-      ) : (
-        // État avec données : tableau de bord opérationnel
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="font-semibold text-gray-700 mb-2">Revenus totaux</h3>
-              <p className="text-3xl font-bold text-green-600">{(stats!.revenue / 100).toFixed(2)}€</p>
-              <p className="text-sm text-gray-500 mt-1">Tous paiements confondus</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="font-semibold text-gray-700 mb-2">Part EasyBaby</h3>
-              <p className="text-3xl font-bold text-blue-600">{(stats!.revenueEasyBaby / 100).toFixed(2)}€</p>
-              <p className="text-sm text-gray-500 mt-1">Commission plateforme</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="font-semibold text-gray-700 mb-2">Part Hôtels</h3>
-              <p className="text-3xl font-bold text-purple-600">{(stats!.revenueHotels / 100).toFixed(2)}€</p>
-              <p className="text-sm text-gray-500 mt-1">Revenus partenaires</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="font-semibold text-gray-700 mb-2">Réservations</h3>
-              <p className="text-3xl font-bold text-orange-600">{stats!.reservations}</p>
-              <p className="text-sm text-gray-500 mt-1">Total réservations</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link href="/admin/cities" className="bg-white p-6 rounded-lg shadow-sm border hover:bg-gray-50 block">
-              <h3 className="font-semibold text-gray-700 mb-2">Villes</h3>
-              <p className="text-2xl font-bold text-indigo-600">{stats!.cities}</p>
-              <p className="text-sm text-gray-500 mt-1">Villes configurées</p>
-              <p className="text-xs text-blue-600 mt-2">Gérer →</p>
-            </Link>
-            
-            <Link href="/admin/hotels" className="bg-white p-6 rounded-lg shadow-sm border hover:bg-gray-50 block">
-              <h3 className="font-semibold text-gray-700 mb-2">Hôtels</h3>
-              <p className="text-2xl font-bold text-green-600">{stats!.hotels}</p>
-              <p className="text-sm text-gray-500 mt-1">Hôtels partenaires</p>
-              <p className="text-xs text-blue-600 mt-2">Gérer →</p>
-            </Link>
-            
-            <Link href="/admin/products" className="bg-white p-6 rounded-lg shadow-sm border hover:bg-gray-50 block">
-              <h3 className="font-semibold text-gray-700 mb-2">Produits</h3>
-              <p className="text-2xl font-bold text-pink-600">{stats!.products}</p>
-              <p className="text-sm text-gray-500 mt-1">Produits disponibles</p>
-              <p className="text-xs text-blue-600 mt-2">Gérer →</p>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Link href="/admin/reservations" className="bg-white p-6 rounded-lg shadow-sm border hover:bg-gray-50 block">
-              <h3 className="font-semibold text-gray-700 mb-2">Dernières réservations</h3>
-              <p className="text-sm text-gray-600">Gérer toutes les réservations et voir les détails</p>
-              <p className="text-xs text-blue-600 mt-2">Voir toutes →</p>
-            </Link>
-            
-            <Link href="/admin/stock" className="bg-white p-6 rounded-lg shadow-sm border hover:bg-gray-50 block">
-              <h3 className="font-semibold text-gray-700 mb-2">Gestion du stock</h3>
-              <p className="text-sm text-gray-600">Suivre les disponibilités par hôtel</p>
-              <p className="text-xs text-blue-600 mt-2">Gérer stock →</p>
-            </Link>
-          </div>
-        </div>
-      )}
-    </div>
+      ) : null}
+    </AdminPageWrapper>
   );
 }
