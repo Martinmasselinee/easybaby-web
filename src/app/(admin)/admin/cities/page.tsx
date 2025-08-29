@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
 import { NoCitiesEmptyState, TableWrapper } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Edit } from 'lucide-react';
+import { Edit, ArrowLeft } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -148,7 +149,15 @@ export default function CitiesPage() {
       <PageHeader 
         title="Villes"
         actions={
-          <Button onClick={openCreateDialog}>Ajouter une ville</Button>
+          <div className="flex space-x-3">
+            <Button asChild variant="outline">
+              <Link href="/admin/hotels">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour aux hôtels
+              </Link>
+            </Button>
+            <Button onClick={openCreateDialog}>Ajouter une ville</Button>
+          </div>
         }
       />
       {cities.length === 0 ? (

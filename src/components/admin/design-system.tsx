@@ -303,24 +303,14 @@ interface StatsCardProps {
 }
 
 export function AdminStatsCard({ title, value, icon, color = 'gray' }: StatsCardProps) {
-  const getColorClasses = () => {
-    switch (color) {
-      case 'green': return 'bg-green-50 border-green-200';
-      case 'red': return 'bg-red-50 border-red-200';
-      case 'orange': return 'bg-orange-50 border-orange-200';
-      case 'blue': return 'bg-blue-50 border-blue-200';
-      default: return 'bg-white border-gray-200';
-    }
-  };
-
   return (
-    <div className={`p-6 rounded-lg border ${getColorClasses()}`}>
+    <div className="p-6 rounded-lg border bg-white border-gray-200">
       <div className="flex items-center">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
         </div>
-        <div className="text-3xl">{icon}</div>
+        <div className="text-3xl text-gray-700">{icon}</div>
       </div>
     </div>
   );

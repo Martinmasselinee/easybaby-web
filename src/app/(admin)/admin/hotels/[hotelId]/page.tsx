@@ -697,23 +697,14 @@ export default function HotelDetailPage() {
                         ? 'Hôtel: 70% - EasyBaby: 30%' 
                         : 'EasyBaby: 70% - Hôtel: 30%'}
                     </p>
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={openEditDiscountDialog}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant={hotel.discountCode.active ? "destructive" : "default"}
-                        onClick={toggleDiscountStatus}
-                      >
-                        {hotel.discountCode.active ? 'Désactiver' : 'Activer'}
-                      </Button>
-                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={openEditDiscountDialog}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Modifier
+                    </Button>
             </div>
                 ) : (
                   <p className="text-gray-500">Aucun code de réduction configuré</p>
@@ -1386,6 +1377,40 @@ export default function HotelDetailPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Hotel Confirmation Dialog */}
+      <Dialog open={isDeleteHotelDialogOpen} onOpenChange={setIsDeleteHotelDialogOpen}>
+        <DialogContent className="max-w-md">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Supprimer l'hôtel</h3>
+              <p className="text-gray-600">
+                Êtes-vous sûr de vouloir supprimer l'hôtel <strong>{hotel?.name}</strong> ? 
+                Cette action est irréversible et supprimera également :
+              </p>
+              <ul className="mt-3 text-sm text-gray-600 list-disc list-inside space-y-1">
+                <li>Tous les stocks de produits</li>
+                <li>Le code de réduction associé</li>
+                <li>Toutes les données de l'hôtel</li>
+              </ul>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button variant="outline" className="flex-1" onClick={() => setIsDeleteHotelDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button 
+                variant="destructive" 
+                className="flex-1" 
+                onClick={handleDeleteHotel} 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Suppression..." : "Supprimer définitivement"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
