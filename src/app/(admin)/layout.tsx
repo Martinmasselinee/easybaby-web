@@ -67,12 +67,12 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <AdminHeader onMenuToggle={toggleSidebar} />
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1 pt-16 relative">
         <AdminSidebar 
           isOpen={sidebarOpen} 
           onClose={closeSidebar} 
         />
-        <main className="flex-1 px-4 md:px-8 lg:px-16 py-8 md:ml-0 transition-all duration-300 overflow-auto">
+        <main className="flex-1 px-6 py-6 md:ml-0 transition-all duration-300 overflow-auto bg-gray-50">
           {children}
         </main>
       </div>

@@ -33,7 +33,7 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="px-4 md:px-8 lg:px-16 flex h-16 items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Bouton menu mobile */}
@@ -42,7 +42,7 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
             onClick={onMenuToggle}
           >
             <svg
-              className="w-6 h-6"
+              className="w-6 h-6 text-gray-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -57,8 +57,8 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
           </button>
 
           <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">EasyBaby</span>
-            <span className="text-sm text-gray-500 hidden sm:inline">Admin</span>
+            <span className="text-xl font-bold text-gray-900">EasyBaby</span>
+            <span className="text-lg text-gray-700 hidden sm:inline">Admin</span>
           </Link>
         </div>
         

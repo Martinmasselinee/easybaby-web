@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { PageLayout, EmptyState, LoadingState, ErrorState } from '@/components/admin/page-layout';
 
 interface Reservation {
   id: string;
@@ -73,67 +74,49 @@ export default function ReservationsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'CONFIRMED': return 'bg-green-100 text-green-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      case 'COMPLETED': return 'bg-blue-100 text-blue-800';
+      case 'PENDING': return 'bg-gray-100 text-gray-800 border border-gray-200';
+      case 'CONFIRMED': return 'bg-gray-900 text-white';
+      case 'CANCELLED': return 'bg-gray-200 text-gray-600';
+      case 'COMPLETED': return 'bg-gray-100 text-gray-800 border border-gray-200';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Réservations</h1>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
+      <PageLayout title="Réservations">
+        <LoadingState message="Chargement des réservations..." />
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Réservations</h1>
-        <div className="text-center py-12">
-          <div className="text-red-600 mb-4">❌ Erreur: {error}</div>
-          <button 
-            onClick={fetchReservations}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Réessayer
-          </button>
-        </div>
-      </div>
+      <PageLayout title="Réservations">
+        <ErrorState message={error} onRetry={fetchReservations} />
+      </PageLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Réservations</h1>
+    <PageLayout 
+      title="Réservations"
+      actions={
         <button 
           onClick={fetchReservations}
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+          className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
         >
           Actualiser
         </button>
-      </div>
+      }
+    >
 
       {reservations.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">📅</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            Aucune réservation
-          </h3>
-          <p className="text-gray-500 mb-6">
-            Les réservations des utilisateurs apparaîtront ici une fois qu'ils auront créé des réservations.
-          </p>
-          <p className="text-sm text-gray-400">
-            Assurez-vous d'avoir créé des villes, hôtels et produits pour permettre aux utilisateurs de faire des réservations.
-          </p>
-        </div>
+        <EmptyState 
+          icon="📅"
+          title="Aucune réservation"
+          description="Les réservations des utilisateurs apparaîtront ici une fois qu'ils auront créé des réservations. Assurez-vous d'avoir créé des villes, hôtels et produits pour permettre aux utilisateurs de faire des réservations."
+        />
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
@@ -209,6 +192,6 @@ export default function ReservationsPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }
