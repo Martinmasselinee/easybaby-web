@@ -8,6 +8,7 @@ import { TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-st
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Edit, Plus, Trash2, Settings } from 'lucide-react';
 import {
   Dialog,
@@ -109,7 +110,9 @@ export default function HotelDetailPage() {
       const [hotelResponse, inventoryResponse, reservationsResponse, productsResponse] = await Promise.all([
         fetch(`/api/hotels/${hotelId}`),
         fetch(`/api/inventory/hotel/${hotelId}`),
-        fetch(`/api/admin/reservations?hotelId=${hotelId}`),
+        fetch(`/api/admin/reservations?hotelId=${hotelId}`, {
+          credentials: 'include'
+        }),
         fetch(`/api/products`)
       ]);
 
