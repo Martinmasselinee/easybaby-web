@@ -66,7 +66,7 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
     <>
       {/* Sidebar plein écran sur mobile */}
       <aside className={cn(
-        "fixed inset-0 z-50 bg-gray-50 transform transition-transform duration-300 ease-in-out md:relative md:top-0 md:inset-auto md:w-64 md:h-[calc(100vh-4rem)] md:border-r md:translate-x-0 md:z-auto",
+        "fixed inset-0 z-50 bg-gray-50 transform transition-transform duration-300 ease-in-out md:fixed md:top-16 md:left-0 md:w-64 md:h-[calc(100vh-4rem)] md:border-r md:translate-x-0 md:z-40",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Header avec bouton X (mobile uniquement) */}

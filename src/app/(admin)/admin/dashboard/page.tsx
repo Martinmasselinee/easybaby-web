@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from "@/components/admin/universal-admin-layout";
+import { Button } from "@/components/ui/button";
 
 type DashboardStats = {
   reservationsCount: number;
@@ -99,57 +100,55 @@ export default function DashboardPage() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Étape 1 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
             <div className="text-4xl mb-4">🏙️</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Créer une ville</h3>
             <p className="text-gray-600 text-sm mb-4">
               Ajoutez votre première ville où les hôtels pourront proposer vos services
             </p>
-            <Link href="/admin/cities">
-              <button className="w-full bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors">
-                Créer une ville
-              </button>
-            </Link>
+            <Button asChild className="w-full">
+              <Link href="/admin/cities">Créer une ville</Link>
+            </Button>
           </div>
           
           {/* Étape 2 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
             <div className="text-4xl mb-4">🏨</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Ajouter un hôtel</h3>
             <p className="text-gray-600 text-sm mb-4">
               Configurez votre premier hôtel partenaire avec ses informations
             </p>
-            <button disabled className="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+            <Button disabled className="w-full">
               Après étape 1
-            </button>
+            </Button>
           </div>
           
           {/* Étape 3 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
             <div className="text-4xl mb-4">📦</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Créer des produits</h3>
             <p className="text-gray-600 text-sm mb-4">
               Ajoutez les équipements bébé disponibles à la location
             </p>
-            <button disabled className="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+            <Button disabled className="w-full">
               Après étape 2
-            </button>
+            </Button>
           </div>
           
           {/* Étape 4 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center shadow-sm">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
             <div className="text-4xl mb-4">📊</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Gérer le stock</h3>
             <p className="text-gray-600 text-sm mb-4">
               Assignez les produits aux hôtels et gérez les quantités
             </p>
-            <button disabled className="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+            <Button disabled className="w-full">
               Après étape 3
-            </button>
+            </Button>
           </div>
-            </div>
+        </div>
             
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
           <p className="text-sm text-blue-700">
@@ -167,8 +166,8 @@ export default function DashboardPage() {
         title="Tableau de bord"
         subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-600">Villes</p>
@@ -178,7 +177,7 @@ export default function DashboardPage() {
           </div>
             </div>
             
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-600">Hôtels</p>
@@ -188,7 +187,7 @@ export default function DashboardPage() {
           </div>
             </div>
             
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-600">Produits</p>
@@ -198,7 +197,7 @@ export default function DashboardPage() {
           </div>
             </div>
             
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-600">Réservations</p>
@@ -210,7 +209,7 @@ export default function DashboardPage() {
       </div>
 
       {stats?.totalRevenueCents ? (
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Revenus</h3>
           <div className="text-3xl font-bold text-green-600">
             {(stats.totalRevenueCents / 100).toFixed(2)}€
