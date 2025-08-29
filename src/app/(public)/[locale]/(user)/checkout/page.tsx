@@ -267,9 +267,13 @@ function CheckoutContent() {
   };
 
   // Handle payment success
-  const handlePaymentSuccess = () => {
-    // Redirect to success page or show success message
-    window.location.href = `/${locale}/reservation/success`;
+  const handlePaymentSuccess = (paymentIntentId: string, setupIntentId: string) => {
+    // Redirect to success page with reservation code
+    const reservationCode = searchParams.get("reservationCode");
+    const successUrl = reservationCode 
+      ? `/${locale}/reservation/success?code=${reservationCode}`
+      : `/${locale}/reservation/success`;
+    window.location.href = successUrl;
   };
 
   // Handle payment error
