@@ -20,17 +20,28 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 POST /api/cities - Début');
+    
     const body = await request.json();
+    console.log('📝 Données reçues:', body);
     
     // Validation avec Zod
     const validatedData = citySchema.parse(body);
+    console.log('✅ Validation réussie:', validatedData);
     
     // Créer la ville
+    console.log('🏗️ Création ville en cours...');
     const city = await createCity(validatedData);
+    console.log('🎉 Ville créée avec succès:', city);
     
     return NextResponse.json(city, { status: 201 });
   } catch (error: any) {
-    console.error('Erreur POST /api/cities:', error);
+    console.error('❌ Erreur POST /api/cities:', {
+      message: error.message,
+      code: error.code,
+      name: error.name,
+      stack: error.stack,
+    });
     
     // Gérer l'erreur de clé unique (slug déjà utilisé)
     if (error.code === 'P2002') {
@@ -38,9 +49,13 @@ export async function POST(request: NextRequest) {
     }
     
     if (error.name === 'ZodError') {
+      console.log('🔍 Détails validation Zod:', error.errors);
       return NextResponse.json({ error: 'Données invalides', details: error.errors }, { status: 400 });
     }
     
-    return NextResponse.json({ error: 'Erreur lors de la création de la ville' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Erreur lors de la création de la ville',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }, { status: 500 });
   }
 }

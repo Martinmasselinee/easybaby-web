@@ -147,101 +147,11 @@ export default function CitiesPage() {
       <PageHeader 
         title="Villes"
         actions={
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>Ajouter une ville</Button>
-            </DialogTrigger>
-            <DialogContent aria-describedby="city-dialog-description">
-              <DialogHeader>
-                <DialogTitle>Créer une nouvelle ville</DialogTitle>
-              </DialogHeader>
-              <div id="city-dialog-description" className="sr-only">
-                Formulaire pour créer une nouvelle ville avec nom et slug URL
-              </div>
-              <form onSubmit={handleCreateCity} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nom de la ville</Label>
-                  <Input 
-                    id="name" 
-                    placeholder="Ex: Paris" 
-                    value={formData.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="slug">Slug (URL)</Label>
-                  <Input 
-                    id="slug" 
-                    placeholder="Ex: paris" 
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    required
-                  />
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline" disabled={isSubmitting}>
-                      Annuler
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Création...' : 'Créer la ville'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={openCreateDialog}>Ajouter une ville</Button>
         }
       />
       {cities.length === 0 ? (
-        <>
-          <NoCitiesEmptyState onCreateClick={openCreateDialog} />
-          
-          {/* Dialog pour empty state */}
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogContent aria-describedby="city-dialog-description-empty">
-              <DialogHeader>
-                <DialogTitle>Créer une nouvelle ville</DialogTitle>
-              </DialogHeader>
-              <div id="city-dialog-description-empty" className="sr-only">
-                Formulaire pour créer votre première ville avec nom et slug URL
-              </div>
-              <form onSubmit={handleCreateCity} className="space-y-4">
-                <div>
-                  <Label htmlFor="name-empty">Nom de la ville</Label>
-                  <Input 
-                    id="name-empty" 
-                    placeholder="Ex: Paris" 
-                    value={formData.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="slug-empty">Slug (URL)</Label>
-                  <Input 
-                    id="slug-empty" 
-                    placeholder="Ex: paris" 
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    required
-                  />
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline" disabled={isSubmitting}>
-                      Annuler
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Création...' : 'Créer la ville'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </>
+        <NoCitiesEmptyState onCreateClick={openCreateDialog} />
       ) : (
         <TableWrapper>
           <table className="min-w-full divide-y divide-gray-200">
@@ -284,6 +194,50 @@ export default function CitiesPage() {
           </table>
         </TableWrapper>
       )}
+      
+      {/* Dialog global pour création ville */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent aria-describedby="city-dialog-description-global">
+          <DialogHeader>
+            <DialogTitle>Créer une nouvelle ville</DialogTitle>
+          </DialogHeader>
+          <div id="city-dialog-description-global" className="sr-only">
+            Formulaire pour créer une nouvelle ville avec nom et slug URL
+          </div>
+          <form onSubmit={handleCreateCity} className="space-y-4">
+            <div>
+              <Label htmlFor="name-global">Nom de la ville</Label>
+              <Input 
+                id="name-global" 
+                placeholder="Ex: Paris" 
+                value={formData.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="slug-global">Slug (URL)</Label>
+              <Input 
+                id="slug-global" 
+                placeholder="Ex: paris" 
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                required
+              />
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting}>
+                  Annuler
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Création...' : 'Créer la ville'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </UniversalAdminLayout>
   );
 }
