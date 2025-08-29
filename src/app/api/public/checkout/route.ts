@@ -9,16 +9,17 @@ const prisma = new PrismaClient();
 
 // Schéma de validation pour la requête de paiement
 const checkoutSchema = z.object({
-  userEmail: z.string().email(),
-  userPhone: z.string().optional(),
-  cityId: z.string(),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  citySlug: z.string().optional(),
   pickupHotelId: z.string(),
   dropHotelId: z.string(),
   productId: z.string(),
-  startAt: z.string().datetime(),
-  endAt: z.string().datetime(),
+  pickupDate: z.string().datetime(),
+  dropDate: z.string().datetime(),
   discountCode: z.string().optional(),
-  finalPrice: z.number().optional(), // Prix final après réduction
+  rentalPrice: z.number().optional(),
+  depositAmount: z.number().optional(),
 });
 
 async function handlePost(request: NextRequest) {
@@ -27,8 +28,8 @@ async function handlePost(request: NextRequest) {
   const validatedData = checkoutSchema.parse(body);
   
   // Convertir les dates
-  const startAt = new Date(validatedData.startAt);
-  const endAt = new Date(validatedData.endAt);
+  const startAt = new Date(validatedData.pickupDate);
+  const endAt = new Date(validatedData.dropDate);
   
   // Vérifier que la date de début est avant la date de fin
   if (startAt >= endAt) {
@@ -50,19 +51,36 @@ async function handlePost(request: NextRequest) {
       );
     }
 
-    // Vérifier la disponibilité
-    const availability = await checkAvailability(
+    // Vérifier la disponibilité pour l'hôtel de retrait
+    const pickupAvailability = await checkAvailability(
       validatedData.pickupHotelId,
       validatedData.productId,
       startAt,
       endAt
     );
 
-    if (!availability.available) {
+    if (!pickupAvailability.available) {
       return NextResponse.json(
-        { error: "Produit non disponible pour les dates sélectionnées", alternatives: availability.alternatives },
+        { error: "Produit non disponible pour les dates sélectionnées à l'hôtel de retrait", alternatives: pickupAvailability.alternatives },
         { status: 409 }
       );
+    }
+
+    // Vérifier la disponibilité pour l'hôtel de retour (si différent)
+    if (validatedData.pickupHotelId !== validatedData.dropHotelId) {
+      const dropoffAvailability = await checkAvailability(
+        validatedData.dropHotelId,
+        validatedData.productId,
+        startAt,
+        endAt
+      );
+
+      if (!dropoffAvailability.available) {
+        return NextResponse.json(
+          { error: "Produit non disponible pour les dates sélectionnées à l'hôtel de retour", alternatives: dropoffAvailability.alternatives },
+          { status: 409 }
+        );
+      }
     }
 
     // Générer un code unique pour la réservation
@@ -77,7 +95,7 @@ async function handlePost(request: NextRequest) {
     const pricingType = durationHours <= 24 ? "HOURLY" : "DAILY";
     
     // Calculer le prix et vérifier le code de réduction
-    let finalPriceCents = validatedData.finalPrice || (pricingType === "HOURLY" ? 
+    let finalPriceCents = validatedData.rentalPrice || (pricingType === "HOURLY" ? 
       product.pricePerHour * durationHours : 
       product.pricePerDay * durationDays);
     

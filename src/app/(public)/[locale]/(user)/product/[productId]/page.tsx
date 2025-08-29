@@ -178,11 +178,17 @@ export default function ProductDetailPage({
         const productData = await productResponse.json();
         setProduct(productData);
 
-        // Fetch available hotels for this product in the city
-        const hotelsResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${productId}`);
+        // Fetch available hotels for this product in the city with date filtering
+        const hotelsResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${productId}&dateStart=${arrivalDate}&dateEnd=${departureDate}`);
         if (hotelsResponse.ok) {
           const hotelsData = await hotelsResponse.json();
-          setHotels(hotelsData);
+          // Filter hotels that have the product available
+          const availableHotels = hotelsData.filter((hotel: any) => 
+            hotel.inventory && hotel.inventory.some((item: any) => 
+              item.productId === productId && item.availableQuantity > 0
+            )
+          );
+          setHotels(availableHotels);
         }
       } catch (err) {
         console.error('Error loading product data:', err);
