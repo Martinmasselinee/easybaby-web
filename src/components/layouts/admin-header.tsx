@@ -7,9 +7,10 @@ import { NotificationBell } from "@/components/admin/notification-bell";
 
 interface AdminHeaderProps {
   onMenuToggle?: () => void;
+  pageTitle?: string;
 }
 
-export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
+export function AdminHeader({ onMenuToggle, pageTitle }: AdminHeaderProps) {
   const router = useRouter();
   const [adminEmail, setAdminEmail] = useState<string>("Admin");
   
@@ -33,8 +34,8 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="px-4 md:px-8 lg:px-16 flex h-16 items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-300 shadow-sm">
+      <div className="px-6 flex h-16 items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Bouton menu mobile */}
           <button
@@ -56,9 +57,17 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
             </svg>
           </button>
 
-          <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-gray-900">EasyBaby</span>
-            <span className="text-lg text-gray-700 hidden sm:inline">Admin</span>
+          <Link href="/admin/dashboard" className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-xl font-bold text-black">EasyBaby</span>
+              <span className="text-lg text-gray-600 hidden sm:inline">Admin</span>
+            </div>
+            {pageTitle && (
+              <>
+                <span className="text-gray-400 hidden md:inline">•</span>
+                <span className="text-lg font-medium text-black hidden md:inline">{pageTitle}</span>
+              </>
+            )}
           </Link>
         </div>
         

@@ -4,16 +4,29 @@ interface PageLayoutProps {
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  subtitle?: string;
 }
 
-export function PageLayout({ title, children, actions }: PageLayoutProps) {
+export function PageLayout({ title, children, actions, subtitle }: PageLayoutProps) {
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-        {actions && <div className="flex space-x-2">{actions}</div>}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header de page uniforme */}
+      <div className="bg-white border-b border-gray-200 px-6 py-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-black">{title}</h1>
+            {subtitle && (
+              <p className="text-gray-600 mt-1">{subtitle}</p>
+            )}
+          </div>
+          {actions && <div className="flex space-x-3">{actions}</div>}
+        </div>
       </div>
-      {children}
+      
+      {/* Contenu de la page */}
+      <div className="px-6 py-6">
+        {children}
+      </div>
     </div>
   );
 }
@@ -27,12 +40,12 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-      <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+    <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+      <div className="text-6xl mb-6 opacity-50">{icon}</div>
+      <h3 className="text-xl font-semibold text-black mb-3">
         {title}
       </h3>
-      <p className="text-gray-500 mb-6 max-w-md mx-auto">
+      <p className="text-gray-600 mb-8 max-w-md mx-auto">
         {description}
       </p>
       {action && action}
@@ -48,7 +61,7 @@ export function LoadingState({ message = "Chargement..." }: LoadingStateProps) {
   return (
     <div className="flex items-center justify-center h-64 bg-white rounded-lg border border-gray-200">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-black mx-auto mb-4"></div>
         <p className="text-gray-600">{message}</p>
       </div>
     </div>
@@ -62,13 +75,13 @@ interface ErrorStateProps {
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
-    <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-      <div className="text-6xl mb-4">❌</div>
-      <div className="text-red-600 mb-4">{message}</div>
+    <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+      <div className="text-6xl mb-6 opacity-50">⚠️</div>
+      <div className="text-black mb-6 font-medium">{message}</div>
       {onRetry && (
         <button 
           onClick={onRetry}
-          className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
+          className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition-colors"
         >
           Réessayer
         </button>
