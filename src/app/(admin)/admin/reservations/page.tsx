@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminPageWrapper, EmptyState, LoadingState, ErrorState, SecondaryButton } from '@/components/admin/admin-page-wrapper';
+import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
 
 interface Reservation {
   id: string;
@@ -84,29 +84,36 @@ export default function ReservationsPage() {
 
   if (isLoading) {
     return (
-      <AdminPageWrapper title="Réservations">
-        <LoadingState message="Chargement des réservations..." />
-      </AdminPageWrapper>
+      <LoadingState 
+        title="Réservations"
+        message="Chargement des réservations..."
+      />
     );
   }
 
   if (error) {
     return (
-      <AdminPageWrapper title="Réservations">
-        <ErrorState message={error} onRetry={fetchReservations} />
-      </AdminPageWrapper>
+      <ErrorState 
+        title="Réservations"
+        error={error}
+        onRetry={fetchReservations}
+      />
     );
   }
 
   return (
-    <AdminPageWrapper 
-      title="Réservations"
-      actions={
-        <SecondaryButton onClick={fetchReservations}>
-          Actualiser
-        </SecondaryButton>
-      }
-    >
+    <UniversalAdminLayout>
+      <PageHeader 
+        title="Réservations"
+        actions={
+          <button 
+            onClick={fetchReservations}
+            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 transition-colors"
+          >
+            Actualiser
+          </button>
+        }
+      />
 
       {reservations.length === 0 ? (
         <EmptyState 
@@ -189,6 +196,6 @@ export default function ReservationsPage() {
           </div>
         </div>
       )}
-    </AdminPageWrapper>
+    </UniversalAdminLayout>
   );
 }

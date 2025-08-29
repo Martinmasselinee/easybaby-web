@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminPageWrapper, EmptyState, LoadingState, ErrorState, PrimaryButton } from '@/components/admin/admin-page-wrapper';
+import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
 
 interface City {
   id: string;
@@ -44,29 +44,33 @@ export default function CitiesPage() {
 
   if (isLoading) {
     return (
-      <AdminPageWrapper title="Villes">
-        <LoadingState message="Chargement des villes..." />
-      </AdminPageWrapper>
+      <LoadingState 
+        title="Villes"
+        message="Chargement des villes..."
+      />
     );
   }
 
   if (error) {
     return (
-      <AdminPageWrapper title="Villes">
-        <ErrorState message={error} onRetry={fetchCities} />
-      </AdminPageWrapper>
+      <ErrorState 
+        title="Villes"
+        error={error}
+        onRetry={fetchCities}
+      />
     );
   }
 
   return (
-    <AdminPageWrapper 
-      title="Villes"
-      actions={
-        <PrimaryButton>
-          Ajouter une ville
-        </PrimaryButton>
-      }
-    >
+    <UniversalAdminLayout>
+      <PageHeader 
+        title="Villes"
+        actions={
+          <button className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors">
+            Ajouter une ville
+          </button>
+        }
+      />
       {cities.length === 0 ? (
         <EmptyState 
           icon="🏙️"
@@ -117,6 +121,6 @@ export default function CitiesPage() {
           </div>
         </div>
       )}
-    </AdminPageWrapper>
+    </UniversalAdminLayout>
   );
 }
