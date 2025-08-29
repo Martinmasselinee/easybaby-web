@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { NoCitiesEmptyState } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -107,41 +108,7 @@ export default function CitiesPage() {
         }
       />
       {cities.length === 0 ? (
-        <div className="text-center py-16 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="text-6xl mb-4">🏙️</div>
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            Aucune ville configurée
-          </h3>
-          <p className="text-blue-800 mb-6 max-w-md mx-auto">
-            Commencez par créer votre première ville. C'est le point de départ pour configurer vos hôtels partenaires et leurs équipements.
-          </p>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>Créer votre première ville</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Créer une nouvelle ville</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nom de la ville</Label>
-                  <Input id="name" placeholder="Ex: Paris" />
-                </div>
-                <div>
-                  <Label htmlFor="slug">Slug (URL)</Label>
-                  <Input id="slug" placeholder="Ex: paris" />
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Annuler</Button>
-                </DialogClose>
-                <Button>Créer la ville</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <NoCitiesEmptyState />
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">

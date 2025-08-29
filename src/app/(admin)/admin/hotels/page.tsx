@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { PrerequisiteEmptyState, GrayEmptyState } from '@/components/admin/reusable-empty-states';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -279,31 +280,25 @@ export default function HotelsPage() {
       </div>
 
       {cities.length === 0 ? (
-        <div className="text-center py-16 bg-yellow-50 rounded-lg border border-yellow-200">
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-            Aucune ville disponible
-          </h3>
-          <p className="text-yellow-800 mb-6">
-            Vous devez d'abord créer au moins une ville avant de pouvoir ajouter des hôtels.
-          </p>
-          <Button asChild>
-            <Link href="/admin/cities">Créer une ville</Link>
-          </Button>
-        </div>
+        <PrerequisiteEmptyState
+          icon="🏙️"
+          title="Aucune ville disponible"
+          description="Vous devez d'abord créer au moins une ville avant de pouvoir ajouter des hôtels."
+          buttonText="Créer une ville"
+          buttonHref="/admin/cities"
+        />
       ) : hotels.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Aucun hôtel configuré
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Ajoutez votre premier hôtel partenaire pour commencer à proposer vos services.
-          </p>
+        <GrayEmptyState
+          icon="🏨"
+          title="Aucun hôtel configuré"
+          description="Ajoutez votre premier hôtel partenaire pour commencer à proposer vos services."
+        >
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>Ajouter mon premier hôtel</Button>
             </DialogTrigger>
           </Dialog>
-        </div>
+        </GrayEmptyState>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center gap-4">

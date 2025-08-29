@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { NoHotelsEmptyState, GrayEmptyState } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -89,36 +90,22 @@ export default function ProductsPage() {
         title="Produits"
         subtitle="Gérez les équipements bébé disponibles à la location"
         actions={
-          hotels.length > 0 ? (
-            <Button>Ajouter un produit</Button>
-          ) : null
+          <Button disabled={hotels.length === 0}>
+            Ajouter un produit
+          </Button>
         }
       />
 
       {hotels.length === 0 ? (
-        <div className="text-center py-16 bg-yellow-50 rounded-lg border border-yellow-200">
-          <div className="text-6xl mb-4">🏨</div>
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-            Aucun hôtel disponible
-          </h3>
-          <p className="text-yellow-800 mb-6 max-w-md mx-auto">
-            Vous devez d'abord créer au moins un hôtel avant de pouvoir ajouter des produits. Les produits seront disponibles dans vos hôtels partenaires.
-          </p>
-          <Button asChild>
-            <Link href="/admin/hotels">Créer un hôtel</Link>
-          </Button>
-        </div>
+        <NoHotelsEmptyState />
       ) : products.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Aucun produit
-          </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires.
-          </p>
+        <GrayEmptyState
+          icon="📦"
+          title="Aucun produit"
+          description="Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires."
+        >
           <Button>Ajouter votre premier produit</Button>
-        </div>
+        </GrayEmptyState>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">

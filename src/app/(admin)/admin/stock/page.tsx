@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { NoProductsEmptyState, PrerequisiteEmptyState, GrayEmptyState } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -108,42 +109,23 @@ export default function StockPage() {
       />
 
       {products.length === 0 ? (
-        <div className="text-center py-16 bg-yellow-50 rounded-lg border border-yellow-200">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-            Aucun produit disponible
-          </h3>
-          <p className="text-yellow-800 mb-6 max-w-md mx-auto">
-            Vous devez d'abord créer des produits avant de pouvoir gérer le stock dans vos hôtels.
-          </p>
-          <Button asChild>
-            <Link href="/admin/products">Créer des produits</Link>
-          </Button>
-        </div>
+        <NoProductsEmptyState />
       ) : hotels.length === 0 ? (
-        <div className="text-center py-16 bg-yellow-50 rounded-lg border border-yellow-200">
-          <div className="text-6xl mb-4">🏨</div>
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-            Aucun hôtel disponible
-          </h3>
-          <p className="text-yellow-800 mb-6 max-w-md mx-auto">
-            Vous devez d'abord créer des hôtels pour pouvoir y assigner du stock de produits.
-          </p>
-          <Button asChild>
-            <Link href="/admin/hotels">Créer des hôtels</Link>
-          </Button>
-        </div>
+        <PrerequisiteEmptyState
+          icon="🏨"
+          title="Aucun hôtel disponible"
+          description="Vous devez d'abord créer des hôtels pour pouvoir y assigner du stock de produits."
+          buttonText="Créer des hôtels"
+          buttonHref="/admin/hotels"
+        />
       ) : inventory.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Aucun stock configuré
-          </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            Assignez vos produits aux hôtels pour définir les quantités disponibles à la location.
-          </p>
+        <GrayEmptyState
+          icon="📊"
+          title="Aucun stock configuré"
+          description="Assignez vos produits aux hôtels pour définir les quantités disponibles à la location."
+        >
           <Button>Configurer le premier stock</Button>
-        </div>
+        </GrayEmptyState>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">

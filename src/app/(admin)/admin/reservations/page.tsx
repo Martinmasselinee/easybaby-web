@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { YellowEmptyState } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -107,6 +108,7 @@ export default function ReservationsPage() {
     <UniversalAdminLayout>
       <PageHeader 
         title="Réservations"
+        subtitle="Consultez et gérez toutes les réservations de vos clients"
         actions={
           <Button 
             onClick={fetchReservations}
@@ -118,18 +120,15 @@ export default function ReservationsPage() {
       />
 
       {reservations.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <div className="text-6xl mb-4">📅</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Aucune réservation
-          </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            Les réservations de vos clients apparaîtront ici une fois qu'ils commenceront à réserver vos équipements via votre site.
-          </p>
+        <YellowEmptyState
+          icon="📅"
+          title="Aucune réservation"
+          description="Les réservations de vos clients apparaîtront ici une fois qu'ils commenceront à réserver vos équipements via votre site."
+        >
           <Button onClick={fetchReservations} variant="outline">
             Actualiser
           </Button>
-        </div>
+        </YellowEmptyState>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
