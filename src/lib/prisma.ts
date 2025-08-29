@@ -1,18 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 
-// PrismaClient est attaché au global object en développement pour éviter
-// d'épuiser la limite de connexions à la base de données pendant le hot-reloading
-declare global {
-  var prisma: PrismaClient | undefined;
-}
-
-// Utiliser un singleton pour le client Prisma - VERSION SIMPLE QUI MARCHE
-export const prisma = global.prisma || new PrismaClient({
-  log: process.env.NODE_ENV === "development" ? ['error'] : ['error'],
+// SOLUTION POUR SUPABASE : désactiver les prepared statements qui causent des conflits avec la connection pool
+export const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL + '?pgbouncer=true&connection_limit=1&prepared_statements=false'
+    }
+  }
 });
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
 
 export default prisma;
