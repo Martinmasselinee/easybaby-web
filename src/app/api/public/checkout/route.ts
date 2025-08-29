@@ -124,7 +124,7 @@ async function handlePost(request: NextRequest) {
         code: reservationCode,
         userEmail: validatedData.email,
         userPhone: validatedData.phone || "",
-        cityId: validatedData.citySlug ? await getCityIdBySlug(validatedData.citySlug) || "default" : "default",
+        cityId: validatedData.citySlug ? await getCityIdBySlug(validatedData.citySlug) : "cmewtaexq0000l704q4sxvyit",
         pickupHotelId: validatedData.pickupHotelId,
         dropHotelId: validatedData.dropHotelId,
         productId: validatedData.productId,
@@ -241,8 +241,8 @@ async function checkAvailability(
     return { available: false, alternatives: [] };
   }
 
-  // Compter les réservations qui se chevauchent
-  const overlappingReservations = await prisma.reservation.count({
+  // Récupérer toutes les réservations qui se chevauchent avec les détails
+  const overlappingReservations = await prisma.reservation.findMany({
     where: {
       pickupHotelId: hotelId,
       productId,
@@ -254,15 +254,32 @@ async function checkAvailability(
         { endAt: { gt: startAt } },
       ],
     },
+    select: {
+      startAt: true,
+      endAt: true,
+      status: true,
+    },
   });
 
-  const available = inventoryItem.quantity > overlappingReservations;
+  // Calculer le nombre total de produits réservés pendant cette période
+  const totalReserved = overlappingReservations.length;
+  
+  // Vérifier si il y a assez de produits disponibles
+  const available = inventoryItem.quantity > totalReserved;
+
+  console.log(`Availability check for hotel ${hotelId}, product ${productId}:`);
+  console.log(`- Total inventory: ${inventoryItem.quantity}`);
+  console.log(`- Overlapping reservations: ${totalReserved}`);
+  console.log(`- Available: ${available}`);
+  console.log(`- Requested period: ${startAt.toISOString()} to ${endAt.toISOString()}`);
+  overlappingReservations.forEach((res, i) => {
+    console.log(`- Reservation ${i + 1}: ${res.startAt.toISOString()} to ${res.endAt.toISOString()} (${res.status})`);
+  });
 
   // Si non disponible, suggérer des alternatives
   let alternatives = [];
   if (!available) {
-    // Logique pour trouver des créneaux alternatifs
-    // Pour simplifier, on suggère juste le jour suivant
+    // Trouver des créneaux alternatifs en cherchant des périodes libres
     const nextDayStart = new Date(startAt);
     nextDayStart.setDate(nextDayStart.getDate() + 1);
     
