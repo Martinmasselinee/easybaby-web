@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface Reservation {
   id: string;
@@ -106,21 +108,28 @@ export default function ReservationsPage() {
       <PageHeader 
         title="Réservations"
         actions={
-          <button 
+          <Button 
             onClick={fetchReservations}
-            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 transition-colors"
+            variant="outline"
           >
             Actualiser
-          </button>
+          </Button>
         }
       />
 
       {reservations.length === 0 ? (
-        <EmptyState 
-          icon="📅"
-          title="Aucune réservation"
-          description="Les réservations des utilisateurs apparaîtront ici une fois qu'ils auront créé des réservations. Assurez-vous d'avoir créé des villes, hôtels et produits pour permettre aux utilisateurs de faire des réservations."
-        />
+        <div className="text-center py-16 bg-gray-50 rounded-lg">
+          <div className="text-6xl mb-4">📅</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Aucune réservation
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Les réservations de vos clients apparaîtront ici une fois qu'ils commenceront à réserver vos équipements via votre site.
+          </p>
+          <Button onClick={fetchReservations} variant="outline">
+            Actualiser
+          </Button>
+        </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">

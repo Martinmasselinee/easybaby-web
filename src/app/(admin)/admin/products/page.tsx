@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface Product {
   id: string;
@@ -15,34 +17,51 @@ interface Product {
   };
 }
 
+interface Hotel {
+  id: string;
+  name: string;
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/products');
       
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+      // Charger produits et hôtels en parallèle
+      const [productsResponse, hotelsResponse] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/hotels')
+      ]);
+      
+      if (!productsResponse.ok || !hotelsResponse.ok) {
+        throw new Error(`Erreur HTTP: ${productsResponse.status} / ${hotelsResponse.status}`);
       }
       
-      const data = await response.json();
-      setProducts(data || []);
+      const [productsData, hotelsData] = await Promise.all([
+        productsResponse.json(),
+        hotelsResponse.json()
+      ]);
+      
+      setProducts(productsData || []);
+      setHotels(hotelsData || []);
     } catch (err: any) {
-      console.error('Erreur lors du chargement des produits:', err);
+      console.error('Erreur lors du chargement:', err);
       setError(err.message);
       setProducts([]);
+      setHotels([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
   if (isLoading) {
@@ -59,7 +78,7 @@ export default function ProductsPage() {
       <ErrorState 
         title="Produits"
         error={error}
-        onRetry={fetchProducts}
+        onRetry={fetchData}
       />
     );
   }
@@ -70,18 +89,36 @@ export default function ProductsPage() {
         title="Produits"
         subtitle="Gérez les équipements bébé disponibles à la location"
         actions={
-          <button className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors">
-            Ajouter un produit
-          </button>
+          hotels.length > 0 ? (
+            <Button>Ajouter un produit</Button>
+          ) : null
         }
       />
 
-      {products.length === 0 ? (
-        <EmptyState 
-          icon="📦"
-          title="Aucun produit"
-          description="Créez votre premier produit pour commencer à proposer des équipements bébé à la location."
-        />
+      {hotels.length === 0 ? (
+        <div className="text-center py-16 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div className="text-6xl mb-4">🏨</div>
+          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+            Aucun hôtel disponible
+          </h3>
+          <p className="text-yellow-800 mb-6 max-w-md mx-auto">
+            Vous devez d'abord créer au moins un hôtel avant de pouvoir ajouter des produits. Les produits seront disponibles dans vos hôtels partenaires.
+          </p>
+          <Button asChild>
+            <Link href="/admin/hotels">Créer un hôtel</Link>
+          </Button>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-16 bg-gray-50 rounded-lg">
+          <div className="text-6xl mb-4">📦</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Aucun produit
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires.
+          </p>
+          <Button>Ajouter votre premier produit</Button>
+        </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">

@@ -2,6 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger
+} from '@/components/ui/dialog';
 
 interface City {
   id: string;
@@ -66,17 +78,70 @@ export default function CitiesPage() {
       <PageHeader 
         title="Villes"
         actions={
-          <button className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors">
-            Ajouter une ville
-          </button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>Ajouter une ville</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Créer une nouvelle ville</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nom de la ville</Label>
+                  <Input id="name" placeholder="Ex: Paris" />
+                </div>
+                <div>
+                  <Label htmlFor="slug">Slug (URL)</Label>
+                  <Input id="slug" placeholder="Ex: paris" />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Annuler</Button>
+                </DialogClose>
+                <Button>Créer la ville</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         }
       />
       {cities.length === 0 ? (
-        <EmptyState 
-          icon="🏙️"
-          title="Aucune ville"
-          description="Créez votre première ville pour commencer à configurer votre plateforme. Les hôtels seront associés aux villes."
-        />
+        <div className="text-center py-16 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="text-6xl mb-4">🏙️</div>
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            Aucune ville configurée
+          </h3>
+          <p className="text-blue-800 mb-6 max-w-md mx-auto">
+            Commencez par créer votre première ville. C'est le point de départ pour configurer vos hôtels partenaires et leurs équipements.
+          </p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>Créer votre première ville</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Créer une nouvelle ville</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nom de la ville</Label>
+                  <Input id="name" placeholder="Ex: Paris" />
+                </div>
+                <div>
+                  <Label htmlFor="slug">Slug (URL)</Label>
+                  <Input id="slug" placeholder="Ex: paris" />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Annuler</Button>
+                </DialogClose>
+                <Button>Créer la ville</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">

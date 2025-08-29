@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
+import { Button } from '@/components/ui/button';
 
 interface RevenueData {
   totalRevenue: number;
@@ -72,21 +73,28 @@ export default function ReportsPage() {
         title="Rapports"
         subtitle="Analyse financière et statistiques de performance"
         actions={
-          <button 
+          <Button 
             onClick={fetchReports}
-            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 transition-colors"
+            variant="outline"
           >
             Actualiser
-          </button>
+          </Button>
         }
       />
 
       {isEmpty ? (
-        <EmptyState 
-          icon="📊"
-          title="Aucune donnée disponible"
-          description="Les rapports financiers apparaîtront ici une fois que vous aurez des réservations confirmées."
-        />
+        <div className="text-center py-16 bg-gray-50 rounded-lg">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Aucune donnée disponible
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Les rapports financiers et statistiques apparaîtront ici une fois que vous aurez des réservations confirmées et payées.
+          </p>
+          <Button onClick={fetchReports} variant="outline">
+            Actualiser
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Revenus */}
