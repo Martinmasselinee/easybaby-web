@@ -29,6 +29,9 @@ export default function CitiesPage() {
   const [cities, setCities] = useState<City[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: '', slug: '' });
 
   const fetchCities = async () => {
     try {
@@ -55,6 +58,71 @@ export default function CitiesPage() {
     fetchCities();
   }, []);
 
+  const handleCreateCity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.slug.trim()) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch('/api/cities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          slug: formData.slug.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la création');
+      }
+
+      // Succès - fermer dialog et rafraîchir
+      setIsAddDialogOpen(false);
+      setFormData({ name: '', slug: '' });
+      await fetchCities(); // Recharger la liste
+
+    } catch (err: any) {
+      console.error('Erreur création ville:', err);
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openCreateDialog = () => {
+    setFormData({ name: '', slug: '' });
+    setIsAddDialogOpen(true);
+  };
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[àáâãäå]/g, 'a')
+      .replace(/[èéêë]/g, 'e')
+      .replace(/[ìíîï]/g, 'i')
+      .replace(/[òóôõö]/g, 'o')
+      .replace(/[ùúûü]/g, 'u')
+      .replace(/[ç]/g, 'c')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  };
+
+  const handleNameChange = (name: string) => {
+    const newFormData = { ...formData, name };
+    // Auto-générer le slug si il est vide ou correspondait au nom précédent
+    if (!formData.slug || formData.slug === generateSlug(formData.name)) {
+      newFormData.slug = generateSlug(name);
+    }
+    setFormData(newFormData);
+  };
+
   if (isLoading) {
     return (
       <LoadingState 
@@ -79,36 +147,101 @@ export default function CitiesPage() {
       <PageHeader 
         title="Villes"
         actions={
-          <Dialog>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>Ajouter une ville</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent aria-describedby="city-dialog-description">
               <DialogHeader>
                 <DialogTitle>Créer une nouvelle ville</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div id="city-dialog-description" className="sr-only">
+                Formulaire pour créer une nouvelle ville avec nom et slug URL
+              </div>
+              <form onSubmit={handleCreateCity} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Nom de la ville</Label>
-                  <Input id="name" placeholder="Ex: Paris" />
+                  <Input 
+                    id="name" 
+                    placeholder="Ex: Paris" 
+                    value={formData.name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="slug">Slug (URL)</Label>
-                  <Input id="slug" placeholder="Ex: paris" />
+                  <Input 
+                    id="slug" 
+                    placeholder="Ex: paris" 
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    required
+                  />
                 </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Annuler</Button>
-                </DialogClose>
-                <Button>Créer la ville</Button>
-              </DialogFooter>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isSubmitting}>
+                      Annuler
+                    </Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Création...' : 'Créer la ville'}
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         }
       />
       {cities.length === 0 ? (
-        <NoCitiesEmptyState />
+        <>
+          <NoCitiesEmptyState onCreateClick={openCreateDialog} />
+          
+          {/* Dialog pour empty state */}
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogContent aria-describedby="city-dialog-description-empty">
+              <DialogHeader>
+                <DialogTitle>Créer une nouvelle ville</DialogTitle>
+              </DialogHeader>
+              <div id="city-dialog-description-empty" className="sr-only">
+                Formulaire pour créer votre première ville avec nom et slug URL
+              </div>
+              <form onSubmit={handleCreateCity} className="space-y-4">
+                <div>
+                  <Label htmlFor="name-empty">Nom de la ville</Label>
+                  <Input 
+                    id="name-empty" 
+                    placeholder="Ex: Paris" 
+                    value={formData.name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="slug-empty">Slug (URL)</Label>
+                  <Input 
+                    id="slug-empty" 
+                    placeholder="Ex: paris" 
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    required
+                  />
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isSubmitting}>
+                      Annuler
+                    </Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Création...' : 'Créer la ville'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </>
       ) : (
         <TableWrapper>
           <table className="min-w-full divide-y divide-gray-200">

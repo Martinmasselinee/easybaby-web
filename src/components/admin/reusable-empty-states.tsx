@@ -84,15 +84,16 @@ export function PrerequisiteEmptyState({
 }
 
 // Composants de prérequis spécifiques
-export function NoCitiesEmptyState() {
+// Ce composant sera utilisé avec un Dialog externe
+export function NoCitiesEmptyState({ onCreateClick }: { onCreateClick: () => void }) {
   return (
     <BlueEmptyState
       icon="🏙️"
       title="Aucune ville configurée"
       description="Commencez par créer votre première ville. C'est le point de départ pour configurer vos hôtels partenaires et leurs équipements."
     >
-      <Button asChild>
-        <Link href="/admin/cities">Créer votre première ville</Link>
+      <Button onClick={onCreateClick}>
+        Créer votre première ville
       </Button>
     </BlueEmptyState>
   );
