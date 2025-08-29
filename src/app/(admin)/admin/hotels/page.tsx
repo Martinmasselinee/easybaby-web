@@ -134,7 +134,7 @@ export default function HotelsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Hôtels</h1>
           <p className="text-muted-foreground">Gérez les hôtels partenaires</p>
@@ -148,7 +148,7 @@ export default function HotelsPage() {
 
   if (error) {
     return (
-      <div className="space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Hôtels</h1>
           <p className="text-muted-foreground">Gérez les hôtels partenaires</p>
@@ -164,7 +164,7 @@ export default function HotelsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Hôtels</h1>

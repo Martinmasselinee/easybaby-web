@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AdminPageWrapper, EmptyState, LoadingState, PrimaryButton } from "@/components/admin/admin-page-wrapper";
+import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from "@/components/admin/universal-admin-layout";
 
 type DashboardStats = {
   reservationsCount: number;
@@ -75,21 +75,22 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <AdminPageWrapper 
+      <LoadingState 
         title="Tableau de bord"
         subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
-      >
-        <LoadingState message="Chargement des statistiques..." />
-      </AdminPageWrapper>
+        message="Chargement des statistiques..."
+      />
     );
   }
 
   if (isEmpty) {
-    return (
-      <AdminPageWrapper 
-        title="Tableau de bord"
-        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
-      >
+  return (
+      <UniversalAdminLayout>
+        <PageHeader 
+          title="Tableau de bord"
+          subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+        />
+        
         <div className="text-center py-12 mb-8">
           <div className="text-6xl mb-6">🎉</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Bienvenue dans EasyBaby Admin !</h2>
@@ -106,9 +107,11 @@ export default function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               Ajoutez votre première ville où les hôtels pourront proposer vos services
             </p>
-            <PrimaryButton href="/admin/cities">
-              Créer une ville
-            </PrimaryButton>
+            <Link href="/admin/cities">
+              <button className="w-full bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors">
+                Créer une ville
+              </button>
+            </Link>
           </div>
           
           {/* Étape 2 */}
@@ -118,9 +121,9 @@ export default function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               Configurez votre premier hôtel partenaire avec ses informations
             </p>
-            <PrimaryButton disabled>
+            <button disabled className="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
               Après étape 1
-            </PrimaryButton>
+            </button>
           </div>
           
           {/* Étape 3 */}
@@ -130,9 +133,9 @@ export default function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               Ajoutez les équipements bébé disponibles à la location
             </p>
-            <PrimaryButton disabled>
+            <button disabled className="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
               Après étape 2
-            </PrimaryButton>
+            </button>
           </div>
           
           {/* Étape 4 */}
@@ -142,27 +145,28 @@ export default function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               Assignez les produits aux hôtels et gérez les quantités
             </p>
-            <PrimaryButton disabled>
+            <button disabled className="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
               Après étape 3
-            </PrimaryButton>
+            </button>
           </div>
-        </div>
-        
+            </div>
+            
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
           <p className="text-sm text-blue-700">
             💡 <strong>Conseil :</strong> Une fois ces étapes terminées, vos clients pourront réserver des équipements sur votre site user !
           </p>
         </div>
-      </AdminPageWrapper>
+      </UniversalAdminLayout>
     );
   }
 
   // Affichage des stats quand il y a des données
   return (
-    <AdminPageWrapper 
-      title="Tableau de bord"
-      subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
-    >
+    <UniversalAdminLayout>
+      <PageHeader 
+        title="Tableau de bord"
+        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center">
@@ -172,8 +176,8 @@ export default function DashboardPage() {
             </div>
             <div className="text-3xl">🏙️</div>
           </div>
-        </div>
-
+            </div>
+            
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center">
             <div className="flex-1">
@@ -182,8 +186,8 @@ export default function DashboardPage() {
             </div>
             <div className="text-3xl">🏨</div>
           </div>
-        </div>
-
+            </div>
+            
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center">
             <div className="flex-1">
@@ -192,8 +196,8 @@ export default function DashboardPage() {
             </div>
             <div className="text-3xl">📦</div>
           </div>
-        </div>
-
+            </div>
+            
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center">
             <div className="flex-1">
@@ -214,6 +218,6 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-600 mt-2">Revenus totaux générés</p>
         </div>
       ) : null}
-    </AdminPageWrapper>
+    </UniversalAdminLayout>
   );
 }
