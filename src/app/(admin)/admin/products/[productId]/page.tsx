@@ -402,44 +402,52 @@ export default function ProductDetailPage() {
                 <thead className={TABLE_STYLES.thead}>
                   <tr>
                     <th className={TABLE_STYLES.th}>Hôtel</th>
-                    <th className={TABLE_STYLES.th}>Ville</th>
                     <th className={TABLE_STYLES.th}>Stock Total</th>
-                    <th className={TABLE_STYLES.th}>Statut</th>
+                    <th className={TABLE_STYLES.th}>Disponible</th>
+                    <th className={TABLE_STYLES.th}>En Utilisation</th>
+                    <th className={TABLE_STYLES.th}>Prix/jour</th>
                     <th className={TABLE_STYLES.th}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className={TABLE_STYLES.tbody}>
-                  {aggregatedInventoryArray.map((inv) => (
-                    <tr key={inv.hotelId} className={TABLE_STYLES.tr}>
-                      <td className={TABLE_STYLES.td}>
-                        {inv.hotelName}
-                      </td>
-                      <td className={TABLE_STYLES.tdSecondary}>
-                        {inv.cityName}
-                      </td>
-                      <td className={TABLE_STYLES.tdSecondary}>
-                        {inv.quantity} unités
-                      </td>
-                      <td className={TABLE_STYLES.tdSecondary}>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          inv.active 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {inv.active ? 'Actif' : 'Inactif'}
-                        </span>
-                      </td>
-                      <td className={TABLE_STYLES.actions}>
-                        <div className="flex justify-end space-x-2">
-                          <Link href={`/admin/hotels/${inv.hotelId}`}>
-                            <Button variant="outline" size="sm" className="border-gray-200">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {aggregatedInventoryArray.map((inv) => {
+                    // Calculate availability for this hotel-product combination
+                    // Note: We'd need reservation data to calculate real usage
+                    const inUse = 0; // Placeholder - would need reservation data
+                    const available = inv.quantity - inUse;
+                    
+                    return (
+                      <tr key={inv.hotelId} className={TABLE_STYLES.tr}>
+                        <td className={TABLE_STYLES.td}>
+                          <div>
+                            <div className="font-medium">{inv.hotelName}</div>
+                            <div className="text-gray-500 text-sm">{inv.cityName}</div>
+                          </div>
+                        </td>
+                        <td className={TABLE_STYLES.tdSecondary}>
+                          <span className="font-semibold">{inv.quantity}</span>
+                        </td>
+                        <td className={TABLE_STYLES.tdSecondary}>
+                          <span className="text-green-600 font-medium">{available}</span>
+                        </td>
+                        <td className={TABLE_STYLES.tdSecondary}>
+                          <span className="text-orange-600 font-medium">{inUse}</span>
+                        </td>
+                        <td className={TABLE_STYLES.tdSecondary}>
+                          {(product.pricePerDay / 100).toFixed(2)}€
+                        </td>
+                        <td className={TABLE_STYLES.actions}>
+                          <div className="flex justify-end space-x-2">
+                            <Link href={`/admin/hotels/${inv.hotelId}`}>
+                              <Button variant="outline" size="sm" className="border-gray-200">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </TableWrapper>

@@ -181,24 +181,44 @@ export default function HotelDetailPage() {
     try {
       setIsSubmitting(true);
       const quantity = parseInt(stockChangeAmount);
-      const newQuantity = action === 'increase' 
-        ? selectedProductForStock.currentQuantity + quantity
-        : Math.max(0, selectedProductForStock.currentQuantity - quantity);
+      
+      if (action === 'increase') {
+        // Add stock using the existing add stock endpoint
+        const response = await fetch("/api/inventory", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            hotelId: hotelId,
+            productId: selectedProductForStock.id,
+            quantity: quantity
+          }),
+        });
 
-      const response = await fetch(`/api/inventory`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          hotelId: hotelId,
-          productId: selectedProductForStock.id,
-          quantity: newQuantity
-        }),
-      });
+        if (!response.ok) {
+          throw new Error("Erreur lors de l'ajout du stock");
+        }
+      } else {
+        // For decrease, we need to find the inventory item and update it
+        const currentInventoryItem = inventory.find(item => item.product.id === selectedProductForStock.id);
+        if (currentInventoryItem) {
+          const newQuantity = Math.max(0, currentInventoryItem.quantity - quantity);
+          
+          const response = await fetch(`/api/inventory/${currentInventoryItem.id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              quantity: newQuantity
+            }),
+          });
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la mise à jour du stock");
+          if (!response.ok) {
+            throw new Error("Erreur lors de la réduction du stock");
+          }
+        }
       }
 
       await fetchHotelData();
@@ -445,65 +465,61 @@ export default function HotelDetailPage() {
                 <div>
                     <dt className="text-sm font-medium text-gray-500">Email</dt>
                     <dd className="mt-1 text-sm text-gray-900">{hotel.email}</dd>
-                  </div>
+                </div>
                   {hotel.phone && (
-                    <div>
+                <div>
                       <dt className="text-sm font-medium text-gray-500">Téléphone</dt>
                       <dd className="mt-1 text-sm text-gray-900">{hotel.phone}</dd>
-                    </div>
+                </div>
                   )}
                   {hotel.contactName && (
-                    <div>
+                <div>
                       <dt className="text-sm font-medium text-gray-500">Contact</dt>
                       <dd className="mt-1 text-sm text-gray-900">{hotel.contactName}</dd>
-                    </div>
+                </div>
                   )}
-                  <div>
+                <div>
                     <dt className="text-sm font-medium text-gray-500">Créé le</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {new Date(hotel.createdAt).toLocaleDateString()}
                     </dd>
-                  </div>
+                </div>
                 </dl>
                 
-                {/* Hotel Management Actions */}
+                                {/* Hotel Management Actions */}
                 <div className="mt-6 flex space-x-3">
                   <Button variant="outline" className="flex-1">
                     <Edit className="h-4 w-4 mr-2" />
                     Modifier Info Hôtel
                   </Button>
-                  <Button className="flex-1" onClick={() => setIsAddStockDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ajouter Stock
-                  </Button>
-                </div>
               </div>
+            </div>
 
               <div className="bg-white p-6 rounded-lg border">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Code de réduction</h3>
                   {!hotel.discountCode && (
-                    <Dialog open={isDiscountDialogOpen} onOpenChange={setIsDiscountDialogOpen}>
-                      <DialogTrigger asChild>
+                <Dialog open={isDiscountDialogOpen} onOpenChange={setIsDiscountDialogOpen}>
+                  <DialogTrigger asChild>
                         <Button size="sm">Créer un code</Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
                           <DialogTitle>Créer un code de réduction</DialogTitle>
-                        </DialogHeader>
+                    </DialogHeader>
                         <form onSubmit={handleDiscountCode} className="space-y-4 mt-4">
-                          <div className="space-y-2">
+                      <div className="space-y-2">
                             <Label htmlFor="code">Code de réduction *</Label>
-                  <Input
+                        <Input 
                               id="code" 
                               name="code" 
                               placeholder="ex: HOTEL30, EASY70..."
                               required 
-                  />
-                </div>
-                          <div className="space-y-2">
+                        />
+                      </div>
+                      <div className="space-y-2">
                             <Label htmlFor="kind">Type de partage *</Label>
-                            <select 
+                        <select 
                               id="kind" 
                               name="kind" 
                               required
@@ -511,23 +527,23 @@ export default function HotelDetailPage() {
                             >
                               <option value="HOTEL_70">Hôtel 70% - EasyBaby 30%</option>
                               <option value="PLATFORM_70">EasyBaby 70% - Hôtel 30%</option>
-                            </select>
-                          </div>
-                          <DialogFooter>
-                            <DialogClose asChild>
+                        </select>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
                               <Button type="button" variant="outline" disabled={isSubmitting}>
                                 Annuler
                               </Button>
-                            </DialogClose>
+                      </DialogClose>
                             <Button type="submit" disabled={isSubmitting}>
                               {isSubmitting ? "Création..." : "Créer"}
                             </Button>
-                          </DialogFooter>
+                    </DialogFooter>
                         </form>
-                      </DialogContent>
-                    </Dialog>
+                  </DialogContent>
+                </Dialog>
                   )}
-                </div>
+              </div>
                 
                 {hotel.discountCode ? (
                   <div className="space-y-3">
@@ -553,7 +569,7 @@ export default function HotelDetailPage() {
                     >
                       {hotel.discountCode.active ? 'Désactiver' : 'Activer'}
                     </Button>
-                </div>
+            </div>
                 ) : (
                   <p className="text-gray-500">Aucun code de réduction configuré</p>
                 )}
@@ -566,8 +582,7 @@ export default function HotelDetailPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Stock des produits</h3>
-              {productsNotInStock.length > 0 && (
-                <Dialog open={isAddStockDialogOpen} onOpenChange={setIsAddStockDialogOpen}>
+              <Dialog open={isAddStockDialogOpen} onOpenChange={setIsAddStockDialogOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
@@ -619,7 +634,6 @@ export default function HotelDetailPage() {
                     </form>
                   </DialogContent>
                 </Dialog>
-              )}
             </div>
 
             {inventory.length === 0 ? (
@@ -654,15 +668,40 @@ export default function HotelDetailPage() {
                       <th className={TABLE_STYLES.th}>Disponible</th>
                       <th className={TABLE_STYLES.th}>En Utilisation</th>
                       <th className={TABLE_STYLES.th}>Prix/jour</th>
-                      <th className={TABLE_STYLES.th}>Statut</th>
                       <th className={TABLE_STYLES.th}>Actions</th>
                     </tr>
                   </thead>
                   <tbody className={TABLE_STYLES.tbody}>
-                    {inventory.map((item) => {
-                      // Calculate usage - this would need to be enhanced with real reservation data
-                      const inUse = Math.min(2, item.quantity); // Placeholder logic
-                      const available = item.quantity - inUse;
+                    {(() => {
+                      // Aggregate inventory by product (combine multiple rows for same product)
+                      const aggregatedInventory = inventory.reduce((acc, item) => {
+                        const productId = item.product.id;
+                        if (acc[productId]) {
+                          acc[productId].quantity += item.quantity;
+                        } else {
+                          acc[productId] = {
+                            id: `${item.id}-aggregated`,
+                            quantity: item.quantity,
+                            product: item.product
+                          };
+                        }
+                        return acc;
+                      }, {} as Record<string, { id: string; quantity: number; product: any; }>);
+                      
+                      return Object.values(aggregatedInventory);
+                    })().map((item) => {
+                      // Calculate real usage based on current active reservations
+                      const today = new Date();
+                      const activeReservations = reservations.filter(reservation => {
+                        const startDate = new Date(reservation.startAt);
+                        const endDate = new Date(reservation.endAt);
+                        return reservation.product.id === item.product.id &&
+                               reservation.status === 'CONFIRMED' &&
+                               startDate <= today && endDate >= today;
+                      });
+                      
+                      const inUse = activeReservations.length;
+                      const available = Math.max(0, item.quantity - inUse);
                       
                       return (
                         <tr key={item.id} className={TABLE_STYLES.tr}>
@@ -678,15 +717,6 @@ export default function HotelDetailPage() {
                           </td>
                           <td className={TABLE_STYLES.tdSecondary}>
                             {(item.product.pricePerDay / 100).toFixed(2)}€
-                          </td>
-                          <td className={TABLE_STYLES.tdSecondary}>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              item.quantity === 0 
-                                ? 'bg-red-100 text-red-800' 
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {item.quantity === 0 ? 'Rupture' : 'Disponible'}
-                            </span>
                           </td>
                           <td className={TABLE_STYLES.actions}>
                             <div className="flex justify-end space-x-2">
@@ -787,7 +817,7 @@ export default function HotelDetailPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {((completedReservations.length / Math.max(reservations.length, 1)) * 100).toFixed(1)}% du total
                 </p>
-            </div>
+              </div>
 
               <div className="bg-white p-6 rounded-lg border">
                 <h4 className="font-semibold text-gray-700 mb-2">Total des revenus</h4>
@@ -797,15 +827,29 @@ export default function HotelDetailPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {reservations.length} réservation(s)
                 </p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg border">
+            </div>
+
+                            <div className="bg-white p-6 rounded-lg border">
                 <h4 className="font-semibold text-gray-700 mb-2">Part de l'hôtel en %</h4>
                 <p className="text-3xl font-bold text-purple-600">
-                  {hotel.discountCode?.kind === 'HOTEL_70' ? '70%' : '30%'}
+                  {(() => {
+                    if (reservations.length === 0) return '0%';
+                    
+                    // Calculate weighted average commission based on actual reservations
+                    const totalRevenue = reservations.reduce((sum, res) => sum + res.priceCents, 0);
+                    const totalHotelRevenue = reservations.reduce((sum, res) => {
+                      // Check if customer used hotel discount code (this would need to be in reservation data)
+                      // For now, use hotel default - in real app, this should be per-reservation
+                      const commission = hotel.discountCode?.kind === 'HOTEL_70' ? 0.7 : 0.3;
+                      return sum + (res.priceCents * commission);
+                    }, 0);
+                    
+                    const averageCommission = totalRevenue > 0 ? (totalHotelRevenue / totalRevenue) * 100 : 0;
+                    return `${Math.round(averageCommission)}%`;
+                  })()}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Commission sur les ventes
+                  Commission moyenne sur les ventes
                 </p>
               </div>
               
@@ -820,7 +864,7 @@ export default function HotelDetailPage() {
                   Montant à reverser
                 </p>
               </div>
-            </div>
+                </div>
 
             {/* Revenue Stream Table */}
             {reservations.length === 0 ? (
@@ -855,13 +899,13 @@ export default function HotelDetailPage() {
                               <div>
                                 <div className="font-medium">{reservation.userEmail}</div>
                                 <div className="text-gray-500 text-xs">{reservation.code}</div>
-                              </div>
+                </div>
                             </td>
                             <td className={TABLE_STYLES.tdSecondary}>
                               <div>
                                 <div>Du {new Date(reservation.startAt).toLocaleDateString()}</div>
                                 <div>Au {new Date(reservation.endAt).toLocaleDateString()}</div>
-                              </div>
+              </div>
                             </td>
                             <td className={TABLE_STYLES.tdSecondary}>
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -880,7 +924,7 @@ export default function HotelDetailPage() {
                               <div>
                                 <div className="font-medium">{hotelCommission}%</div>
                                 <div className="text-green-600 font-medium">{hotelAmount}€</div>
-                              </div>
+            </div>
                             </td>
                             <td className={TABLE_STYLES.tdSecondary}>
                               <div className="font-medium">
@@ -928,7 +972,7 @@ export default function HotelDetailPage() {
               <p className="text-2xl font-bold text-gray-900">
                 {selectedProductForStock?.currentQuantity} unités
               </p>
-            </div>
+    </div>
             
             <div className="space-y-2">
               <Label htmlFor="stockChange">Quantité à modifier</Label>
