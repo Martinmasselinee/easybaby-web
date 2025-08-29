@@ -56,35 +56,7 @@ const translations = {
   }
 };
 
-// Données de démonstration pour la V1
-const demoProducts = {
-  "poussette": {
-    id: "poussette",
-    name: "Poussette",
-    description: "Poussette confortable et facile à plier",
-    deposit: 15000, // 150€ en centimes
-    pricePerHour: 300, // 3€ par heure en centimes
-    pricePerDay: 1500, // 15€ par jour en centimes
-  },
-  "lit-parapluie": {
-    id: "lit-parapluie",
-    name: "Lit parapluie",
-    description: "Lit parapluie confortable et sécurisé",
-    deposit: 20000, // 200€ en centimes
-    pricePerHour: 200, // 2€ par heure en centimes
-    pricePerDay: 1000, // 10€ par jour en centimes
-  },
-};
 
-const demoHotels = {
-  "paris": [
-    {
-      id: "hotel-demo-paris",
-      name: "Hôtel Demo Paris",
-      address: "123 Avenue des Champs-Élysées, 75008 Paris",
-    },
-  ],
-};
 
 export default function ProductDetailPage({
   params,
@@ -100,12 +72,16 @@ export default function ProductDetailPage({
   const t = translations[locale as keyof typeof translations] || translations.fr;
   const searchParams = useSearchParams();
   const citySlug = searchParams.get("city") || "paris";
+  
+  // Get pre-selected dates from search
+  const arrivalDate = searchParams.get("arrival");
+  const departureDate = searchParams.get("departure");
 
   const [pickupHotelId, setPickupHotelId] = useState<string>("");
   const [dropHotelId, setDropHotelId] = useState<string>("");
-  const [pickupDate, setPickupDate] = useState<string>("");
+  const [pickupDate, setPickupDate] = useState<string>(arrivalDate || "");
   const [pickupTime, setPickupTime] = useState<string>("10:00");
-  const [dropDate, setDropDate] = useState<string>("");
+  const [dropDate, setDropDate] = useState<string>(departureDate || "");
   const [dropTime, setDropTime] = useState<string>("14:00");
   
   // États pour la disponibilité
@@ -116,44 +92,106 @@ export default function ProductDetailPage({
 
   // Charger les dates disponibles au démarrage
   useEffect(() => {
-    // Générer les 14 prochains jours comme dates disponibles par défaut
-    const generateAvailableDates = () => {
-      const dates = [];
-      const today = new Date();
+    // Si des dates sont déjà fournies, les utiliser
+    if (arrivalDate && departureDate) {
+      setPickupDate(arrivalDate);
+      setDropDate(departureDate);
       
-      for (let i = 0; i < 14; i++) {
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() + i);
+      // Générer les dates disponibles autour des dates sélectionnées
+      const generateAvailableDates = () => {
+        const dates = [];
+        const arrival = new Date(arrivalDate);
         
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
+        // Générer 7 jours avant et après la date d'arrivée
+        for (let i = -7; i <= 7; i++) {
+          const startDate = new Date(arrival);
+          startDate.setDate(arrival.getDate() + i);
+          
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 1);
+          
+          dates.push({
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0]
+          });
+        }
         
-        dates.push({
-          start: startDate.toISOString().split('T')[0],
-          end: endDate.toISOString().split('T')[0]
-        });
+        return dates;
+      };
+
+      const availableDates = generateAvailableDates();
+      setAvailableDates(availableDates);
+    } else {
+      // Générer les 14 prochains jours comme dates disponibles par défaut
+      const generateDefaultDates = () => {
+        const dates = [];
+        const today = new Date();
+        
+        for (let i = 0; i < 14; i++) {
+          const startDate = new Date(today);
+          startDate.setDate(today.getDate() + i);
+          
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 1);
+          
+          dates.push({
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0]
+          });
+        }
+        
+        return dates;
+      };
+
+      const defaultDates = generateDefaultDates();
+      setAvailableDates(defaultDates);
+      
+      // Sélectionner la première date disponible
+      if (defaultDates.length > 0) {
+        setPickupDate(defaultDates[0].start);
+        setDropDate(defaultDates[0].end);
       }
-      
-      return dates;
+    }
+  }, [arrivalDate, departureDate]);
+
+  const [product, setProduct] = useState<any>(null);
+  const [hotels, setHotels] = useState<any[]>([]);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
+  const [productError, setProductError] = useState<string | null>(null);
+
+  // Load product and hotels data
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        setIsLoadingProduct(true);
+        setProductError(null);
+
+        // Fetch product details
+        const productResponse = await fetch(`/api/products/${productId}`);
+        if (!productResponse.ok) {
+          throw new Error('Product not found');
+        }
+        const productData = await productResponse.json();
+        setProduct(productData);
+
+        // Fetch available hotels for this product in the city
+        const hotelsResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${productId}`);
+        if (hotelsResponse.ok) {
+          const hotelsData = await hotelsResponse.json();
+          setHotels(hotelsData);
+        }
+      } catch (err) {
+        console.error('Error loading product data:', err);
+        setProductError('Error loading product data');
+      } finally {
+        setIsLoadingProduct(false);
+      }
     };
 
-    const defaultDates = generateAvailableDates();
-    setAvailableDates(defaultDates);
-    
-    // Sélectionner la première date disponible
-    if (defaultDates.length > 0) {
-      setPickupDate(defaultDates[0].start);
-      setDropDate(defaultDates[0].end);
+    if (productId) {
+      fetchProductData();
     }
-  }, []);
-
-  const product = demoProducts[productId as keyof typeof demoProducts];
-  const hotels = availableHotels.length > 0 
-    ? availableHotels.map(hotel => ({
-        id: hotel.hotelId,
-        name: hotel.hotelName,
-      }))
-    : demoHotels[citySlug as keyof typeof demoHotels] || [];
+  }, [productId, citySlug]);
     
   // Vérifier la disponibilité lorsqu'un hôtel est sélectionné
   const checkAvailabilityForHotel = async (hotelId: string) => {
@@ -272,12 +310,22 @@ export default function ProductDetailPage({
     }
   };
 
-  if (!product) {
+  if (isLoadingProduct) {
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Chargement du produit...</p>
+      </div>
+    );
+  }
+
+  if (productError || !product) {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold mb-4">{t.productNotFound}</h1>
+        <p className="text-gray-600 mb-4">{productError || 'Produit non trouvé'}</p>
         <Button asChild>
-          <Link href={`/${locale}/city/${citySlug}`}>{t.back}</Link>
+          <Link href={`/${locale}/products?city=${citySlug}`}>{t.back}</Link>
         </Button>
       </div>
     );

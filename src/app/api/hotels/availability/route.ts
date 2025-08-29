@@ -4,14 +4,14 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const cityId = searchParams.get("cityId");
+    const citySlug = searchParams.get("citySlug");
     const productId = searchParams.get("productId");
     const dateStart = searchParams.get("dateStart");
     const dateEnd = searchParams.get("dateEnd");
 
-    if (!cityId) {
+    if (!citySlug) {
       return NextResponse.json(
-        { error: "cityId est requis" },
+        { error: "citySlug est requis" },
         { status: 400 }
       );
     }
@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
     // Construire la requête de base pour les hôtels
     const hotelsQuery = {
       where: {
-        cityId,
+        city: {
+          slug: citySlug,
+        },
       },
       include: {
         inventory: {
