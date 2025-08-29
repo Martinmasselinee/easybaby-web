@@ -178,10 +178,13 @@ export default function HotelsPage() {
             <DialogTrigger asChild>
               <Button>Ajouter un hôtel</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl" aria-describedby="hotel-dialog-description">
               <DialogHeader>
                 <DialogTitle>Ajouter un nouvel hôtel</DialogTitle>
               </DialogHeader>
+              <div id="hotel-dialog-description" className="sr-only">
+                Formulaire pour ajouter un nouvel hôtel partenaire avec informations de contact
+              </div>
               <form onSubmit={handleAddHotel} className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
