@@ -90,6 +90,16 @@ export default function HotelDetailPage() {
   const [isCautionDialogOpen, setIsCautionDialogOpen] = useState(false);
   const [isDamageDialogOpen, setIsDamageDialogOpen] = useState(false);
   const [isProcessingCaution, setIsProcessingCaution] = useState(false);
+  
+  // Hotel edit states
+  const [isEditHotelDialogOpen, setIsEditHotelDialogOpen] = useState(false);
+  const [editHotelForm, setEditHotelForm] = useState({
+    name: '',
+    address: '',
+    phone: '',
+    contactName: '',
+    contactEmail: ''
+  });
 
     const fetchHotelData = async () => {
     try {
@@ -138,6 +148,45 @@ export default function HotelDetailPage() {
     fetchHotelData();
     }
   }, [hotelId]);
+
+  const handleEditHotel = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/hotels/${hotelId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editHotelForm),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour de l'hôtel");
+      }
+
+      await fetchHotelData();
+      setIsEditHotelDialogOpen(false);
+    } catch (error: any) {
+      console.error("Erreur:", error);
+      alert(`Erreur: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openEditHotelDialog = () => {
+    if (hotel) {
+      setEditHotelForm({
+        name: hotel.name,
+        address: hotel.address || '',
+        phone: hotel.phone || '',
+        contactName: hotel.contactName || '',
+        contactEmail: hotel.contactEmail || ''
+      });
+      setIsEditHotelDialogOpen(true);
+    }
+  };
 
   const handleAddStock = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -488,7 +537,7 @@ export default function HotelDetailPage() {
                 
                                 {/* Hotel Management Actions */}
                 <div className="mt-6 flex space-x-3">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={openEditHotelDialog}>
                     <Edit className="h-4 w-4 mr-2" />
                     Modifier Info Hôtel
                   </Button>
@@ -1118,6 +1167,79 @@ export default function HotelDetailPage() {
                 disabled={isProcessingCaution}
               >
                 {isProcessingCaution ? 'Traitement...' : 'Produit Endommagé'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Hotel Dialog */}
+      <Dialog open={isEditHotelDialogOpen} onOpenChange={setIsEditHotelDialogOpen}>
+        <DialogContent className="max-w-md">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Modifier les informations de l'hôtel</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-hotel-name">Nom de l'hôtel</Label>
+                <Input
+                  id="edit-hotel-name"
+                  value={editHotelForm.name}
+                  onChange={(e) => setEditHotelForm({...editHotelForm, name: e.target.value})}
+                  placeholder="Nom de l'hôtel"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-hotel-address">Adresse</Label>
+                <Textarea
+                  id="edit-hotel-address"
+                  value={editHotelForm.address}
+                  onChange={(e) => setEditHotelForm({...editHotelForm, address: e.target.value})}
+                  placeholder="Adresse complète"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-hotel-phone">Téléphone</Label>
+                <Input
+                  id="edit-hotel-phone"
+                  value={editHotelForm.phone}
+                  onChange={(e) => setEditHotelForm({...editHotelForm, phone: e.target.value})}
+                  placeholder="Numéro de téléphone"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-hotel-contact">Nom du contact</Label>
+                <Input
+                  id="edit-hotel-contact"
+                  value={editHotelForm.contactName}
+                  onChange={(e) => setEditHotelForm({...editHotelForm, contactName: e.target.value})}
+                  placeholder="Nom de la personne de contact"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-hotel-email">Email du contact</Label>
+                <Input
+                  id="edit-hotel-email"
+                  type="email"
+                  value={editHotelForm.contactEmail}
+                  onChange={(e) => setEditHotelForm({...editHotelForm, contactEmail: e.target.value})}
+                  placeholder="email@exemple.com"
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button variant="outline" className="flex-1" onClick={() => setIsEditHotelDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button className="flex-1" onClick={handleEditHotel} disabled={isSubmitting}>
+                {isSubmitting ? 'Mise à jour...' : 'Mettre à jour'}
               </Button>
             </div>
           </div>
