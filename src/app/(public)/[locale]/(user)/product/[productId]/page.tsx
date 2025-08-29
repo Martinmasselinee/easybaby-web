@@ -215,7 +215,11 @@ export default function ProductDetailPage({
       
       if (response.ok) {
         const availabilityData = await response.json();
-        const isAvailable = availabilityData.some((item: any) => item.hotelId === hotelId && item.available > 0);
+        console.log('Availability data:', availabilityData);
+        const hotel = availabilityData.find((item: any) => item.id === hotelId);
+        console.log('Found hotel:', hotel);
+        const isAvailable = hotel && hotel.hasAvailableProducts;
+        console.log('Is available:', isAvailable);
         
         setIsProductAvailable(isAvailable);
         
