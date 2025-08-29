@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PublicLayout, PublicPageHeader, PublicLoadingState, PublicEmptyState } from '@/components/layouts/public-layout';
 import { Button } from "@/components/ui/button";
 
 // Type pour les villes
@@ -88,34 +89,26 @@ export default function CitiesPage() {
   }, []);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">{t.citiesTitle}</h1>
-        <p className="text-muted-foreground">
-          {t.tagline}
-        </p>
-        {error && (
-          <p className="text-sm text-red-500 mt-2">{error}</p>
-        )}
-      </div>
+    <PublicLayout>
+      <PublicPageHeader 
+        title={t.citiesTitle}
+        subtitle={t.tagline}
+      />
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <p>Chargement des villes...</p>
-        </div>
+        <PublicLoadingState message="Chargement des villes..." />
       ) : cities.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🏙️</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            Aucune ville disponible
-          </h3>
-          <p className="text-gray-500 mb-6">
-            L'administrateur doit d'abord créer des villes avec des hôtels et produits.
-          </p>
-          <p className="text-sm text-gray-400">
-            Accédez à l'interface admin pour configurer les destinations.
-          </p>
-        </div>
+        <PublicEmptyState
+          icon="🏙️"
+          title="Aucune ville disponible"
+          description="L'administrateur doit d'abord créer des villes avec des hôtels et produits. Accédez à l'interface admin pour configurer les destinations."
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {cities.map((city) => (
@@ -143,6 +136,6 @@ export default function CitiesPage() {
         ))}
       </div>
       )}
-    </div>
+    </PublicLayout>
   );
 }
