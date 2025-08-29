@@ -17,36 +17,43 @@ export async function POST(request: Request) {
       );
     }
 
-    // Utilisation de findFirst au lieu de findUnique pour éviter les erreurs potentielles
+    // Authentification simple pour démo
+    // TODO: Remplacer par une vraie authentification avec base de données
+    if (email === "admin@easybaby.io" && password === "admin123") {
+      return NextResponse.json(
+        {
+          id: "admin-1",
+          email: "admin@easybaby.io",
+          role: "ADMIN",
+        },
+        { status: 200 }
+      );
+    }
+
+    // Essayer aussi avec la base de données au cas où il y aurait des utilisateurs
     const user = await prisma.adminUser.findFirst({
       where: {
         email: email,
       },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Identifiants invalides" },
-        { status: 401 }
-      );
-    }
-
-    const isPasswordValid = await compare(password, user.passwordHash);
-
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Identifiants invalides" },
-        { status: 401 }
-      );
+    if (user) {
+      const isPasswordValid = await compare(password, user.passwordHash);
+      if (isPasswordValid) {
+        return NextResponse.json(
+          {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          },
+          { status: 200 }
+        );
+      }
     }
 
     return NextResponse.json(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      { status: 200 }
+      { error: "Identifiants invalides" },
+      { status: 401 }
     );
   } catch (error) {
     console.error("Erreur de connexion:", error);
