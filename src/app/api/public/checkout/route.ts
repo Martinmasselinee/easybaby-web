@@ -112,7 +112,7 @@ async function handlePost(request: NextRequest) {
         
         // Pour la V1, on applique une réduction de 10% (à titre d'exemple)
         // Dans une vraie implémentation, le prix final serait déjà calculé côté client
-        if (!validatedData.finalPrice) {
+        if (!validatedData.rentalPrice) {
           finalPriceCents = Math.round(finalPriceCents * 0.9);
         }
       }
@@ -122,9 +122,9 @@ async function handlePost(request: NextRequest) {
     const reservation = await prisma.reservation.create({
       data: {
         code: reservationCode,
-        userEmail: validatedData.userEmail,
-        userPhone: validatedData.userPhone || "",
-        cityId: validatedData.cityId,
+        userEmail: validatedData.email,
+        userPhone: validatedData.phone || "",
+        cityId: validatedData.citySlug ? await getCityIdBySlug(validatedData.citySlug) : null,
         pickupHotelId: validatedData.pickupHotelId,
         dropHotelId: validatedData.dropHotelId,
         productId: validatedData.productId,
@@ -132,7 +132,7 @@ async function handlePost(request: NextRequest) {
         endAt,
         status: ReservationStatus.PENDING,
         priceCents: finalPriceCents,
-        depositCents: product.deposit,
+        depositCents: validatedData.depositAmount || product.deposit,
         durationHours,
         durationDays,
         pricingType,
@@ -151,11 +151,11 @@ async function handlePost(request: NextRequest) {
 
     // Créer un PaymentIntent pour la pré-autorisation
     const { paymentIntent, success: paymentSuccess } = await createPaymentIntent(
-      product.deposit,
+      validatedData.depositAmount || product.deposit,
       {
         reservationId: reservation.id,
         reservationCode,
-        userEmail: validatedData.userEmail,
+        userEmail: validatedData.email,
       }
     );
 
@@ -176,7 +176,7 @@ async function handlePost(request: NextRequest) {
     const { setupIntent, success: setupSuccess } = await createSetupIntent({
       reservationId: reservation.id,
       reservationCode,
-      userEmail: validatedData.userEmail,
+              userEmail: validatedData.userEmail,
     });
 
     if (!setupSuccess || !setupIntent) {
@@ -211,6 +211,15 @@ async function handlePost(request: NextRequest) {
 }
 
 export const POST = withErrorHandling(handlePost);
+
+// Helper function to get city ID by slug
+async function getCityIdBySlug(citySlug: string) {
+  const city = await prisma.city.findUnique({
+    where: { slug: citySlug },
+    select: { id: true }
+  });
+  return city?.id || null;
+}
 
 // Fonction pour vérifier la disponibilité
 async function checkAvailability(
