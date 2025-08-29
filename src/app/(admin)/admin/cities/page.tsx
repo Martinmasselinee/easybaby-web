@@ -191,7 +191,7 @@ export default function CitiesPage() {
                   </tr>
                 ))}
               </tbody>
-          </table>
+            </table>
         </TableWrapper>
       )}
       
@@ -214,7 +214,7 @@ export default function CitiesPage() {
                 onChange={(e) => handleNameChange(e.target.value)}
                 required
               />
-            </div>
+      </div>
             <div>
               <Label htmlFor="slug-global">Slug (URL)</Label>
               <Input 
@@ -224,7 +224,7 @@ export default function CitiesPage() {
                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                 required
               />
-            </div>
+    </div>
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline" disabled={isSubmitting}>

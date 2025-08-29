@@ -572,7 +572,7 @@ export default function StockPage() {
         <div className="space-y-6">
           {/* Stock Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-white p-4 border border-gray-200">
+            <div className="bg-white p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <Package className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
@@ -582,7 +582,7 @@ export default function StockPage() {
               </div>
             </div>
             
-            <div className="bg-white p-4 border border-gray-200">
+            <div className="bg-white p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
@@ -592,7 +592,7 @@ export default function StockPage() {
               </div>
             </div>
             
-            <div className="bg-white p-4 border border-gray-200">
+            <div className="bg-white p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <BarChart3 className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
@@ -602,7 +602,7 @@ export default function StockPage() {
               </div>
             </div>
             
-            <div className="bg-white p-4 border border-gray-200">
+            <div className="bg-white p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <div className="h-4 w-4 bg-gray-800 mr-2" />
                 <div>
@@ -612,7 +612,7 @@ export default function StockPage() {
               </div>
             </div>
             
-            <div className="bg-white p-4 border border-gray-200">
+            <div className="bg-white p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <div className="h-4 w-4 bg-gray-400 mr-2" />
                 <div>
@@ -622,7 +622,7 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-4 border border-gray-200">
+            <div className="bg-white p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <AlertTriangle className="h-4 w-4 text-gray-800 mr-2" />
                 <div>
@@ -635,7 +635,7 @@ export default function StockPage() {
 
           {/* View Mode Selector */}
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex space-x-1 border border-gray-200 bg-white">
+            <div className="flex space-x-1 border border-gray-200 bg-white rounded-lg">
               <Button
                 variant={viewMode === 'product-centric' ? 'default' : 'outline'}
                 size="sm"
@@ -662,7 +662,7 @@ export default function StockPage() {
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-white p-4 border border-gray-200">
+          <div className="bg-white p-4 border border-gray-200 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               {/* Search */}
               <div className="lg:col-span-2">
@@ -767,19 +767,24 @@ export default function StockPage() {
                 </DropdownMenu>
               </div>
 
-              {/* Status & Stock Level Filters */}
-              <div className="grid grid-cols-2 gap-2">
+              {/* Status Filter */}
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full">
-                      {filterStatus === 'all' ? 'Statut' : 
-                       filterStatus === 'available' ? 'Disponible' : 
-                       filterStatus === 'in-use' ? 'En Usage' : 'Complet'}
+                    <Button variant="outline" className="w-full justify-between">
+                      <span className="truncate">
+                        {filterStatus === 'all' ? 'Tous les statuts' : 
+                         filterStatus === 'available' ? 'Disponible' : 
+                         filterStatus === 'in-use' ? 'En Usage' : 'Complet'}
+                      </span>
+                      <Filter className="h-4 w-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setFilterStatus('all')}>
-                      Tous
+                      Tous les statuts
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setFilterStatus('available')}>
                       Disponible
@@ -792,31 +797,39 @@ export default function StockPage() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div>
 
+              {/* Stock Level Filter */}
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full">
-                      {stockLevel === 'all' ? 'Stock' :
-                       stockLevel === 'low' ? 'Faible' :
-                       stockLevel === 'normal' ? 'Normal' : 
-                       stockLevel === 'high' ? 'Élevé' : 'Demandé'}
+                    <Button variant="outline" className="w-full justify-between">
+                      <span className="truncate">
+                        {stockLevel === 'all' ? 'Tous les niveaux' :
+                         stockLevel === 'low' ? 'Stock faible' :
+                         stockLevel === 'normal' ? 'Stock normal' : 
+                         stockLevel === 'high' ? 'Stock élevé' : 'Forte demande'}
+                      </span>
+                      <Filter className="h-4 w-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Filtrer par niveau</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setStockLevel('all')}>
-                      Tous
+                      Tous les niveaux
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('low')}>
-                      Faible (≤2)
+                      Stock faible (≤2)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('normal')}>
-                      Normal (3-10)
+                      Stock normal (3-10)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('high')}>
-                      Élevé (&gt;10)
+                      Stock élevé (&gt;10)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStockLevel('high-demand')}>
-                      Forte Demande
+                      Forte demande
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -842,7 +855,7 @@ export default function StockPage() {
             <>
               {/* Product-Centric View */}
               {viewMode === 'product-centric' && (
-                <div className="bg-white border border-gray-200">
+                <div className="bg-white border border-gray-200 rounded-lg">
                   <div className="px-4 py-3 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-900">
                       Vue par Produits ({productStockView.length})
@@ -901,7 +914,7 @@ export default function StockPage() {
                                 href={`/admin/products/${product.productId}`}
                                 className="text-gray-900 hover:text-gray-700"
                               >
-                                Détails
+                                Gérer
                               </Link>
                             </td>
                           </tr>
@@ -914,7 +927,7 @@ export default function StockPage() {
 
               {/* Hotel-Centric View */}
               {viewMode === 'hotel-centric' && (
-                <div className="bg-white border border-gray-200">
+                <div className="bg-white border border-gray-200 rounded-lg">
                   <div className="px-4 py-3 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-900">
                       Vue par Hôtels ({hotelStockView.length})
