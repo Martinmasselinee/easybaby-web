@@ -124,7 +124,7 @@ async function handlePost(request: NextRequest) {
         code: reservationCode,
         userEmail: validatedData.email,
         userPhone: validatedData.phone || "",
-        cityId: validatedData.citySlug ? await getCityIdBySlug(validatedData.citySlug) : null,
+        cityId: validatedData.citySlug ? await getCityIdBySlug(validatedData.citySlug) || "default" : "default",
         pickupHotelId: validatedData.pickupHotelId,
         dropHotelId: validatedData.dropHotelId,
         productId: validatedData.productId,
