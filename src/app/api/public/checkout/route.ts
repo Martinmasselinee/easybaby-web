@@ -228,8 +228,8 @@ async function checkAvailability(
   startAt: Date,
   endAt: Date
 ) {
-  // Récupérer l'inventaire total pour ce produit dans cet hôtel
-  const inventoryItem = await prisma.inventoryItem.findFirst({
+  // Récupérer TOUS les inventaires pour ce produit dans cet hôtel
+  const inventoryItems = await prisma.inventoryItem.findMany({
     where: {
       hotelId,
       productId,
@@ -237,9 +237,12 @@ async function checkAvailability(
     },
   });
 
-  if (!inventoryItem) {
+  if (inventoryItems.length === 0) {
     return { available: false, alternatives: [] };
   }
+
+  // Calculer le total de l'inventaire disponible
+  const totalInventory = inventoryItems.reduce((sum, item) => sum + item.quantity, 0);
 
   // Récupérer toutes les réservations qui se chevauchent avec les détails
   const overlappingReservations = await prisma.reservation.findMany({
@@ -262,13 +265,14 @@ async function checkAvailability(
   });
 
   // Calculer le nombre total de produits réservés pendant cette période
+  // Chaque réservation consomme 1 produit
   const totalReserved = overlappingReservations.length;
   
   // Vérifier si il y a assez de produits disponibles
-  const available = inventoryItem.quantity > totalReserved;
+  const available = totalInventory > totalReserved;
 
   console.log(`Availability check for hotel ${hotelId}, product ${productId}:`);
-  console.log(`- Total inventory: ${inventoryItem.quantity}`);
+  console.log(`- Total inventory: ${totalInventory}`);
   console.log(`- Overlapping reservations: ${totalReserved}`);
   console.log(`- Available: ${available}`);
   console.log(`- Requested period: ${startAt.toISOString()} to ${endAt.toISOString()}`);
