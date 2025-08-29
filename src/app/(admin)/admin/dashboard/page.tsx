@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from "@/components/admin/universal-admin-layout";
-import { StatsCard } from '@/components/admin/reusable-empty-states';
+import { 
+  AdminPageLayout, 
+  LoadingState, 
+  ErrorState, 
+  AdminStatsCard,
+  AdminCard,
+  AdminEmptyState,
+  PrimaryButton,
+  ActionButton
+} from "@/components/admin/design-system";
 import { Button } from "@/components/ui/button";
 
 type DashboardStats = {
@@ -76,116 +84,93 @@ export default function DashboardPage() {
   const isEmpty = stats && stats.citiesCount === 0 && stats.hotelsCount === 0 && stats.productsCount === 0;
 
   if (isLoading) {
-    return (
-      <LoadingState 
-        title="Tableau de bord"
-        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
-        message="Chargement des statistiques..."
-      />
-    );
+    return <LoadingState />;
   }
 
   if (isEmpty) {
-  return (
-      <UniversalAdminLayout>
-        <PageHeader 
-          title="Tableau de bord"
-          subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+    return (
+      <AdminPageLayout
+        title="Tableau de bord"
+        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+      >
+        <AdminEmptyState
+          icon="🎉"
+          title="Bienvenue dans EasyBaby Admin !"
+          description="Votre plateforme est vide et prête à être configurée. Suivez ces étapes pour créer votre première configuration et recevoir vos premières réservations."
         />
         
-        <div className="text-center py-12 mb-8">
-          <div className="text-6xl mb-6">🎉</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Bienvenue dans EasyBaby Admin !</h2>
-          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Votre plateforme est vide et prête à être configurée. Suivez ces étapes pour créer votre première configuration et recevoir vos premières réservations.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Étape 1 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          <AdminCard title="1. Créer une ville" className="text-center">
             <div className="text-4xl mb-4">🏙️</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Créer une ville</h3>
             <p className="text-gray-600 text-sm mb-4">
               Ajoutez votre première ville où les hôtels pourront proposer vos services
             </p>
-            <Button asChild className="w-full">
-              <Link href="/admin/cities">Créer une ville</Link>
-            </Button>
-          </div>
+            <PrimaryButton variant="create" href="/admin/cities">
+              Créer une ville
+            </PrimaryButton>
+          </AdminCard>
           
-          {/* Étape 2 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+          <AdminCard title="2. Ajouter un hôtel" className="text-center">
             <div className="text-4xl mb-4">🏨</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Ajouter un hôtel</h3>
             <p className="text-gray-600 text-sm mb-4">
               Configurez votre premier hôtel partenaire avec ses informations
             </p>
             <Button disabled className="w-full">
               Après étape 1
             </Button>
-          </div>
+          </AdminCard>
           
-          {/* Étape 3 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+          <AdminCard title="3. Créer des produits" className="text-center">
             <div className="text-4xl mb-4">📦</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Créer des produits</h3>
             <p className="text-gray-600 text-sm mb-4">
               Ajoutez les équipements bébé disponibles à la location
             </p>
             <Button disabled className="w-full">
               Après étape 2
             </Button>
-          </div>
+          </AdminCard>
           
-          {/* Étape 4 */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+          <AdminCard title="4. Gérer le stock" className="text-center">
             <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Gérer le stock</h3>
             <p className="text-gray-600 text-sm mb-4">
               Assignez les produits aux hôtels et gérez les quantités
             </p>
             <Button disabled className="w-full">
               Après étape 3
             </Button>
-          </div>
+          </AdminCard>
         </div>
             
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center mt-6">
           <p className="text-sm text-blue-700">
             💡 <strong>Conseil :</strong> Une fois ces étapes terminées, vos clients pourront réserver des équipements sur votre site user !
           </p>
         </div>
-      </UniversalAdminLayout>
+      </AdminPageLayout>
     );
   }
 
   // Affichage des stats quand il y a des données
   return (
-    <UniversalAdminLayout>
-      <PageHeader 
-        title="Tableau de bord"
-        subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatsCard title="Villes" value={stats?.citiesCount || 0} icon="🏙️" />
-            
-                <StatsCard title="Hôtels" value={stats?.hotelsCount || 0} icon="🏨" />
-            
-                <StatsCard title="Produits" value={stats?.productsCount || 0} icon="📦" />
-            
-        <StatsCard title="Réservations" value={stats?.reservationsCount || 0} icon="📅" />
+    <AdminPageLayout
+      title="Tableau de bord"
+      subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <AdminStatsCard title="Villes" value={stats?.citiesCount || 0} icon="🏙️" />
+        <AdminStatsCard title="Hôtels" value={stats?.hotelsCount || 0} icon="🏨" />
+        <AdminStatsCard title="Produits" value={stats?.productsCount || 0} icon="📦" />
+        <AdminStatsCard title="Réservations" value={stats?.reservationsCount || 0} icon="📅" />
       </div>
 
       {stats?.totalRevenueCents ? (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Revenus</h3>
+        <AdminCard title="Revenus totaux" className="mt-6">
           <div className="text-3xl font-bold text-green-600">
             {(stats.totalRevenueCents / 100).toFixed(2)}€
           </div>
           <p className="text-sm text-gray-600 mt-2">Revenus totaux générés</p>
-        </div>
+        </AdminCard>
       ) : null}
-    </UniversalAdminLayout>
+    </AdminPageLayout>
   );
 }

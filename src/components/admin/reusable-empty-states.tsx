@@ -1,6 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { 
+  AdminEmptyState, 
+  AdminTableWrapper, 
+  AdminStatsCard, 
+  ADMIN_TABLE_STYLES,
+  ActionButton,
+  PrimaryButton
+} from './design-system';
 
 interface EmptyStateProps {
   icon: string;
@@ -10,48 +18,15 @@ interface EmptyStateProps {
 }
 
 export function YellowEmptyState({ icon, title, description, children }: EmptyStateProps) {
-  return (
-    <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
-      <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
-        {description}
-      </p>
-      {children}
-    </div>
-  );
+  return <AdminEmptyState icon={icon} title={title} description={description} action={children} />;
 }
 
 export function BlueEmptyState({ icon, title, description, children }: EmptyStateProps) {
-  return (
-    <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
-      <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
-        {description}
-      </p>
-      {children}
-    </div>
-  );
+  return <AdminEmptyState icon={icon} title={title} description={description} action={children} />;
 }
 
 export function GrayEmptyState({ icon, title, description, children }: EmptyStateProps) {
-  return (
-    <div className="text-center py-16 bg-gray-50 rounded-lg">
-      <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
-        {description}
-      </p>
-      {children}
-    </div>
-  );
+  return <AdminEmptyState icon={icon} title={title} description={description} action={children} />;
 }
 
 // Composants spécialisés pour les prérequis
@@ -141,13 +116,7 @@ interface TableWrapperProps {
 }
 
 export function TableWrapper({ children }: TableWrapperProps) {
-  return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        {children}
-      </div>
-    </div>
-  );
+  return <AdminTableWrapper>{children}</AdminTableWrapper>;
 }
 
 interface StatsCardProps {
@@ -157,32 +126,13 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ title, value, icon }: StatsCardProps) {
-  return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
-      <div className="flex items-center">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-        </div>
-        <div className="text-3xl">{icon}</div>
-      </div>
-    </div>
-  );
+  return <AdminStatsCard title={title} value={value} icon={icon} />;
 }
 
-// Standardized table styles to match Products page design
-export const TABLE_STYLES = {
-  table: "min-w-full divide-y divide-gray-200",
-  thead: "bg-gray-50",
-  th: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
-  tbody: "bg-white divide-y divide-gray-200",
-  tr: "hover:bg-gray-50",
-  td: "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900",
-  tdSecondary: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
-  actions: "px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-};
+// Export the new standardized styles - keep for backward compatibility
+export const TABLE_STYLES = ADMIN_TABLE_STYLES;
 
-// Standardized action button styles
+// Standardized action button styles - keep for backward compatibility  
 export const ACTION_BUTTON_STYLES = {
   edit: "border-gray-200",
   delete: "border-red-200 text-red-600 hover:bg-red-50",
