@@ -239,10 +239,10 @@ function CheckoutContent() {
           dropHotelId,
           pickupDate: pickupDateTime.toISOString(),
           dropDate: dropDateTime.toISOString(),
-          userEmail: email,
-          userPhone: phone,
+          email: email,
+          phone: phone,
           discountCode: discountValid ? discountCode : undefined,
-          finalPrice: finalPrice,
+          rentalPrice: finalPrice,
           depositAmount: product.deposit,
         }),
       });

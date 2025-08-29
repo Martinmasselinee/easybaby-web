@@ -99,8 +99,8 @@ async function handlePost(request: NextRequest) {
       product.pricePerHour * durationHours : 
       product.pricePerDay * durationDays);
     
-    let revenueShareType = ShareType.PLATFORM_70; // Par défaut, 70% pour la plateforme
-    let discountCodeId = null;
+    let revenueShareType: ShareType = ShareType.PLATFORM_70; // Par défaut, 70% pour la plateforme
+    let discountCodeId: string | undefined = undefined;
     
     // Si un code de réduction est fourni, on le vérifie et on l'applique
     if (validatedData.discountCode) {
@@ -108,7 +108,7 @@ async function handlePost(request: NextRequest) {
       
       if (discountCode && discountCode.active) {
         discountCodeId = discountCode.id;
-        revenueShareType = discountCode.kind; // Utiliser le type de partage défini dans le code
+        revenueShareType = discountCode.kind as ShareType; // Utiliser le type de partage défini dans le code
         
         // Pour la V1, on applique une réduction de 10% (à titre d'exemple)
         // Dans une vraie implémentation, le prix final serait déjà calculé côté client
@@ -119,34 +119,31 @@ async function handlePost(request: NextRequest) {
     }
 
     // Créer une réservation en attente
+    const reservationData: any = {
+      code: reservationCode,
+      userEmail: validatedData.email,
+      userPhone: validatedData.phone || "",
+      cityId: validatedData.citySlug ? (await getCityIdBySlug(validatedData.citySlug)) || "cmewtaexq0000l704q4sxvyit" : "cmewtaexq0000l704q4sxvyit",
+      pickupHotelId: validatedData.pickupHotelId,
+      dropHotelId: validatedData.dropHotelId,
+      productId: validatedData.productId,
+      startAt,
+      endAt,
+      status: ReservationStatus.PENDING,
+      priceCents: finalPriceCents,
+      depositCents: validatedData.depositAmount || product.deposit,
+      durationHours,
+      durationDays,
+      pricingType,
+      revenueShareApplied: revenueShareType,
+    };
+
+    if (discountCodeId) {
+      reservationData.discountCodeId = discountCodeId;
+    }
+
     const reservation = await prisma.reservation.create({
-      data: {
-        code: reservationCode,
-        userEmail: validatedData.email,
-        userPhone: validatedData.phone || "",
-        cityId: validatedData.citySlug ? await getCityIdBySlug(validatedData.citySlug) : "cmewtaexq0000l704q4sxvyit",
-        pickupHotelId: validatedData.pickupHotelId,
-        dropHotelId: validatedData.dropHotelId,
-        productId: validatedData.productId,
-        startAt,
-        endAt,
-        status: ReservationStatus.PENDING,
-        priceCents: finalPriceCents,
-        depositCents: validatedData.depositAmount || product.deposit,
-        durationHours,
-        durationDays,
-        pricingType,
-        revenueShareApplied: revenueShareType,
-        ...(discountCodeId
-          ? {
-              discountCode: {
-                connect: {
-                  id: discountCodeId,
-                },
-              },
-            }
-          : {}),
-      },
+      data: reservationData,
     });
 
     // Créer un PaymentIntent pour la pré-autorisation
@@ -176,7 +173,7 @@ async function handlePost(request: NextRequest) {
     const { setupIntent, success: setupSuccess } = await createSetupIntent({
       reservationId: reservation.id,
       reservationCode,
-              userEmail: validatedData.email,
+      userEmail: validatedData.email,
     });
 
     if (!setupSuccess || !setupIntent) {
@@ -283,7 +280,7 @@ async function checkAvailability(
   });
 
   // Si non disponible, suggérer des alternatives
-  let alternatives = [];
+  let alternatives: Array<{startAt: string, endAt: string}> = [];
   if (!available) {
     // Trouver des créneaux alternatifs en cherchant des périodes libres
     const nextDayStart = new Date(startAt);
