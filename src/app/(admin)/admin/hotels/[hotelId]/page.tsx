@@ -83,6 +83,7 @@ export default function HotelDetailPage() {
   const [activeTab, setActiveTab] = useState("info");
   const [isAddStockDialogOpen, setIsAddStockDialogOpen] = useState(false);
   const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
+  const [isEditDiscountDialogOpen, setIsEditDiscountDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProductForStock, setSelectedProductForStock] = useState<{ id: string; name: string; currentQuantity: number } | null>(null);
   const [isManageStockDialogOpen, setIsManageStockDialogOpen] = useState(false);
@@ -100,6 +101,11 @@ export default function HotelDetailPage() {
     phone: '',
     contactName: '',
     contactEmail: ''
+  });
+
+  const [editDiscountForm, setEditDiscountForm] = useState({
+    code: '',
+    kind: 'HOTEL_70' as 'HOTEL_70' | 'PLATFORM_70'
   });
 
     const fetchHotelData = async () => {
@@ -425,6 +431,51 @@ export default function HotelDetailPage() {
     }
   };
 
+  const openEditDiscountDialog = () => {
+    if (hotel?.discountCode) {
+      setEditDiscountForm({
+        code: hotel.discountCode.code,
+        kind: hotel.discountCode.kind
+      });
+      setIsEditDiscountDialogOpen(true);
+    }
+  };
+
+  const handleEditDiscountCode = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const discountData = {
+      code: formData.get("code") as string,
+      kind: formData.get("kind") as "PLATFORM_70" | "HOTEL_70",
+    };
+
+    try {
+      const response = await fetch(`/api/hotels/${hotelId}/discount`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(discountData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erreur lors de la modification");
+      }
+
+      await fetchHotelData(); // Refresh data
+      setIsEditDiscountDialogOpen(false);
+      (event.target as HTMLFormElement).reset();
+    } catch (error: any) {
+      console.error("Erreur lors de la modification du code:", error);
+      alert(`Erreur: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const totalRevenue = reservations.reduce((sum, res) => sum + res.priceCents, 0);
   const completedReservations = reservations.filter(res => res.status === "COMPLETED");
   
@@ -614,13 +665,23 @@ export default function HotelDetailPage() {
                         ? 'Hôtel: 70% - EasyBaby: 30%' 
                         : 'EasyBaby: 70% - Hôtel: 30%'}
                     </p>
-                    <Button 
-                      size="sm" 
-                      variant={hotel.discountCode.active ? "destructive" : "default"}
-                      onClick={toggleDiscountStatus}
-                    >
-                      {hotel.discountCode.active ? 'Désactiver' : 'Activer'}
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={openEditDiscountDialog}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Modifier
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant={hotel.discountCode.active ? "destructive" : "default"}
+                        onClick={toggleDiscountStatus}
+                      >
+                        {hotel.discountCode.active ? 'Désactiver' : 'Activer'}
+                      </Button>
+                    </div>
             </div>
                 ) : (
                   <p className="text-gray-500">Aucun code de réduction configuré</p>
@@ -1245,6 +1306,54 @@ export default function HotelDetailPage() {
                 {isSubmitting ? 'Mise à jour...' : 'Mettre à jour'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Discount Code Dialog */}
+      <Dialog open={isEditDiscountDialogOpen} onOpenChange={setIsEditDiscountDialogOpen}>
+        <DialogContent className="max-w-md">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Modifier le code de réduction</h3>
+            </div>
+            
+            <form onSubmit={handleEditDiscountCode} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-discount-code">Code de réduction *</Label>
+                <Input 
+                  id="edit-discount-code" 
+                  name="code" 
+                  value={editDiscountForm.code}
+                  onChange={(e) => setEditDiscountForm({...editDiscountForm, code: e.target.value})}
+                  placeholder="ex: HOTEL30, EASY70..."
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-discount-kind">Type de partage *</Label>
+                <select 
+                  id="edit-discount-kind" 
+                  name="kind" 
+                  value={editDiscountForm.kind}
+                  onChange={(e) => setEditDiscountForm({...editDiscountForm, kind: e.target.value as 'HOTEL_70' | 'PLATFORM_70'})}
+                  required
+                  className="w-full h-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="HOTEL_70">Hôtel 70% - EasyBaby 30%</option>
+                  <option value="PLATFORM_70">EasyBaby 70% - Hôtel 30%</option>
+                </select>
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button variant="outline" className="flex-1" onClick={() => setIsEditDiscountDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                  {isSubmitting ? "Modification..." : "Modifier"}
+                </Button>
+              </div>
+            </form>
           </div>
         </DialogContent>
       </Dialog>

@@ -59,3 +59,62 @@ export async function POST(
     );
   }
 }
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const hotelId = params.id;
+    const body = await request.json();
+    
+    // Vérifier si l'hôtel existe
+    const hotel = await getHotelById(hotelId);
+    if (!hotel) {
+      return NextResponse.json(
+        { error: 'Hotel not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Validation basique
+    if (!body.code || !body.kind) {
+      return NextResponse.json(
+        { error: 'Code and kind are required' },
+        { status: 400 }
+      );
+    }
+    
+    // Vérifier que le type est valide
+    if (!['PLATFORM_70', 'HOTEL_70'].includes(body.kind)) {
+      return NextResponse.json(
+        { error: 'Kind must be either PLATFORM_70 or HOTEL_70' },
+        { status: 400 }
+      );
+    }
+    
+    // Mettre à jour le code de réduction (garder le statut actif actuel)
+    const discountCode = await createOrUpdateDiscountCode(hotelId, {
+      code: body.code,
+      kind: body.kind,
+      active: hotel.discountCode?.active ?? true, // Garder le statut actuel
+    });
+    
+    return NextResponse.json(discountCode);
+  } catch (error) {
+    console.error('Error updating discount code:', error);
+    
+    // Gérer l'erreur de clé unique (code déjà utilisé)
+    if ((error as unknown).code === 'P2002') {
+      return NextResponse.json(
+        { error: 'This discount code is already used by another hotel' },
+        { status: 409 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Failed to update discount code' },
+      { status: 500 }
+    );
+  }
+}
