@@ -1,23 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  AdminPageLayout, 
-  LoadingState, 
-  ErrorState, 
-  AdminEmptyState,
-  AdminTableWrapper,
-  ADMIN_TABLE_STYLES,
-  AdminDialog,
-  AdminFormField,
-  PrimaryButton,
-  ActionButton
-} from '@/components/admin/design-system';
-import { NoHotelsEmptyState, GrayEmptyState, TableWrapper } from '@/components/admin/reusable-empty-states';
+import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, PrerequisiteEmptyState, GrayEmptyState } from "@/components/admin/universal-admin-layout";
+import { NoHotelsEmptyState, TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Edit } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
