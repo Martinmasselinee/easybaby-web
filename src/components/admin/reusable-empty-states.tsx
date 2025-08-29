@@ -11,12 +11,12 @@ interface EmptyStateProps {
 
 export function YellowEmptyState({ icon, title, description, children }: EmptyStateProps) {
   return (
-    <div className="text-center py-16 bg-yellow-50 rounded-lg border border-yellow-200">
+    <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
       <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
         {title}
       </h3>
-      <p className="text-yellow-800 mb-6 max-w-md mx-auto">
+      <p className="text-gray-600 mb-6 max-w-md mx-auto">
         {description}
       </p>
       {children}
@@ -26,12 +26,12 @@ export function YellowEmptyState({ icon, title, description, children }: EmptySt
 
 export function BlueEmptyState({ icon, title, description, children }: EmptyStateProps) {
   return (
-    <div className="text-center py-16 bg-blue-50 rounded-lg border border-blue-200">
+    <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
       <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-blue-900 mb-2">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
         {title}
       </h3>
-      <p className="text-blue-800 mb-6 max-w-md mx-auto">
+      <p className="text-gray-600 mb-6 max-w-md mx-auto">
         {description}
       </p>
       {children}
@@ -169,3 +169,22 @@ export function StatsCard({ title, value, icon }: StatsCardProps) {
     </div>
   );
 }
+
+// Standardized table styles to match Products page design
+export const TABLE_STYLES = {
+  table: "min-w-full divide-y divide-gray-200",
+  thead: "bg-gray-50",
+  th: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+  tbody: "bg-white divide-y divide-gray-200",
+  tr: "hover:bg-gray-50",
+  td: "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900",
+  tdSecondary: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
+  actions: "px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+};
+
+// Standardized action button styles
+export const ACTION_BUTTON_STYLES = {
+  edit: "border-gray-200",
+  delete: "border-red-200 text-red-600 hover:bg-red-50",
+  manage: "border-gray-200"
+};

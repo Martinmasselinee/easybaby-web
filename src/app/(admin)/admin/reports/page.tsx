@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
-import { YellowEmptyState, StatsCard } from '@/components/admin/reusable-empty-states';
+import { GrayEmptyState, StatsCard } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 
 interface RevenueData {
@@ -84,7 +84,7 @@ export default function ReportsPage() {
       />
 
       {isEmpty ? (
-        <YellowEmptyState
+        <GrayEmptyState
           icon="📊"
           title="Aucune donnée disponible"
           description="Les rapports financiers et statistiques apparaîtront ici une fois que vous aurez des réservations confirmées et payées."
@@ -92,7 +92,7 @@ export default function ReportsPage() {
           <Button onClick={fetchReports} variant="outline">
             Actualiser
           </Button>
-        </YellowEmptyState>
+        </GrayEmptyState>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard 

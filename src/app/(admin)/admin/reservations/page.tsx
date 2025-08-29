@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
-import { YellowEmptyState, TableWrapper } from '@/components/admin/reusable-empty-states';
+import { GrayEmptyState, TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Eye } from 'lucide-react';
 
 interface Reservation {
   id: string;
@@ -120,7 +121,7 @@ export default function ReservationsPage() {
       />
 
       {reservations.length === 0 ? (
-        <YellowEmptyState
+        <GrayEmptyState
           icon="📅"
           title="Aucune réservation"
           description="Les réservations de vos clients apparaîtront ici une fois qu'ils commenceront à réserver vos équipements via votre site."
@@ -128,73 +129,71 @@ export default function ReservationsPage() {
           <Button onClick={fetchReservations} variant="outline">
             Actualiser
           </Button>
-        </YellowEmptyState>
+        </GrayEmptyState>
       ) : (
         <TableWrapper>
-          <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <table className={TABLE_STYLES.table}>
+              <thead className={TABLE_STYLES.thead}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Client
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Produit
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Période
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Prix
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
+                  <th className={TABLE_STYLES.th}>Code</th>
+                  <th className={TABLE_STYLES.th}>Client</th>
+                  <th className={TABLE_STYLES.th}>Produit</th>
+                  <th className={TABLE_STYLES.th}>Période</th>
+                  <th className={TABLE_STYLES.th}>Prix</th>
+                  <th className={TABLE_STYLES.th}>Statut</th>
+                  <th className={TABLE_STYLES.th}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className={TABLE_STYLES.tbody}>
                 {reservations.map((reservation) => (
-                  <tr key={reservation.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr key={reservation.id} className={TABLE_STYLES.tr}>
+                    <td className={TABLE_STYLES.td}>
                       {reservation.code}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className={TABLE_STYLES.tdSecondary}>
                       <div>
-                        <div className="font-medium">{reservation.userEmail}</div>
+                        <div className="font-medium text-gray-900">{reservation.userEmail}</div>
                         {reservation.userPhone && (
                           <div className="text-gray-500">{reservation.userPhone}</div>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className={TABLE_STYLES.tdSecondary}>
                       <div>
-                        <div className="font-medium">{reservation.product.name}</div>
+                        <div className="font-medium text-gray-900">{reservation.product.name}</div>
                         <div className="text-gray-500">
                           {reservation.pickupHotel.name} → {reservation.dropHotel.name}
                         </div>
                         <div className="text-gray-500 text-xs">{reservation.city.name}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className={TABLE_STYLES.tdSecondary}>
                       <div>
                         <div>Du {formatDate(reservation.startAt)}</div>
                         <div>Au {formatDate(reservation.endAt)}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className={TABLE_STYLES.tdSecondary}>
                       <div>
-                        <div className="font-medium">{formatPrice(reservation.priceCents)}</div>
+                        <div className="font-medium text-gray-900">{formatPrice(reservation.priceCents)}</div>
                         <div className="text-gray-500 text-xs">
                           Caution: {formatPrice(reservation.depositCents)}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={TABLE_STYLES.tdSecondary}>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
                         {reservation.status}
                       </span>
+                    </td>
+                    <td className={TABLE_STYLES.actions}>
+                      <div className="flex justify-end space-x-2">
+                        <Link href={`/admin/reservations/${reservation.id}`}>
+                          <Button variant="outline" size="sm" className="border-gray-200">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

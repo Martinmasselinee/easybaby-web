@@ -6,6 +6,7 @@ import { NoCitiesEmptyState, TableWrapper } from '@/components/admin/reusable-em
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Edit } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -184,9 +185,11 @@ export default function CitiesPage() {
                       {city._count?.hotels || 0} hôtels
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-gray-600 hover:text-gray-900">
-                        Modifier
-                      </button>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" size="sm" className="border-gray-200">
+                          <Edit className="h-4 w-4" />
+                              </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

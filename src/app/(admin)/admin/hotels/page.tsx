@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PrerequisiteEmptyState, GrayEmptyState } from '@/components/admin/reusable-empty-states';
+import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState } from '@/components/admin/universal-admin-layout';
+import { PrerequisiteEmptyState, GrayEmptyState, TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-states';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Edit, MapPin } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -135,254 +137,205 @@ export default function HotelsPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Hôtels</h1>
-          <p className="text-muted-foreground">Gérez les hôtels partenaires</p>
-        </div>
-        <div className="flex items-center justify-center py-8">
-          <p>Chargement des hôtels...</p>
-        </div>
-      </div>
+      <LoadingState 
+        title="Hôtels"
+        subtitle="Gérez les hôtels partenaires qui proposeront vos équipements"
+        message="Chargement des hôtels..."
+      />
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Hôtels</h1>
-          <p className="text-muted-foreground">Gérez les hôtels partenaires</p>
-        </div>
-        <div className="text-center py-8 text-red-600">
-          <p>Erreur : {error}</p>
-          <Button onClick={() => fetchHotels()} className="mt-2">
-            Réessayer
-          </Button>
-        </div>
-      </div>
+      <ErrorState 
+        title="Hôtels"
+        subtitle="Gérez les hôtels partenaires qui proposeront vos équipements"
+        error={error}
+        onRetry={fetchHotels}
+      />
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Hôtels</h1>
-          <p className="text-muted-foreground">
-            Gérez les hôtels partenaires qui proposeront vos équipements
-          </p>
-        </div>
-        {cities.length > 0 ? (
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>Ajouter un hôtel</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl" aria-describedby="hotel-dialog-description">
-              <DialogHeader>
-                <DialogTitle>Ajouter un nouvel hôtel</DialogTitle>
-              </DialogHeader>
-              <div id="hotel-dialog-description" className="sr-only">
-                Formulaire pour ajouter un nouvel hôtel partenaire avec informations de contact
-              </div>
-              <form onSubmit={handleAddHotel} className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nom de l'hôtel *</Label>
-                    <Input 
-                      id="name" 
-                      name="name" 
-                      placeholder="ex: Hôtel Plaza Paris"
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cityId">Ville *</Label>
-                    <select 
-                      id="cityId" 
-                      name="cityId" 
-                      required
-                      className="w-full h-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Sélectionner une ville</option>
-                      {cities.map((city) => (
-                        <option key={city.id} value={city.id}>
-                          {city.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="address">Adresse complète *</Label>
-                  <Input 
-                    id="address" 
-                    name="address" 
-                    placeholder="ex: 123 Rue de la Paix, 75001 Paris"
-                    required 
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email de contact *</Label>
-                    <Input 
-                      id="email" 
-                      name="email" 
-                      type="email"
-                      placeholder="ex: contact@hotel-plaza.com"
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Téléphone</Label>
-                    <Input 
-                      id="phone" 
-                      name="phone" 
-                      type="tel"
-                      placeholder="ex: +33 1 23 45 67 89"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="contactName">Nom du contact</Label>
-                  <Input 
-                    id="contactName" 
-                    name="contactName" 
-                    placeholder="ex: Jean Dupont, Directeur"
-                  />
-                </div>
-                
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    <strong>💡 Après création :</strong> Vous pourrez configurer un code de réduction 
-                    personnalisé pour cet hôtel et gérer son stock de produits.
-                  </p>
-                </div>
-                
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline" disabled={isSubmitting}>
-                      Annuler
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Création..." : "Créer l'hôtel"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        ) : (
-          <div className="flex gap-2">
-            <Button asChild>
-              <Link href="/admin/cities">Créer une ville</Link>
-            </Button>
+    <UniversalAdminLayout>
+      <PageHeader 
+        title="Hôtels"
+        subtitle="Gérez les hôtels partenaires qui proposeront vos équipements"
+        actions={
+          cities.length > 0 ? (
+            <Button onClick={() => setIsAddDialogOpen(true)}>Ajouter un hôtel</Button>
+          ) : (
             <Button disabled title="Créez d'abord une ville">
               Ajouter un hôtel
             </Button>
-          </div>
-        )}
-      </div>
+          )
+        }
+      />
 
       {cities.length === 0 ? (
         <PrerequisiteEmptyState
           icon="🏙️"
           title="Aucune ville disponible"
-          description="Vous devez d'abord créer au moins une ville avant de pouvoir ajouter des hôtels."
+          description="Vous devez d'abord créer au moins une ville avant de pouvoir ajouter des hôtels partenaires."
           buttonText="Créer une ville"
           buttonHref="/admin/cities"
         />
-      ) : hotels.length === 0 ? (
+      ) : filteredHotels.length === 0 ? (
         <GrayEmptyState
           icon="🏨"
-          title="Aucun hôtel configuré"
-          description="Ajoutez votre premier hôtel partenaire pour commencer à proposer vos services."
+          title="Aucun hôtel"
+          description="Créez votre premier hôtel partenaire pour commencer à proposer vos équipements bébé."
         >
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>Ajouter mon premier hôtel</Button>
-            </DialogTrigger>
-          </Dialog>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            Ajouter votre premier hôtel
+          </Button>
         </GrayEmptyState>
       ) : (
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Rechercher un hôtel..."
-                className="w-full rounded-md border px-4 py-2 pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
+        <>
+          <div className="mb-4">
+            <Input
+              placeholder="Rechercher par nom d'hôtel, ville ou email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-md"
+            />
           </div>
-
-          <div className="border rounded-lg">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-3 text-left text-sm font-medium">Nom</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Ville</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Email</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Contact</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Code Réduction</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Stock</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+          
+          <TableWrapper>
+            <table className={TABLE_STYLES.table}>
+              <thead className={TABLE_STYLES.thead}>
+                <tr>
+                  <th className={TABLE_STYLES.th}>Nom</th>
+                  <th className={TABLE_STYLES.th}>Ville</th>
+                  <th className={TABLE_STYLES.th}>Email</th>
+                  <th className={TABLE_STYLES.th}>Stock</th>
+                  <th className={TABLE_STYLES.th}>Réservations</th>
+                  <th className={TABLE_STYLES.th}>Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className={TABLE_STYLES.tbody}>
                 {filteredHotels.map((hotel) => (
-                  <tr key={hotel.id} className="border-b">
-                    <td className="px-4 py-3 text-sm font-medium">{hotel.name}</td>
-                    <td className="px-4 py-3 text-sm">{hotel.city.name}</td>
-                    <td className="px-4 py-3 text-sm">{hotel.email}</td>
-                    <td className="px-4 py-3 text-sm">{hotel.contactName || '-'}</td>
-                    <td className="px-4 py-3 text-sm">
-                      {hotel.discountCode ? (
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          hotel.discountCode.active 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {hotel.discountCode.code} ({hotel.discountCode.kind === 'HOTEL_70' ? 'Hôtel 70%' : 'Platform 70%'})
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">Aucun</span>
-                      )}
+                  <tr key={hotel.id} className={TABLE_STYLES.tr}>
+                    <td className={TABLE_STYLES.td}>{hotel.name}</td>
+                    <td className={TABLE_STYLES.tdSecondary}>
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {hotel.city.name}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-sm">{hotel._count.inventory} produits</td>
-                    <td className="px-4 py-3 text-sm">
-                      <Button asChild variant="outline" size="sm">
+                    <td className={TABLE_STYLES.tdSecondary}>{hotel.email}</td>
+                    <td className={TABLE_STYLES.tdSecondary}>
+                      {hotel._count?.inventory || 0} produits
+                    </td>
+                    <td className={TABLE_STYLES.tdSecondary}>
+                      {hotel._count?.pickupReservations || 0} réservations
+                    </td>
+                    <td className={TABLE_STYLES.actions}>
+                      <div className="flex justify-end space-x-2">
                         <Link href={`/admin/hotels/${hotel.id}`}>
-                          Gérer
+                          <Button variant="outline" size="sm" className="border-gray-200">
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </Link>
-                      </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
+          </TableWrapper>
+        </>
       )}
-    </div>
+      
+      {/* Dialog pour création hôtel */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="max-w-2xl" aria-describedby="hotel-dialog-description">
+          <DialogHeader>
+            <DialogTitle>Ajouter un nouvel hôtel</DialogTitle>
+          </DialogHeader>
+          <div id="hotel-dialog-description" className="sr-only">
+            Formulaire pour ajouter un nouvel hôtel partenaire avec informations de contact
+          </div>
+          <form onSubmit={handleAddHotel} className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom de l'hôtel *</Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  placeholder="ex: Hôtel Plaza Paris"
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cityId">Ville *</Label>
+                <select 
+                  id="cityId" 
+                  name="cityId" 
+                  required
+                  className="w-full h-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Sélectionner une ville</option>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">Adresse *</Label>
+              <Input 
+                id="address" 
+                name="address" 
+                placeholder="ex: 123 Rue de la Paix, 75001 Paris"
+                required 
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email"
+                  placeholder="ex: contact@hotelplaza.com"
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Téléphone</Label>
+                <Input 
+                  id="phone" 
+                  name="phone" 
+                  placeholder="ex: +33 1 23 45 67 89"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contactName">Nom du contact</Label>
+              <Input 
+                id="contactName" 
+                name="contactName" 
+                placeholder="ex: Jean Dupont"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <DialogClose asChild>
+                <Button type="button" variant="outline">Annuler</Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Création...' : 'Créer l\'hôtel'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </UniversalAdminLayout>
   );
 }
