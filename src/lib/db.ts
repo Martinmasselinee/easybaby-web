@@ -833,3 +833,63 @@ export async function getDashboardStats() {
     totalRevenueCents: totalRevenue._sum.priceCents || 0,
   };
 }
+
+// === INVENTORY FUNCTIONS ===
+export async function getAllInventory() {
+  return await prisma.inventoryItem.findMany({
+    include: {
+      hotel: {
+        include: {
+          city: true,
+        },
+      },
+      product: true,
+    },
+    orderBy: [
+      { hotel: { name: 'asc' } },
+      { product: { name: 'asc' } },
+    ],
+  });
+}
+
+export async function createInventoryItem(data: {
+  hotelId: string;
+  productId: string;
+  quantity: number;
+  active?: boolean;
+}) {
+  return await prisma.inventoryItem.create({
+    data: {
+      hotelId: data.hotelId,
+      productId: data.productId,
+      quantity: data.quantity,
+      active: data.active ?? true,
+    },
+    include: {
+      hotel: {
+        include: {
+          city: true,
+        },
+      },
+      product: true,
+    },
+  });
+}
+
+export async function updateInventoryItem(id: string, data: {
+  quantity?: number;
+  active?: boolean;
+}) {
+  return await prisma.inventoryItem.update({
+    where: { id },
+    data,
+    include: {
+      hotel: {
+        include: {
+          city: true,
+        },
+      },
+      product: true,
+    },
+  });
+}
