@@ -133,3 +133,38 @@ export function NoStockEmptyState() {
     />
   );
 }
+
+// Composants réutilisables pour les UI
+interface TableWrapperProps {
+  children: React.ReactNode;
+}
+
+export function TableWrapper({ children }: TableWrapperProps) {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+interface StatsCardProps {
+  title: string;
+  value: string | number;
+  icon: string;
+}
+
+export function StatsCard({ title, value, icon }: StatsCardProps) {
+  return (
+    <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="flex items-center">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+        </div>
+        <div className="text-3xl">{icon}</div>
+      </div>
+    </div>
+  );
+}

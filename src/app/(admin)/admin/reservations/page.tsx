@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
-import { YellowEmptyState } from '@/components/admin/reusable-empty-states';
+import { YellowEmptyState, TableWrapper } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -130,9 +130,8 @@ export default function ReservationsPage() {
           </Button>
         </YellowEmptyState>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+        <TableWrapper>
+          <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -200,9 +199,8 @@ export default function ReservationsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
-        </div>
+          </table>
+        </TableWrapper>
       )}
     </UniversalAdminLayout>
   );

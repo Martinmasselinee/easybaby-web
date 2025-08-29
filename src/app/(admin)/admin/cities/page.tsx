@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
-import { NoCitiesEmptyState } from '@/components/admin/reusable-empty-states';
+import { NoCitiesEmptyState, TableWrapper } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -110,9 +110,8 @@ export default function CitiesPage() {
       {cities.length === 0 ? (
         <NoCitiesEmptyState />
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+        <TableWrapper>
+          <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -149,9 +148,8 @@ export default function CitiesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
-        </div>
+          </table>
+        </TableWrapper>
       )}
     </UniversalAdminLayout>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from "@/components/admin/universal-admin-layout";
+import { StatsCard } from '@/components/admin/reusable-empty-states';
 import { Button } from "@/components/ui/button";
 
 type DashboardStats = {
@@ -167,45 +168,13 @@ export default function DashboardPage() {
         subtitle={`Bienvenue, ${adminData?.email || 'admin@easybaby.io'}`}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Villes</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.citiesCount}</p>
-            </div>
-            <div className="text-3xl">🏙️</div>
-          </div>
-            </div>
+                <StatsCard title="Villes" value={stats?.citiesCount || 0} icon="🏙️" />
             
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Hôtels</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.hotelsCount}</p>
-            </div>
-            <div className="text-3xl">🏨</div>
-          </div>
-            </div>
+                <StatsCard title="Hôtels" value={stats?.hotelsCount || 0} icon="🏨" />
             
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Produits</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.productsCount}</p>
-            </div>
-            <div className="text-3xl">📦</div>
-          </div>
-            </div>
+                <StatsCard title="Produits" value={stats?.productsCount || 0} icon="📦" />
             
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Réservations</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.reservationsCount}</p>
-            </div>
-            <div className="text-3xl">📅</div>
-          </div>
-        </div>
+        <StatsCard title="Réservations" value={stats?.reservationsCount || 0} icon="📅" />
       </div>
 
       {stats?.totalRevenueCents ? (

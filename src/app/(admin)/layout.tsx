@@ -72,7 +72,7 @@ export default function AdminLayout({
           isOpen={sidebarOpen} 
           onClose={closeSidebar} 
         />
-        <main className="flex-1 md:ml-0 transition-all duration-300 overflow-auto">
+        <main className="flex-1 md:ml-64 transition-all duration-300 overflow-auto">
           {children}
         </main>
       </div>

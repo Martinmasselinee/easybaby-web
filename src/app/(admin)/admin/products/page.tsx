@@ -2,8 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
-import { NoHotelsEmptyState, GrayEmptyState } from '@/components/admin/reusable-empty-states';
+import { NoHotelsEmptyState, GrayEmptyState, TableWrapper } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger
+} from '@/components/ui/dialog';
 import Link from 'next/link';
 
 interface Product {
@@ -28,6 +40,8 @@ export default function ProductsPage() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -90,9 +104,52 @@ export default function ProductsPage() {
         title="Produits"
         subtitle="Gérez les équipements bébé disponibles à la location"
         actions={
-          <Button disabled={hotels.length === 0}>
-            Ajouter un produit
-          </Button>
+          hotels.length > 0 ? (
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Ajouter un produit</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Créer un nouveau produit</DialogTitle>
+                </DialogHeader>
+                <form className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Nom du produit</Label>
+                    <Input id="name" placeholder="Ex: Poussette City Mini" />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea id="description" placeholder="Description détaillée du produit..." />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="pricePerHour">Prix/heure (€)</Label>
+                      <Input id="pricePerHour" type="number" placeholder="5.00" step="0.01" />
+                    </div>
+                    <div>
+                      <Label htmlFor="pricePerDay">Prix/jour (€)</Label>
+                      <Input id="pricePerDay" type="number" placeholder="25.00" step="0.01" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="deposit">Caution (€)</Label>
+                    <Input id="deposit" type="number" placeholder="50.00" step="0.01" />
+                  </div>
+                </form>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Annuler</Button>
+                  </DialogClose>
+                  <Button>Créer le produit</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Button disabled title="Créez d'abord un hôtel">
+              Ajouter un produit
+            </Button>
+          )
         }
       />
 
@@ -104,12 +161,50 @@ export default function ProductsPage() {
           title="Aucun produit"
           description="Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires."
         >
-          <Button>Ajouter votre premier produit</Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>Ajouter votre premier produit</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Créer un nouveau produit</DialogTitle>
+              </DialogHeader>
+              <form className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nom du produit</Label>
+                  <Input id="name" placeholder="Ex: Poussette City Mini" />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea id="description" placeholder="Description détaillée du produit..." />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="pricePerHour">Prix/heure (€)</Label>
+                    <Input id="pricePerHour" type="number" placeholder="5.00" step="0.01" />
+                  </div>
+                  <div>
+                    <Label htmlFor="pricePerDay">Prix/jour (€)</Label>
+                    <Input id="pricePerDay" type="number" placeholder="25.00" step="0.01" />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="deposit">Caution (€)</Label>
+                  <Input id="deposit" type="number" placeholder="50.00" step="0.01" />
+                </div>
+              </form>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Annuler</Button>
+                </DialogClose>
+                <Button>Créer le produit</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </GrayEmptyState>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+        <TableWrapper>
+          <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -158,9 +253,8 @@ export default function ProductsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
-        </div>
+          </table>
+        </TableWrapper>
       )}
     </UniversalAdminLayout>
   );

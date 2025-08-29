@@ -273,9 +273,14 @@ export default function HotelsPage() {
             </DialogContent>
           </Dialog>
         ) : (
-          <Button disabled title="Créez d'abord une ville">
-            Ajouter un hôtel
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link href="/admin/cities">Créer une ville</Link>
+            </Button>
+            <Button disabled title="Créez d'abord une ville">
+              Ajouter un hôtel
+            </Button>
+          </div>
         )}
       </div>
 

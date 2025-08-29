@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, EmptyState } from '@/components/admin/universal-admin-layout';
-import { YellowEmptyState } from '@/components/admin/reusable-empty-states';
+import { YellowEmptyState, StatsCard } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 
 interface RevenueData {
@@ -95,57 +95,29 @@ export default function ReportsPage() {
         </YellowEmptyState>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Revenus */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600">Revenus Totaux</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {(revenueData!.totalRevenue / 100).toFixed(2)}€
-                </p>
-              </div>
-              <div className="text-3xl">💰</div>
-            </div>
-          </div>
+          <StatsCard 
+            title="Revenus Totaux" 
+            value={`${(revenueData!.totalRevenue / 100).toFixed(2)}€`} 
+            icon="💰" 
+          />
 
-          {/* EasyBaby (70%) */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600">EasyBaby (70%)</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {(revenueData!.easyBabyRevenue / 100).toFixed(2)}€
-                </p>
-              </div>
-              <div className="text-3xl">🏢</div>
-            </div>
-          </div>
+          <StatsCard 
+            title="EasyBaby (70%)" 
+            value={`${(revenueData!.easyBabyRevenue / 100).toFixed(2)}€`} 
+            icon="🏢" 
+          />
 
-          {/* Hôtels (30%) */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600">Hôtels (30%)</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {(revenueData!.hotelsRevenue / 100).toFixed(2)}€
-                </p>
-              </div>
-              <div className="text-3xl">🏨</div>
-            </div>
-          </div>
+          <StatsCard 
+            title="Hôtels (30%)" 
+            value={`${(revenueData!.hotelsRevenue / 100).toFixed(2)}€`} 
+            icon="🏨" 
+          />
 
-          {/* Réservations */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600">Réservations</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {revenueData!.totalReservations}
-                </p>
-              </div>
-              <div className="text-3xl">📅</div>
-            </div>
-          </div>
+          <StatsCard 
+            title="Réservations" 
+            value={revenueData!.totalReservations} 
+            icon="📅" 
+          />
         </div>
       )}
     </UniversalAdminLayout>
