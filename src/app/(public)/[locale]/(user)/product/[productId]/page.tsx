@@ -210,33 +210,43 @@ export default function ProductDetailPage({
     setIsCheckingAvailability(true);
     
     try {
-      // Pour la démo, nous simulons une disponibilité
-      // Dans une vraie implémentation, nous appellerions l'API avec les dates
-      setIsProductAvailable(true);
+      // Vérifier la disponibilité réelle pour cet hôtel
+      const response = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${productId}&hotelId=${hotelId}`);
       
-      // Générer les 14 prochains jours comme dates disponibles
-      const availableDates = [];
-      const today = new Date();
-      
-      for (let i = 0; i < 14; i++) {
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() + i);
+      if (response.ok) {
+        const availabilityData = await response.json();
+        const isAvailable = availabilityData.some((item: any) => item.hotelId === hotelId && item.available > 0);
         
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
+        setIsProductAvailable(isAvailable);
         
-        availableDates.push({
-          start: startDate.toISOString().split('T')[0],
-          end: endDate.toISOString().split('T')[0]
-        });
-      }
-      
-      setAvailableDates(availableDates);
-      
-      // Sélectionner la première date disponible
-      if (availableDates.length > 0) {
-        setPickupDate(availableDates[0].start);
-        setDropDate(availableDates[0].end);
+        if (isAvailable) {
+          // Générer les dates disponibles autour des dates sélectionnées
+          const availableDates = [];
+          const baseDate = new Date(pickupDate || new Date());
+          
+          for (let i = -7; i <= 7; i++) {
+            const startDate = new Date(baseDate);
+            startDate.setDate(baseDate.getDate() + i);
+            
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 1);
+            
+            availableDates.push({
+              start: startDate.toISOString().split('T')[0],
+              end: endDate.toISOString().split('T')[0]
+            });
+          }
+          
+          setAvailableDates(availableDates);
+          
+          // Sélectionner la première date disponible
+          if (availableDates.length > 0) {
+            setPickupDate(availableDates[0].start);
+            setDropDate(availableDates[0].end);
+          }
+        }
+      } else {
+        setIsProductAvailable(false);
       }
     } catch (err) {
       console.error("Erreur lors de la vérification de la disponibilité:", err);

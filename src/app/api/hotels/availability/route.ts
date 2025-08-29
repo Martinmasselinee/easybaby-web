@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const citySlug = searchParams.get("citySlug");
     const productId = searchParams.get("productId");
+    const hotelId = searchParams.get("hotelId");
     const dateStart = searchParams.get("dateStart");
     const dateEnd = searchParams.get("dateEnd");
 
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
         city: {
           slug: citySlug,
         },
+        ...(hotelId && { id: hotelId }),
       },
       include: {
         inventory: {

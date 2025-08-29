@@ -176,7 +176,7 @@ async function handlePost(request: NextRequest) {
     const { setupIntent, success: setupSuccess } = await createSetupIntent({
       reservationId: reservation.id,
       reservationCode,
-              userEmail: validatedData.userEmail,
+              userEmail: validatedData.email,
     });
 
     if (!setupSuccess || !setupIntent) {
