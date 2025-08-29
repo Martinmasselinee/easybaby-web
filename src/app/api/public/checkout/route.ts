@@ -228,6 +228,8 @@ async function checkAvailability(
   startAt: Date,
   endAt: Date
 ) {
+  console.log(`🔍 Checking availability for hotel ${hotelId}, product ${productId}`);
+  console.log(`📅 Period: ${startAt.toISOString()} to ${endAt.toISOString()}`);
   // Récupérer TOUS les inventaires pour ce produit dans cet hôtel
   const inventoryItems = await prisma.inventoryItem.findMany({
     where: {
