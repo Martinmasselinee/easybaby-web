@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PageLayout, EmptyState, LoadingState, ErrorState } from '@/components/admin/page-layout';
+import { AdminPageWrapper, EmptyState, LoadingState, ErrorState, SecondaryButton } from '@/components/admin/admin-page-wrapper';
 
 interface Reservation {
   id: string;
@@ -84,30 +84,27 @@ export default function ReservationsPage() {
 
   if (isLoading) {
     return (
-      <PageLayout title="Réservations">
+      <AdminPageWrapper title="Réservations">
         <LoadingState message="Chargement des réservations..." />
-      </PageLayout>
+      </AdminPageWrapper>
     );
   }
 
   if (error) {
     return (
-      <PageLayout title="Réservations">
+      <AdminPageWrapper title="Réservations">
         <ErrorState message={error} onRetry={fetchReservations} />
-      </PageLayout>
+      </AdminPageWrapper>
     );
   }
 
   return (
-    <PageLayout 
+    <AdminPageWrapper 
       title="Réservations"
       actions={
-        <button 
-          onClick={fetchReservations}
-          className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
-        >
+        <SecondaryButton onClick={fetchReservations}>
           Actualiser
-        </button>
+        </SecondaryButton>
       }
     >
 
@@ -192,6 +189,6 @@ export default function ReservationsPage() {
           </div>
         </div>
       )}
-    </PageLayout>
+    </AdminPageWrapper>
   );
 }

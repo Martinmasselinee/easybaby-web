@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { PageLayout, EmptyState, LoadingState } from "@/components/admin/page-layout";
+import { AdminPageWrapper, EmptyState, LoadingState, PrimaryButton } from "@/components/admin/admin-page-wrapper";
 
 type DashboardStats = {
   cities: number;
