@@ -42,6 +42,13 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [productFormData, setProductFormData] = useState({
+    name: '',
+    description: '',
+    pricePerHour: '',
+    pricePerDay: '',
+    deposit: ''
+  });
 
   const fetchData = async () => {
     try {
@@ -79,6 +86,61 @@ export default function ProductsPage() {
     fetchData();
   }, []);
 
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!productFormData.name.trim()) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: productFormData.name.trim(),
+          description: productFormData.description.trim(),
+          pricePerHour: Math.round(parseFloat(productFormData.pricePerHour || '0') * 100), // Convertir en centimes
+          pricePerDay: Math.round(parseFloat(productFormData.pricePerDay || '0') * 100), // Convertir en centimes
+          deposit: Math.round(parseFloat(productFormData.deposit || '0') * 100), // Convertir en centimes
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la création');
+      }
+
+      // Succès - fermer dialog et rafraîchir
+      setIsAddDialogOpen(false);
+      setProductFormData({
+        name: '',
+        description: '',
+        pricePerHour: '',
+        pricePerDay: '',
+        deposit: ''
+      });
+      await fetchData(); // Recharger la liste
+
+    } catch (err: any) {
+      console.error('Erreur création produit:', err);
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openCreateDialog = () => {
+    setProductFormData({
+      name: '',
+      description: '',
+      pricePerHour: '',
+      pricePerDay: '',
+      deposit: ''
+    });
+    setIsAddDialogOpen(true);
+  };
+
   if (isLoading) {
     return (
       <LoadingState 
@@ -105,46 +167,7 @@ export default function ProductsPage() {
         subtitle="Gérez les équipements bébé disponibles à la location"
         actions={
           hotels.length > 0 ? (
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>Ajouter un produit</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Créer un nouveau produit</DialogTitle>
-                </DialogHeader>
-                <form className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Nom du produit</Label>
-                    <Input id="name" placeholder="Ex: Poussette City Mini" />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" placeholder="Description détaillée du produit..." />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="pricePerHour">Prix/heure (€)</Label>
-                      <Input id="pricePerHour" type="number" placeholder="5.00" step="0.01" />
-                    </div>
-                    <div>
-                      <Label htmlFor="pricePerDay">Prix/jour (€)</Label>
-                      <Input id="pricePerDay" type="number" placeholder="25.00" step="0.01" />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="deposit">Caution (€)</Label>
-                    <Input id="deposit" type="number" placeholder="50.00" step="0.01" />
-                  </div>
-                </form>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Annuler</Button>
-                  </DialogClose>
-                  <Button>Créer le produit</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={openCreateDialog}>Ajouter un produit</Button>
           ) : (
             <Button disabled title="Créez d'abord un hôtel">
               Ajouter un produit
@@ -161,46 +184,9 @@ export default function ProductsPage() {
           title="Aucun produit"
           description="Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires."
         >
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>Ajouter votre premier produit</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Créer un nouveau produit</DialogTitle>
-              </DialogHeader>
-              <form className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nom du produit</Label>
-                  <Input id="name" placeholder="Ex: Poussette City Mini" />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" placeholder="Description détaillée du produit..." />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="pricePerHour">Prix/heure (€)</Label>
-                    <Input id="pricePerHour" type="number" placeholder="5.00" step="0.01" />
-                  </div>
-                  <div>
-                    <Label htmlFor="pricePerDay">Prix/jour (€)</Label>
-                    <Input id="pricePerDay" type="number" placeholder="25.00" step="0.01" />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="deposit">Caution (€)</Label>
-                  <Input id="deposit" type="number" placeholder="50.00" step="0.01" />
-                </div>
-              </form>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Annuler</Button>
-                </DialogClose>
-                <Button>Créer le produit</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={openCreateDialog}>
+            Ajouter votre premier produit
+          </Button>
         </GrayEmptyState>
       ) : (
         <TableWrapper>
@@ -256,6 +242,85 @@ export default function ProductsPage() {
           </table>
         </TableWrapper>
       )}
+      
+      {/* Dialog global pour création produit */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent aria-describedby="product-dialog-description-global">
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau produit</DialogTitle>
+          </DialogHeader>
+          <div id="product-dialog-description-global" className="sr-only">
+            Formulaire pour créer un nouveau produit avec nom, description, prix et caution
+          </div>
+          <form onSubmit={handleCreateProduct} className="space-y-4">
+            <div>
+              <Label htmlFor="name-global">Nom du produit</Label>
+              <Input 
+                id="name-global" 
+                placeholder="Ex: Poussette City Mini" 
+                value={productFormData.name}
+                onChange={(e) => setProductFormData({ ...productFormData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="description-global">Description</Label>
+              <Textarea 
+                id="description-global" 
+                placeholder="Description détaillée du produit..."
+                value={productFormData.description}
+                onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="pricePerHour-global">Prix/heure (€)</Label>
+                <Input 
+                  id="pricePerHour-global" 
+                  type="number" 
+                  placeholder="5.00" 
+                  step="0.01"
+                  value={productFormData.pricePerHour}
+                  onChange={(e) => setProductFormData({ ...productFormData, pricePerHour: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="pricePerDay-global">Prix/jour (€)</Label>
+                <Input 
+                  id="pricePerDay-global" 
+                  type="number" 
+                  placeholder="25.00" 
+                  step="0.01"
+                  value={productFormData.pricePerDay}
+                  onChange={(e) => setProductFormData({ ...productFormData, pricePerDay: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="deposit-global">Caution (€)</Label>
+              <Input 
+                id="deposit-global" 
+                type="number" 
+                placeholder="50.00" 
+                step="0.01"
+                value={productFormData.deposit}
+                onChange={(e) => setProductFormData({ ...productFormData, deposit: e.target.value })}
+                required
+              />
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting}>Annuler</Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Création...' : 'Créer le produit'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </UniversalAdminLayout>
   );
 }
