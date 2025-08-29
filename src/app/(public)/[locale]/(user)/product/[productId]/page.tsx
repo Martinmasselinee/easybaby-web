@@ -61,9 +61,13 @@ const translations = {
 export default function ProductDetailPage({
   params,
 }: {
-  params: { productId: string };
+  params: Promise<{ productId: string }>;
 }) {
-  const productId = params.productId;
+  const [productId, setProductId] = useState<string>("");
+
+  useEffect(() => {
+    params.then(({ productId }) => setProductId(productId));
+  }, [params]);
   
   const routeParams = useParams<{ locale: string }>();
   const locale = routeParams?.locale || 'fr';
@@ -188,7 +192,7 @@ export default function ProductDetailPage({
       }
     };
 
-    if (productId) {
+    if (productId && citySlug) {
       fetchProductData();
     }
   }, [productId, citySlug]);

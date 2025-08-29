@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, PrerequisiteEmptyState, GrayEmptyState } from "@/components/admin/universal-admin-layout";
+import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState, PrerequisiteEmptyState, EmptyState } from "@/components/admin/universal-admin-layout";
 import { NoHotelsEmptyState, TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -180,15 +180,16 @@ export default function ProductsPage() {
       {hotels.length === 0 ? (
         <NoHotelsEmptyState />
       ) : products.length === 0 ? (
-        <GrayEmptyState
+        <EmptyState
           icon="📦"
-          title="Aucun produit"
-          description="Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires."
-        >
-          <Button onClick={openCreateDialog}>
-            Ajouter votre premier produit
-          </Button>
-        </GrayEmptyState>
+          emptyTitle="Aucun produit"
+          emptyDescription="Créez votre premier équipement bébé à proposer à la location dans vos hôtels partenaires."
+          action={
+            <Button onClick={openCreateDialog}>
+              Ajouter votre premier produit
+            </Button>
+          }
+        />
       ) : (
         <TableWrapper>
           <table className="min-w-full divide-y divide-gray-200">
