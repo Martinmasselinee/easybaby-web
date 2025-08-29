@@ -316,27 +316,34 @@ export default function ProductDetailPage({
 
   if (isLoadingProduct) {
     return (
-      <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Chargement du produit...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement du produit...</p>
+        </div>
       </div>
     );
   }
 
   if (productError || !product) {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold mb-4">{t.productNotFound}</h1>
-        <p className="text-gray-600 mb-4">{productError || 'Produit non trouvé'}</p>
-        <Button asChild>
-          <Link href={`/${locale}/products?city=${citySlug}`}>{t.back}</Link>
-        </Button>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">{t.productNotFound}</h1>
+          <p className="text-gray-600 mb-4">{productError || 'Produit non trouvé'}</p>
+          <Button asChild>
+            <Link href={`/${locale}/products?city=${citySlug}`}>{t.back}</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-8">
+          <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
         <p className="text-muted-foreground">{product.description}</p>
@@ -519,7 +526,7 @@ export default function ProductDetailPage({
 
         <div className="flex justify-between pt-4">
           <Button variant="outline" asChild>
-            <Link href={`/${locale}/city/${citySlug}`}>
+            <Link href={`/${locale}/products?city=${citySlug}`}>
               {t.back}
             </Link>
           </Button>
@@ -528,6 +535,9 @@ export default function ProductDetailPage({
           </Button>
         </div>
       </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

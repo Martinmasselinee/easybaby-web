@@ -167,10 +167,10 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-      <div className="max-w-4xl w-full">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center py-8">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
             {t.title}
           </h1>
@@ -180,9 +180,9 @@ export default function HomePage() {
         </div>
 
         {/* Search Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSearch} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               {/* Destination */}
               <div className="relative">
                 <Label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-2">
@@ -258,19 +258,19 @@ export default function HomePage() {
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </div>
-            </div>
 
-            {/* Search Button */}
-            <div className="flex justify-center">
-              <Button
-                type="submit"
-                disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium flex items-center space-x-2 transition-colors"
-              >
-                <Search className="h-5 w-5" />
-                <span>{t.search}</span>
-                <ArrowRight className="h-5 w-5" />
-              </Button>
+              {/* Search Button */}
+              <div>
+                <Button
+                  type="submit"
+                  disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
+                >
+                  <Search className="h-5 w-5" />
+                  <span>{t.search}</span>
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
           </form>
         </div>

@@ -306,10 +306,13 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">{t.summary}</h1>
-      </div>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-8">
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{t.summary}</h1>
+            </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
@@ -584,6 +587,8 @@ function CheckoutContent() {
               </div>
             )}
           </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -592,17 +597,15 @@ function CheckoutContent() {
 
 // Composant principal qui enveloppe le contenu dans un Suspense
 export default function CheckoutPage() {
-  // Fallback pour le chargement
-  const LoadingFallback = () => (
-    <div className="flex items-center justify-center min-h-[300px]">
-      <div className="text-center">
-        <p className="text-lg font-medium">Chargement...</p>
-      </div>
-    </div>
-  );
-
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
       <CheckoutContent />
     </Suspense>
   );
