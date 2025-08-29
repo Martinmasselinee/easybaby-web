@@ -8,7 +8,7 @@ import { TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-st
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Edit, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Plus, Trash2, Settings } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -83,6 +83,9 @@ export default function HotelDetailPage() {
   const [isAddStockDialogOpen, setIsAddStockDialogOpen] = useState(false);
   const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedProductForStock, setSelectedProductForStock] = useState<{ id: string; name: string; currentQuantity: number } | null>(null);
+  const [isManageStockDialogOpen, setIsManageStockDialogOpen] = useState(false);
+  const [stockChangeAmount, setStockChangeAmount] = useState('');
 
   const fetchHotelData = async () => {
     try {
@@ -162,6 +165,44 @@ export default function HotelDetailPage() {
       (event.target as HTMLFormElement).reset();
     } catch (error: any) {
       console.error("Erreur lors de l'ajout du stock:", error);
+      alert(`Erreur: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleManageStock = async (action: 'increase' | 'decrease') => {
+    if (!selectedProductForStock || !stockChangeAmount) return;
+    
+    try {
+      setIsSubmitting(true);
+      const quantity = parseInt(stockChangeAmount);
+      const newQuantity = action === 'increase' 
+        ? selectedProductForStock.currentQuantity + quantity
+        : Math.max(0, selectedProductForStock.currentQuantity - quantity);
+
+      const response = await fetch(`/api/inventory`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hotelId: hotelId,
+          productId: selectedProductForStock.id,
+          quantity: newQuantity
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour du stock");
+      }
+
+      await fetchHotelData();
+      setIsManageStockDialogOpen(false);
+      setSelectedProductForStock(null);
+      setStockChangeAmount('');
+    } catch (error: any) {
+      console.error("Erreur:", error);
       alert(`Erreur: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -431,7 +472,10 @@ export default function HotelDetailPage() {
               {productsNotInStock.length > 0 && (
                 <Dialog open={isAddStockDialogOpen} onOpenChange={setIsAddStockDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button>Ajouter un produit</Button>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Ajouter Stock
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -504,38 +548,76 @@ export default function HotelDetailPage() {
                 )}
               </div>
             ) : (
-              <div className="border rounded-lg">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-4 py-3 text-left text-sm font-medium">Produit</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Quantité</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Prix/jour</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Statut</th>
+              <TableWrapper>
+                <table className={TABLE_STYLES.table}>
+                  <thead className={TABLE_STYLES.thead}>
+                    <tr>
+                      <th className={TABLE_STYLES.th}>Produit</th>
+                      <th className={TABLE_STYLES.th}>Stock Total</th>
+                      <th className={TABLE_STYLES.th}>Disponible</th>
+                      <th className={TABLE_STYLES.th}>En Utilisation</th>
+                      <th className={TABLE_STYLES.th}>Prix/jour</th>
+                      <th className={TABLE_STYLES.th}>Statut</th>
+                      <th className={TABLE_STYLES.th}>Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {inventory.map((item) => (
-                      <tr key={item.id} className="border-b">
-                        <td className="px-4 py-3 text-sm font-medium">{item.product.name}</td>
-                        <td className="px-4 py-3 text-sm text-center font-bold">{item.quantity}</td>
-                        <td className="px-4 py-3 text-sm">{(item.product.pricePerDay / 100).toFixed(2)}€</td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            item.quantity === 0 
-                              ? 'bg-red-100 text-red-800' 
-                              : item.quantity <= 2 
-                                ? 'bg-yellow-100 text-yellow-800' 
-                                : 'bg-green-100 text-green-800'
-                          }`}>
-                            {item.quantity === 0 ? 'Rupture' : item.quantity <= 2 ? 'Stock bas' : 'Disponible'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                  <tbody className={TABLE_STYLES.tbody}>
+                    {inventory.map((item) => {
+                      // Calculate usage - this would need to be enhanced with real reservation data
+                      const inUse = Math.min(2, item.quantity); // Placeholder logic
+                      const available = item.quantity - inUse;
+                      
+                      return (
+                        <tr key={item.id} className={TABLE_STYLES.tr}>
+                          <td className={TABLE_STYLES.td}>{item.product.name}</td>
+                          <td className={TABLE_STYLES.tdSecondary}>
+                            <span className="font-semibold">{item.quantity}</span>
+                          </td>
+                          <td className={TABLE_STYLES.tdSecondary}>
+                            <span className="text-green-600 font-medium">{available}</span>
+                          </td>
+                          <td className={TABLE_STYLES.tdSecondary}>
+                            <span className="text-orange-600 font-medium">{inUse}</span>
+                          </td>
+                          <td className={TABLE_STYLES.tdSecondary}>
+                            {(item.product.pricePerDay / 100).toFixed(2)}€
+                          </td>
+                          <td className={TABLE_STYLES.tdSecondary}>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              item.quantity === 0 
+                                ? 'bg-red-100 text-red-800' 
+                                : item.quantity <= 2 
+                                  ? 'bg-yellow-100 text-yellow-800' 
+                                  : 'bg-green-100 text-green-800'
+                            }`}>
+                              {item.quantity === 0 ? 'Rupture' : item.quantity <= 2 ? 'Stock bas' : 'Disponible'}
+                            </span>
+                          </td>
+                          <td className={TABLE_STYLES.actions}>
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-gray-200"
+                                onClick={() => {
+                                  setSelectedProductForStock({
+                                    id: item.product.id,
+                                    name: item.product.name,
+                                    currentQuantity: item.quantity
+                                  });
+                                  setIsManageStockDialogOpen(true);
+                                }}
+                              >
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-              </div>
+              </TableWrapper>
             )}
           </div>
         )}
@@ -644,6 +726,65 @@ export default function HotelDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Individual Stock Management Dialog */}
+      <Dialog open={isManageStockDialogOpen} onOpenChange={setIsManageStockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Gérer le stock: {selectedProductForStock?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Stock actuel</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {selectedProductForStock?.currentQuantity} unités
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="stockChange">Quantité à modifier</Label>
+              <Input
+                id="stockChange"
+                type="number"
+                min="1"
+                placeholder="ex: 5"
+                value={stockChangeAmount}
+                onChange={(e) => setStockChangeAmount(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button
+                className="flex-1"
+                onClick={() => handleManageStock('increase')}
+                disabled={isSubmitting || !stockChangeAmount}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Augmenter
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => handleManageStock('decrease')}
+                disabled={isSubmitting || !stockChangeAmount}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Diminuer
+              </Button>
+            </div>
+            
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline" disabled={isSubmitting}>
+                  Annuler
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </UniversalAdminLayout>
   );
 }

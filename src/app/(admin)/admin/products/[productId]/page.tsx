@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { UniversalAdminLayout, PageHeader, LoadingState, ErrorState } from '@/components/admin/universal-admin-layout';
+import { TableWrapper, TABLE_STYLES } from '@/components/admin/reusable-empty-states';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -174,6 +175,26 @@ export default function ProductDetailPage() {
 
   const totalStock = product.inventory.reduce((sum, inv) => sum + inv.quantity, 0);
   const activeStock = product.inventory.filter(inv => inv.active).reduce((sum, inv) => sum + inv.quantity, 0);
+  
+  // Aggregate inventory by hotel (combine multiple rows for same hotel)
+  const aggregatedInventory = product.inventory.reduce((acc, inv) => {
+    const hotelId = inv.hotel.id;
+    if (acc[hotelId]) {
+      acc[hotelId].quantity += inv.quantity;
+      acc[hotelId].active = acc[hotelId].active || inv.active; // Active if any row is active
+    } else {
+      acc[hotelId] = {
+        hotelId: inv.hotel.id,
+        hotelName: inv.hotel.name,
+        cityName: inv.hotel.city.name,
+        quantity: inv.quantity,
+        active: inv.active
+      };
+    }
+    return acc;
+  }, {} as Record<string, { hotelId: string; hotelName: string; cityName: string; quantity: number; active: boolean; }>);
+  
+  const aggregatedInventoryArray = Object.values(aggregatedInventory);
 
   return (
     <UniversalAdminLayout>
@@ -373,60 +394,55 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Inventory Table */}
-        {product.inventory.length > 0 && (
-          <div className="bg-white border border-gray-200">
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-900">Inventaire par hôtel</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+        {aggregatedInventoryArray.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Stock par hôtel</h3>
+            <TableWrapper>
+              <table className={TABLE_STYLES.table}>
+                <thead className={TABLE_STYLES.thead}>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hôtel
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ville
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Quantité
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className={TABLE_STYLES.th}>Hôtel</th>
+                    <th className={TABLE_STYLES.th}>Ville</th>
+                    <th className={TABLE_STYLES.th}>Stock Total</th>
+                    <th className={TABLE_STYLES.th}>Statut</th>
+                    <th className={TABLE_STYLES.th}>Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {product.inventory.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {inv.hotel.name}
+                <tbody className={TABLE_STYLES.tbody}>
+                  {aggregatedInventoryArray.map((inv) => (
+                    <tr key={inv.hotelId} className={TABLE_STYLES.tr}>
+                      <td className={TABLE_STYLES.td}>
+                        {inv.hotelName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {inv.hotel.city.name}
+                      <td className={TABLE_STYLES.tdSecondary}>
+                        {inv.cityName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {inv.quantity}
+                      <td className={TABLE_STYLES.tdSecondary}>
+                        {inv.quantity} unités
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {inv.active ? 'Actif' : 'Inactif'}
+                      <td className={TABLE_STYLES.tdSecondary}>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          inv.active 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {inv.active ? 'Actif' : 'Inactif'}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <Link 
-                          href={`/admin/hotels/${inv.hotel.id}`}
-                          className="text-gray-900 hover:text-gray-700"
-                        >
-                          Gérer hôtel
-                        </Link>
+                      <td className={TABLE_STYLES.actions}>
+                        <div className="flex justify-end space-x-2">
+                          <Link href={`/admin/hotels/${inv.hotelId}`}>
+                            <Button variant="outline" size="sm" className="border-gray-200">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableWrapper>
           </div>
         )}
       </div>
