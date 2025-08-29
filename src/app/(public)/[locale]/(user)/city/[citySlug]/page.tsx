@@ -39,7 +39,7 @@ type Product = {
   deposit: number;
   pricePerHour: number;
   pricePerDay: number;
-  availability: {
+  availability?: {
     total: number;
     available: number;
     hotelsCount?: number;
@@ -157,11 +157,11 @@ export default function CityProductsPage() {
                     {t.deposit((product.deposit / 100).toFixed(2) + "€")}
                   </p>
                   <p className="text-sm">
-                    {t.availability(product.availability.available, product.availability.total)}
+                    {product.availability ? t.availability(product.availability.available, product.availability.total) : t.notAvailable}
                   </p>
                 </div>
 
-                {product.availability.available > 0 ? (
+                {product.availability && product.availability.available > 0 ? (
                   <Button asChild className="w-full">
                     <Link href={`/${locale}/product/${product.id}?city=${citySlug}`}>
                       {t.select}
