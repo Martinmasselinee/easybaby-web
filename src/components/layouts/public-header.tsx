@@ -44,11 +44,6 @@ export function PublicHeader() {
           <Link href={`/${currentLocale}`} className="text-2xl font-bold text-white">
             {t.appName}
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href={`/${currentLocale}/city`} className="text-sm font-medium text-white hover:text-white/80">
-              {t.cities}
-            </Link>
-          </nav>
         </div>
         <div className="flex items-center gap-4">
           <DropdownMenu>

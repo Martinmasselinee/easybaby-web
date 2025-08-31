@@ -19,7 +19,7 @@ type City = {
 // Translations
 const translations = {
   fr: {
-    title: "Location d'équipements pour bébé",
+    title: "Louez tout l'équipement\npour vos vacances en famille !",
     subtitle: "Trouvez tout ce dont vous avez besoin pour votre séjour à l'hôtel",
     destination: "Destination",
     destinationPlaceholder: "Rechercher une destination",
@@ -33,7 +33,7 @@ const translations = {
     error: "Erreur lors du chargement des villes"
   },
   en: {
-    title: "Baby Equipment Rental",
+    title: "Easy Baby Equipment Rental\nFor Your Family Holiday !",
     subtitle: "Find everything you need for your hotel stay",
     destination: "Destination",
     destinationPlaceholder: "Search for a destination",
@@ -172,7 +172,7 @@ export default function HomePage() {
       <div className="fixed inset-0 z-0 bg-white"></div>
       {/* Header */}
       <div className="text-center mb-8 relative z-20">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3">
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3 whitespace-pre-line">
           {t.title}
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
