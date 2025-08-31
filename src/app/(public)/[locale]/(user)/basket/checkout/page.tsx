@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Calendar, MapPin, Package, Clock, CreditCard } from 'lucide-react';
 import Link from 'next/link';
+import { loadStripe } from '@stripe/stripe-js';
 
 export default function BasketCheckoutPage() {
   const params = useParams<{ locale: string }>();
@@ -110,12 +111,53 @@ export default function BasketCheckoutPage() {
     setError(null);
 
     try {
-      // For now, just redirect to a success page
-      // In a real implementation, this would create the basket reservation and handle payment
-      router.push(`/${locale}/basket/success`);
+      if (!state.basket?.id) {
+        throw new Error('No basket found');
+      }
+
+      // Get city ID from first item (simplified - in real app you'd get actual city ID)
+      const firstItem = state.basket.items[0];
+      if (!firstItem) {
+        throw new Error('No items in basket');
+      }
+
+      // Create checkout session
+      const checkoutResponse = await fetch(`/api/basket/${state.basket.id}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userEmail: email,
+          userPhone: phone,
+          cityId: firstItem.pickupHotelId, // Simplified - should get actual city ID
+        }),
+      });
+
+      if (!checkoutResponse.ok) {
+        const errorData = await checkoutResponse.json();
+        throw new Error(errorData.error || 'Checkout failed');
+      }
+
+      const checkoutData = await checkoutResponse.json();
+      
+      // Redirect to Stripe payment
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+      if (!stripe) {
+        throw new Error('Stripe failed to load');
+      }
+
+      const { error } = await stripe.confirmPayment({
+        clientSecret: checkoutData.clientSecret,
+        confirmParams: {
+          return_url: `${window.location.origin}/${locale}/basket/success`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
     } catch (error) {
-      console.error('Error during checkout:', error);
-      setError('An error occurred during checkout');
+      console.error('Payment error:', error);
+      setError(error instanceof Error ? error.message : 'Payment failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

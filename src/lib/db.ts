@@ -1184,7 +1184,7 @@ export async function createBasketReservation(basketId: string, userData: {
   });
 }
 
-function generateReservationCode(): string {
+export function generateReservationCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let result = 'EZB-';
   for (let i = 0; i < 4; i++) {

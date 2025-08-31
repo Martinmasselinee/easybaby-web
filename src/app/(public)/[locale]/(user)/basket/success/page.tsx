@@ -57,8 +57,18 @@ export default function BasketSuccessPage() {
     }).format(cents / 100);
   };
 
-  // Generate a mock reservation code (in real implementation, this would come from the API)
-  const reservationCode = 'EZB-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+  // Get reservation code from URL params or generate mock
+  const [reservationCode, setReservationCode] = React.useState('EZB-' + Math.random().toString(36).substr(2, 4).toUpperCase());
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get('reservation_code');
+      if (code) {
+        setReservationCode(code);
+      }
+    }
+  }, []);
 
   const handleNewOrder = () => {
     clearBasket();

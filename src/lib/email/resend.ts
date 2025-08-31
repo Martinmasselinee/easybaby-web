@@ -3,7 +3,7 @@ import { env } from '@/env.mjs';
 import ical from 'ical-generator';
 
 // Initialiser Resend avec la clé API
-const resend = new Resend(env.RESEND_API_KEY);
+export const resend = new Resend(env.RESEND_API_KEY);
 
 // Fonction pour générer un fichier ICS
 export function generateICS(options: {
@@ -218,9 +218,9 @@ type HotelNotificationEmailProps = {
 
 // Templates d'emails
 function UserConfirmationEmailTemplate(props: UserConfirmationEmailProps) {
-  return render(<UserConfirmationEmail {...props} />);
+  return React.createElement(UserConfirmationEmail, props);
 }
 
 function HotelNotificationEmailTemplate(props: HotelNotificationEmailProps) {
-  return render(<HotelNotificationEmail {...props} />);
+  return React.createElement(HotelNotificationEmail, props);
 }

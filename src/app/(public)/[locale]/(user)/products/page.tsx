@@ -181,23 +181,38 @@ function ProductsContent() {
     }
 
     try {
-      // For now, use default dates and first available hotel
-      // In a real implementation, this would open a modal to select dates/hotels
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      // Get real hotel data for this product
+      const hotelResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${product.id}`);
+      if (!hotelResponse.ok) {
+        throw new Error('Failed to fetch hotel data');
+      }
       
-      const dayAfterTomorrow = new Date();
-      dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+      const hotels = await hotelResponse.json();
+      const availableHotels = hotels.filter((hotel: any) => hotel.hasAvailableProducts);
+      
+      if (availableHotels.length === 0) {
+        throw new Error('No available hotels for this product');
+      }
+
+      // Use the first available hotel
+      const selectedHotel = availableHotels[0];
+      
+      // Use the search dates or default to tomorrow
+      const pickupDate = arrivalDate ? new Date(arrivalDate) : new Date();
+      pickupDate.setDate(pickupDate.getDate() + 1);
+      
+      const dropDate = departureDate ? new Date(departureDate) : new Date();
+      dropDate.setDate(dropDate.getDate() + 2);
 
       await addItemToBasket({
         productId: product.id,
         productName: product.name,
-        pickupHotelId: "default-hotel-id", // Would be selected by user
-        pickupHotelName: "Default Hotel", // Would be selected by user
-        dropHotelId: "default-hotel-id", // Would be selected by user
-        dropHotelName: "Default Hotel", // Would be selected by user
-        pickupDate: tomorrow,
-        dropDate: dayAfterTomorrow,
+        pickupHotelId: selectedHotel.id,
+        pickupHotelName: selectedHotel.name,
+        dropHotelId: selectedHotel.id,
+        dropHotelName: selectedHotel.name,
+        pickupDate: pickupDate,
+        dropDate: dropDate,
         quantity: 1,
         priceCents: product.pricePerDay,
         depositCents: product.deposit,
