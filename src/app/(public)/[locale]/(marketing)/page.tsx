@@ -180,121 +180,120 @@ export default function HomePage() {
 
       {/* Search Form */}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              {/* Destination */}
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            {/* Destination */}
+            <div className="relative">
+              <Label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-2">
+                {t.destination}
+              </Label>
               <div className="relative">
-                <Label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.destination}
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="destination"
-                    type="text"
-                    value={selectedCity}
-                    onChange={(e) => handleCityInputChange(e.target.value)}
-                    placeholder={t.destinationPlaceholder}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  
-                  {/* City Dropdown */}
-                  {showCityDropdown && filteredCities.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                      {filteredCities.map((city) => (
-                        <button
-                          key={city.id}
-                          type="button"
-                          onClick={() => handleCitySelect(city)}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                        >
-                          <div className="font-medium text-gray-900">{city.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {city.hotelsCount} hôtel{city.hotelsCount !== 1 ? 's' : ''} • {city.productsCount} produit{city.productsCount !== 1 ? 's' : ''}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Arrival Date */}
-              <div>
-                <Label htmlFor="arrival" className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.arrival}
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="arrival"
-                    type="date"
-                    value={arrivalDate}
-                    onChange={(e) => setArrivalDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Departure Date */}
-              <div>
-                <Label htmlFor="departure" className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.departure}
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="departure"
-                    type="date"
-                    value={departureDate}
-                    onChange={(e) => setDepartureDate(e.target.value)}
-                    min={arrivalDate || new Date().toISOString().split('T')[0]}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Search Button */}
-              <div>
-                <Button
-                  type="submit"
-                  disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
-                >
-                  <Search className="h-5 w-5" />
-                  <span>{t.search}</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
+                <Input
+                  id="destination"
+                  type="text"
+                  value={selectedCity}
+                  onChange={(e) => handleCityInputChange(e.target.value)}
+                  placeholder={t.destinationPlaceholder}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                
+                {/* City Dropdown */}
+                {showCityDropdown && filteredCities.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                    {filteredCities.map((city) => (
+                      <button
+                        key={city.id}
+                        type="button"
+                        onClick={() => handleCitySelect(city)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                      >
+                        <div className="font-medium text-gray-900">{city.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {city.hotelsCount} hôtel{city.hotelsCount !== 1 ? 's' : ''} • {city.productsCount} produit{city.productsCount !== 1 ? 's' : ''}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          </form>
-        </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center mt-8">
-            <p className="text-gray-600">{t.loading}</p>
-          </div>
-        )}
+            {/* Arrival Date */}
+            <div>
+              <Label htmlFor="arrival" className="block text-sm font-medium text-gray-700 mb-2">
+                {t.arrival}
+              </Label>
+              <div className="relative">
+                <Input
+                  id="arrival"
+                  type="date"
+                  value={arrivalDate}
+                  onChange={(e) => setArrivalDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="text-center mt-8">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
+            {/* Departure Date */}
+            <div>
+              <Label htmlFor="departure" className="block text-sm font-medium text-gray-700 mb-2">
+                {t.departure}
+              </Label>
+              <div className="relative">
+                <Input
+                  id="departure"
+                  type="date"
+                  value={departureDate}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  min={arrivalDate || new Date().toISOString().split('T')[0]}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
 
-        {/* Empty State */}
-        {!isLoading && !error && cities.length === 0 && (
-          <div className="text-center mt-8">
-            <p className="text-gray-600">{t.noCities}</p>
+            {/* Search Button */}
+            <div>
+              <Button
+                type="submit"
+                disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
+              >
+                <Search className="h-5 w-5" />
+                <span>{t.search}</span>
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
-        )}
+        </form>
       </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center mt-8">
+          <p className="text-gray-600">{t.loading}</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="text-center mt-8">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && cities.length === 0 && (
+        <div className="text-center mt-8">
+          <p className="text-gray-600">{t.noCities}</p>
+        </div>
+      )}
     </div>
   );
 }
