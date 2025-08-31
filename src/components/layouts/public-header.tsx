@@ -1,11 +1,13 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Locale, locales } from "@/i18n";
 import { BasketIcon } from "@/components/basket/basket-icon";
+import { BasketDrawer } from "@/components/basket/basket-drawer";
 
 // Définir des traductions statiques pour simplifier
 const translations = {
@@ -23,6 +25,7 @@ const translations = {
 
 export function PublicHeader() {
   const pathname = usePathname();
+  const [isBasketOpen, setIsBasketOpen] = useState(false);
   
   // Extract locale from pathname
   const currentLocale = pathname?.split("/")[1] as Locale || "fr";
@@ -48,7 +51,7 @@ export function PublicHeader() {
         </div>
         <div className="flex items-center gap-4">
           <BasketIcon 
-            onClick={() => console.log('Basket clicked')} 
+            onClick={() => setIsBasketOpen(true)} 
             className="text-white hover:bg-white/20"
           />
           <DropdownMenu>
@@ -69,6 +72,11 @@ export function PublicHeader() {
           </DropdownMenu>
         </div>
       </div>
+      
+      <BasketDrawer 
+        isOpen={isBasketOpen} 
+        onClose={() => setIsBasketOpen(false)} 
+      />
     </header>
   );
 }
