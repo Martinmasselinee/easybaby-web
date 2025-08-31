@@ -243,19 +243,19 @@ function ProductsContent() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="py-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex flex-col items-start space-y-4">
-                <Button onClick={handleBackToSearch} variant="outline" size="sm" className="hover:bg-blue-50">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  {t.backToSearch}
-                </Button>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
-                  <p className="text-gray-600">{t.subtitle}</p>
-                </div>
+            <div className="flex flex-col items-start space-y-4 mb-6">
+              <Button onClick={handleBackToSearch} variant="outline" size="sm" className="hover:bg-blue-50">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                {t.backToSearch}
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
+                <p className="text-gray-600">{t.subtitle}</p>
               </div>
+            </div>
 
-              {/* View Toggle */}
+            {/* View Toggle - Now inside the main content area */}
+            <div className="flex justify-end mb-6">
               <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
