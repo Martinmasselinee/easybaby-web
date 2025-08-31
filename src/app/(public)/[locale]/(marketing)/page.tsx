@@ -168,22 +168,14 @@ export default function HomePage() {
 
   return (
     <div className="w-full max-w-4xl px-4 relative z-10">
-      {/* Background Image with Overlay */}
-      <div className="fixed inset-0 z-0">
-        <div 
-          className="w-full h-full bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/ChatGPT%20Image%2031%20ao%C3%BBt%202025,%2015_15_40.png')`
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-pink-500/15"></div>
-      </div>
+      {/* White Background */}
+      <div className="fixed inset-0 z-0 bg-white"></div>
       {/* Header */}
       <div className="text-center mb-8 relative z-20">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg">
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3">
           {t.title}
         </h1>
-        <p className="text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           {t.subtitle}
         </p>
       </div>
