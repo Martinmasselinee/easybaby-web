@@ -11,7 +11,7 @@ export default function UserLayout({
       <div className="sticky top-0 z-50 bg-white">
         <PublicHeader />
       </div>
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         {children}
       </main>
       <div className="sticky bottom-0 z-50 bg-white border-t">
