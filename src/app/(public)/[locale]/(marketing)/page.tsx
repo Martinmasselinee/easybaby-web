@@ -167,20 +167,19 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center py-6">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3">
-            {t.title}
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
-        </div>
+    <div className="w-full max-w-4xl px-4">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3">
+          {t.title}
+        </h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          {t.subtitle}
+        </p>
+      </div>
 
-        {/* Search Form */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-4">
+      {/* Search Form */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               {/* Destination */}
