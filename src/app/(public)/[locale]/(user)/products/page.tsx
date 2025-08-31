@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Package, Hotel } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Package, Hotel, Grid3X3, List, Search } from "lucide-react";
 
 // Type for products with availability
 type Product = {
@@ -37,7 +37,11 @@ const translations = {
     select: "Sélectionner",
     notAvailable: "Indisponible",
     loading: "Chargement des produits...",
-    error: "Erreur lors du chargement des produits"
+    error: "Erreur lors du chargement des produits",
+    searchPlaceholder: "Rechercher un équipement...",
+    gridView: "Vue grille",
+    listView: "Vue liste",
+    resultsCount: (count: number) => `${count} équipement${count !== 1 ? 's' : ''} trouvé${count !== 1 ? 's' : ''}`
   },
   en: {
     title: "Available Equipment",
@@ -53,7 +57,11 @@ const translations = {
     select: "Select",
     notAvailable: "Not available",
     loading: "Loading products...",
-    error: "Error loading products"
+    error: "Error loading products",
+    searchPlaceholder: "Search equipment...",
+    gridView: "Grid view",
+    listView: "List view",
+    resultsCount: (count: number) => `${count} equipment found`
   }
 };
 
@@ -72,9 +80,12 @@ function ProductsContent() {
 
   // State
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cityName, setCityName] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Load products for the selected dates
   useEffect(() => {
@@ -105,10 +116,12 @@ function ProductsContent() {
         
         const data = await productsResponse.json();
         setProducts(data || []);
+        setFilteredProducts(data || []);
       } catch (err) {
         console.error("Error loading products:", err);
         setError(t.error);
         setProducts([]);
+        setFilteredProducts([]);
       } finally {
         setIsLoading(false);
       }
@@ -116,6 +129,19 @@ function ProductsContent() {
 
     fetchProducts();
   }, [citySlug, arrivalDate, departureDate, t.error]);
+
+  // Filter products based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -151,7 +177,7 @@ function ProductsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t.loading}</p>
@@ -162,7 +188,7 @@ function ProductsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={handleBackToSearch} variant="outline">
@@ -175,13 +201,49 @@ function ProductsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Sticky Search Summary */}
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Search Criteria */}
+              <div className="flex items-center space-x-6 text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">{cityName}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span>{formatDate(arrivalDate)} - {formatDate(departureDate)}</span>
+                </div>
+                <div className="text-gray-500">
+                  {t.resultsCount(filteredProducts.length)}
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative max-w-md w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={t.searchPlaceholder}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="py-8">
+        <div className="py-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
-              <Button onClick={handleBackToSearch} variant="outline" size="sm">
+              <Button onClick={handleBackToSearch} variant="outline" size="sm" className="hover:bg-blue-50">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {t.backToSearch}
               </Button>
@@ -190,101 +252,169 @@ function ProductsContent() {
                 <p className="text-gray-600">{t.subtitle}</p>
               </div>
             </div>
-          </div>
 
-          {/* Search Summary */}
-          <div className="flex items-center space-x-6 text-sm text-gray-600 mb-8">
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-4 w-4" />
-              <span>{cityName}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
-              <span>{formatDate(arrivalDate)} - {formatDate(departureDate)}</span>
+            {/* View Toggle */}
+            <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="h-8 px-3"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-8 px-3"
+              >
+                <List className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Content */}
         <div className="pb-8">
-          {products.length === 0 ? (
+          {filteredProducts.length === 0 ? (
             <div className="text-center py-16">
               <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t.noProducts}
+                {searchTerm ? "Aucun résultat trouvé" : t.noProducts}
               </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                {t.noProductsDescription}
+                {searchTerm ? "Essayez de modifier vos critères de recherche." : t.noProductsDescription}
               </p>
               <Button onClick={handleBackToSearch} variant="outline">
                 {t.tryOtherDates}
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+            <div className={
+              viewMode === 'grid' 
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                : "space-y-4"
+            }>
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md ${
+                  className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 ${
                     product.availability.available === 0 
                       ? 'opacity-60 cursor-not-allowed' 
-                      : 'cursor-pointer hover:border-blue-300'
-                  }`}
+                      : 'cursor-pointer hover:scale-[1.02] hover:border-blue-300'
+                  } ${viewMode === 'list' ? 'flex items-center p-6' : 'p-6'}`}
                   onClick={() => handleProductSelect(product)}
                 >
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {product.name}
-                    </h3>
-                    
-                    {product.description && (
-                      <p className="text-sm text-gray-600 mb-4">
-                        {product.description}
-                      </p>
-                    )}
-
-                    <div className="space-y-2 mb-4">
-                      <p className="text-sm">
-                        {t.pricePerHour((product.pricePerHour / 100).toFixed(2) + "€")}
-                      </p>
-                      <p className="text-sm">
-                        {t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}
-                      </p>
-                      <p className="text-sm">
-                        {t.deposit((product.deposit / 100).toFixed(2) + "€")}
-                      </p>
-                    </div>
-
-                    {/* Availability Info */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Hotel className="h-4 w-4" />
-                        <span>{t.availableIn(product.availability.hotelsCount)}</span>
+                  {viewMode === 'list' ? (
+                    // List View
+                    <>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                          {product.name}
+                        </h3>
+                        {product.description && (
+                          <p className="text-sm text-gray-600 mb-3">
+                            {product.description}
+                          </p>
+                        )}
+                        <div className="flex items-center space-x-6 text-sm text-gray-600">
+                          <span>{t.pricePerHour((product.pricePerHour / 100).toFixed(2) + "€")}</span>
+                          <span>{t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}</span>
+                          <span>{t.deposit((product.deposit / 100).toFixed(2) + "€")}</span>
+                        </div>
                       </div>
-                      <div className={`px-2 py-1 rounded-full text-xs ${
-                        product.availability.available > 0
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {product.availability.available > 0 
-                          ? `${product.availability.available} disponible${product.availability.available !== 1 ? 's' : ''}`
-                          : t.notAvailable
-                        }
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <Hotel className="h-4 w-4" />
+                          <span>{t.availableIn(product.availability.hotelsCount)}</span>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          product.availability.available > 0
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {product.availability.available > 0 
+                            ? `${product.availability.available} disponible${product.availability.available !== 1 ? 's' : ''}`
+                            : t.notAvailable
+                          }
+                        </div>
+                        <Button
+                          className={`${
+                            product.availability.available === 0
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          }`}
+                          disabled={product.availability.available === 0}
+                        >
+                          {product.availability.available > 0 ? t.select : t.notAvailable}
+                        </Button>
                       </div>
-                    </div>
+                    </>
+                  ) : (
+                    // Grid View
+                    <>
+                      <div className="relative">
+                        {/* Product Image Placeholder */}
+                        <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mb-4 flex items-center justify-center">
+                          <Package className="h-12 w-12 text-blue-600" />
+                        </div>
+                        
+                        {/* Availability Badge */}
+                        <div className={`absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium ${
+                          product.availability.available > 0
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {product.availability.available > 0 
+                            ? `${product.availability.available} disponible${product.availability.available !== 1 ? 's' : ''}`
+                            : t.notAvailable
+                          }
+                        </div>
+                      </div>
 
-                    {/* Action Button */}
-                    <Button
-                      className={`w-full ${
-                        product.availability.available === 0
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
-                      disabled={product.availability.available === 0}
-                    >
-                      {product.availability.available > 0 ? t.select : t.notAvailable}
-                    </Button>
-                  </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        {product.name}
+                      </h3>
+                      
+                      {product.description && (
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                          {product.description}
+                        </p>
+                      )}
+
+                      {/* Pricing */}
+                      <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600">{t.pricePerHour((product.pricePerHour / 100).toFixed(2) + "€")}</span>
+                          <span className="text-sm text-gray-600">{t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}</span>
+                        </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {t.deposit((product.deposit / 100).toFixed(2) + "€")}
+                        </div>
+                      </div>
+
+                      {/* Availability Info */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <Hotel className="h-4 w-4" />
+                          <span>{t.availableIn(product.availability.hotelsCount)}</span>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        className={`w-full ${
+                          product.availability.available === 0
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
+                        disabled={product.availability.available === 0}
+                      >
+                        {product.availability.available > 0 ? t.select : t.notAvailable}
+                      </Button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -298,7 +428,7 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement...</p>
