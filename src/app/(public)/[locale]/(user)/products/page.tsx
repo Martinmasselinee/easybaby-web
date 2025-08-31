@@ -311,11 +311,11 @@ function ProductsContent() {
                     // List View
                     <>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          {product.name}
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          {product.name.toLowerCase().replace(/\b\w/g, (l, i) => i === 0 ? l.toUpperCase() : l)}
                         </h3>
                         {product.description && (
-                          <p className="text-sm text-gray-600 mb-3">
+                          <p className="text-base text-gray-600 mb-3 line-clamp-2">
                             {product.description}
                           </p>
                         )}
@@ -374,12 +374,12 @@ function ProductsContent() {
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {product.name}
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        {product.name.toLowerCase().replace(/\b\w/g, (l, i) => i === 0 ? l.toUpperCase() : l)}
                       </h3>
                       
                       {product.description && (
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-base text-gray-600 mb-4 line-clamp-2">
                           {product.description}
                         </p>
                       )}
