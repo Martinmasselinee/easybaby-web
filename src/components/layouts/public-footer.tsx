@@ -28,7 +28,7 @@ export function PublicFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t py-6 md:py-0">
+    <footer className="border-t py-4 md:py-0">
       <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4 md:h-16">
         <div className="text-sm text-muted-foreground">
           &copy; {year} EasyBaby. {t.tagline}
