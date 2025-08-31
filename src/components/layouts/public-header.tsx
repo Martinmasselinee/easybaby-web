@@ -38,14 +38,14 @@ export function PublicHeader() {
   };
 
   return (
-    <header className="border-b">
+    <header className="border-b bg-gradient-to-r from-pink-600 to-red-600">
       <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto w-full flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href={`/${currentLocale}`} className="text-2xl font-bold">
+          <Link href={`/${currentLocale}`} className="text-2xl font-bold text-white">
             {t.appName}
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href={`/${currentLocale}/city`} className="text-sm font-medium">
+            <Link href={`/${currentLocale}/city`} className="text-sm font-medium text-white hover:text-white/80">
               {t.cities}
             </Link>
           </nav>
@@ -53,7 +53,7 @@ export function PublicHeader() {
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 {currentLocale.toUpperCase()}
               </Button>
             </DropdownMenuTrigger>

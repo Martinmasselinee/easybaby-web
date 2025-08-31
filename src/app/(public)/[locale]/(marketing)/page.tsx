@@ -176,7 +176,7 @@ export default function HomePage() {
             backgroundImage: `url('/ChatGPT Image 31 août 2025, 15_15_40.png')`
           }}
         />
-        <div className="absolute inset-0 bg-red-500/30 bg-pink-500/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-pink-500/30"></div>
       </div>
       {/* Header */}
       <div className="text-center mb-8">
@@ -189,7 +189,7 @@ export default function HomePage() {
       </div>
 
       {/* Search Form */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             {/* Destination */}
