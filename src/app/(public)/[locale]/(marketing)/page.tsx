@@ -176,7 +176,7 @@ export default function HomePage() {
             backgroundImage: `url('/ChatGPT%20Image%2031%20ao%C3%BBt%202025,%2015_15_40.png')`
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-pink-500/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-pink-500/15"></div>
       </div>
       {/* Header */}
       <div className="text-center mb-8 relative z-20">
