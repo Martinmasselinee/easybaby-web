@@ -177,7 +177,7 @@ function ProductsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t.loading}</p>
@@ -188,7 +188,7 @@ function ProductsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={handleBackToSearch} variant="outline">
@@ -206,14 +206,14 @@ function ProductsContent() {
       <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
           <div className="py-4">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-4">
               {/* Left side - Back button */}
               <Button onClick={handleBackToSearch} variant="default" size="sm" className="bg-black hover:bg-gray-800">
                 <ArrowLeft className="h-4 w-4 text-white" />
               </Button>
 
               {/* Center - Search Criteria */}
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4 text-pink-600" />
                   <span className="font-medium">{cityName}</span>
