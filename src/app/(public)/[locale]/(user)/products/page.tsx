@@ -238,9 +238,8 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Content with padding within blue zone */}
-      <div className="px-4 md:px-8 lg:px-16">
-        <div className="max-w-7xl mx-auto">
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
           {/* Header */}
           <div className="py-6">
             <div className="flex flex-col items-start space-y-4 mb-6">
@@ -421,7 +420,6 @@ function ProductsContent() {
               ))}
             </div>
           )}
-          </div>
         </div>
       </div>
     </div>
