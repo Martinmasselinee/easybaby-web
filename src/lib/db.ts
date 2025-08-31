@@ -934,3 +934,261 @@ export async function updateInventoryItem(id: string, data: {
     },
   });
 }
+
+// Basket Management Functions
+export async function createShoppingBasket(userEmail: string, sessionId?: string) {
+  return await prisma.shoppingBasket.create({
+    data: {
+      userEmail,
+      sessionId,
+      status: 'ACTIVE',
+    },
+  });
+}
+
+export async function getBasketById(basketId: string) {
+  return await prisma.shoppingBasket.findUnique({
+    where: { id: basketId },
+    include: {
+      items: {
+        include: {
+          product: true,
+          pickupHotel: true,
+          dropHotel: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getBasketByEmail(email: string) {
+  return await prisma.shoppingBasket.findFirst({
+    where: { 
+      userEmail: email,
+      status: 'ACTIVE',
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+          pickupHotel: true,
+          dropHotel: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getBasketBySession(sessionId: string) {
+  return await prisma.shoppingBasket.findFirst({
+    where: { 
+      sessionId,
+      status: 'ACTIVE',
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+          pickupHotel: true,
+          dropHotel: true,
+        },
+      },
+    },
+  });
+}
+
+export async function updateBasketStatus(basketId: string, status: 'ACTIVE' | 'CONVERTED' | 'EXPIRED' | 'ABANDONED') {
+  return await prisma.shoppingBasket.update({
+    where: { id: basketId },
+    data: { status },
+  });
+}
+
+export async function addItemToBasket(basketId: string, itemData: {
+  productId: string;
+  pickupHotelId: string;
+  dropHotelId: string;
+  pickupDate: Date;
+  dropDate: Date;
+  quantity: number;
+  priceCents: number;
+  depositCents: number;
+}) {
+  return await prisma.basketItem.create({
+    data: {
+      basketId,
+      ...itemData,
+    },
+    include: {
+      product: true,
+      pickupHotel: true,
+      dropHotel: true,
+    },
+  });
+}
+
+export async function updateBasketItem(itemId: string, itemData: Partial<{
+  pickupHotelId: string;
+  dropHotelId: string;
+  pickupDate: Date;
+  dropDate: Date;
+  quantity: number;
+  priceCents: number;
+  depositCents: number;
+}>) {
+  return await prisma.basketItem.update({
+    where: { id: itemId },
+    data: itemData,
+    include: {
+      product: true,
+      pickupHotel: true,
+      dropHotel: true,
+    },
+  });
+}
+
+export async function removeBasketItem(itemId: string) {
+  return await prisma.basketItem.delete({
+    where: { id: itemId },
+  });
+}
+
+export async function getBasketItems(basketId: string) {
+  return await prisma.basketItem.findMany({
+    where: { basketId },
+    include: {
+      product: true,
+      pickupHotel: true,
+      dropHotel: true,
+    },
+  });
+}
+
+// Multi-Item Availability Functions
+export async function checkBasketAvailability(basketItems: Array<{
+  productId: string;
+  pickupHotelId: string;
+  dropHotelId: string;
+  pickupDate: Date;
+  dropDate: Date;
+  quantity: number;
+}>) {
+  if (basketItems.length === 0) return [];
+
+  // Use existing optimized function
+  const availabilityChecks = basketItems.map(item => ({
+    productId: item.productId,
+    hotelId: item.pickupHotelId,
+    startAt: item.pickupDate,
+    endAt: item.dropDate,
+  }));
+
+  const results = await checkMultipleProductAvailability(availabilityChecks);
+  
+  // Check for conflicts within the same basket
+  const conflicts = findBasketConflicts(basketItems, results);
+  
+  return {
+    available: conflicts.length === 0,
+    conflicts,
+    availabilityResults: results,
+  };
+}
+
+function findBasketConflicts(basketItems: Array<{
+  productId: string;
+  pickupHotelId: string;
+  pickupDate: Date;
+  dropDate: Date;
+}>, availabilityResults: any[]) {
+  const conflicts = [];
+  
+  // Check for overlapping dates for same product/hotel
+  for (let i = 0; i < basketItems.length; i++) {
+    for (let j = i + 1; j < basketItems.length; j++) {
+      const item1 = basketItems[i];
+      const item2 = basketItems[j];
+      
+      if (item1.productId === item2.productId && 
+          item1.pickupHotelId === item2.pickupHotelId) {
+        
+        // Check date overlap
+        if (item1.pickupDate < item2.dropDate && item1.dropDate > item2.pickupDate) {
+          conflicts.push({
+            type: 'DATE_OVERLAP',
+            item1: item1,
+            item2: item2,
+            message: 'Same product cannot be rented for overlapping dates',
+          });
+        }
+      }
+    }
+  }
+  
+  return conflicts;
+}
+
+export async function validateBasketItems(basketId: string) {
+  const basket = await getBasketById(basketId);
+  if (!basket) {
+    return { valid: false, error: 'Basket not found' };
+  }
+
+  const availabilityCheck = await checkBasketAvailability(
+    basket.items.map(item => ({
+      productId: item.productId,
+      pickupHotelId: item.pickupHotelId,
+      dropHotelId: item.dropHotelId,
+      pickupDate: item.pickupDate,
+      dropDate: item.dropDate,
+      quantity: item.quantity,
+    }))
+  );
+
+  return {
+    valid: availabilityCheck.available,
+    conflicts: availabilityCheck.conflicts,
+    availabilityResults: availabilityCheck.availabilityResults,
+  };
+}
+
+// Basket Reservation Functions
+export async function createBasketReservation(basketId: string, userData: {
+  userEmail: string;
+  userPhone?: string;
+  cityId: string;
+  totalPriceCents: number;
+  totalDepositCents: number;
+}) {
+  const reservationCode = generateReservationCode();
+  
+  return await prisma.basketReservation.create({
+    data: {
+      basketId,
+      reservationCode,
+      ...userData,
+    },
+    include: {
+      basket: {
+        include: {
+          items: {
+            include: {
+              product: true,
+              pickupHotel: true,
+              dropHotel: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function generateReservationCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let result = 'EZB-';
+  for (let i = 0; i < 4; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Locale, locales } from "@/i18n";
+import { BasketIcon } from "@/components/basket/basket-icon";
 
 // Définir des traductions statiques pour simplifier
 const translations = {
@@ -46,6 +47,10 @@ export function PublicHeader() {
           </Link>
         </div>
         <div className="flex items-center gap-4">
+          <BasketIcon 
+            onClick={() => console.log('Basket clicked')} 
+            className="text-white hover:bg-white/20"
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">

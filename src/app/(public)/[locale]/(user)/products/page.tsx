@@ -4,7 +4,8 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Package, Hotel, Grid3X3, List, Search } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Package, Hotel, Grid3X3, List, Search, ShoppingCart } from "lucide-react";
+import { useBasket } from "@/components/basket/basket-provider";
 
 // Type for products with availability
 type Product = {
@@ -86,6 +87,7 @@ function ProductsContent() {
   const [cityName, setCityName] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { addItemToBasket, getBasketItemCount } = useBasket();
 
   // Load products for the selected dates
   useEffect(() => {
@@ -168,6 +170,45 @@ function ProductsContent() {
     });
     
     router.push(`/${locale}/product/${product.id}?${params.toString()}`);
+  };
+
+  // Handle adding product to basket
+  const handleAddToBasket = async (product: Product, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent navigation
+    
+    if (product.availability.available === 0) {
+      return; // Product not available
+    }
+
+    try {
+      // For now, use default dates and first available hotel
+      // In a real implementation, this would open a modal to select dates/hotels
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const dayAfterTomorrow = new Date();
+      dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+
+      await addItemToBasket({
+        productId: product.id,
+        productName: product.name,
+        pickupHotelId: "default-hotel-id", // Would be selected by user
+        pickupHotelName: "Default Hotel", // Would be selected by user
+        dropHotelId: "default-hotel-id", // Would be selected by user
+        dropHotelName: "Default Hotel", // Would be selected by user
+        pickupDate: tomorrow,
+        dropDate: dayAfterTomorrow,
+        quantity: 1,
+        priceCents: product.pricePerDay,
+        depositCents: product.deposit,
+      });
+
+      // Show success message or notification
+      console.log("Product added to basket!");
+    } catch (error) {
+      console.error("Error adding product to basket:", error);
+      // Show error message
+    }
   };
 
   // Go back to search
@@ -403,17 +444,28 @@ function ProductsContent() {
                         </div>
                       </div>
 
-                      {/* Action Button */}
-                      <Button
-                                                  className={`w-full ${
+                      {/* Action Buttons */}
+                      <div className="flex space-x-2">
+                        <Button
+                          className={`flex-1 ${
                             product.availability.available === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-pink-600 hover:bg-pink-700'
                           }`}
-                        disabled={product.availability.available === 0}
-                      >
-                        {product.availability.available > 0 ? t.select : t.notAvailable}
-                      </Button>
+                          disabled={product.availability.available === 0}
+                        >
+                          {product.availability.available > 0 ? t.select : t.notAvailable}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="px-3"
+                          onClick={(e) => handleAddToBasket(product, e)}
+                          disabled={product.availability.available === 0}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </>
                   )}
                 </div>

@@ -16,6 +16,7 @@ model City {
   slug        String  @unique
   hotels      Hotel[]
   reservations Reservation[]
+  basketReservations BasketReservation[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -33,6 +34,8 @@ model Hotel {
   inventory   InventoryItem[]
   pickupReservations Reservation[] @relation("pickupHotel")
   dropReservations Reservation[] @relation("dropHotel")
+  pickupBasketItems BasketItem[] @relation("pickupHotel")
+  dropBasketItems BasketItem[] @relation("dropHotel")
   revenueAgreements RevenueAgreement[]
   claims     Claim[]
   createdAt   DateTime @default(now())
@@ -49,6 +52,7 @@ model Product {
   deposit     Int      // cents (caution)
   inventory   InventoryItem[]
   reservations Reservation[]
+  basketItems BasketItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -91,6 +95,7 @@ model Reservation {
   discountCodeId String?
   revenueShareApplied ShareType @default(PLATFORM_70)
   revenueComputedCents Int @default(0) // total for hotel + platform
+  basketReservationId String?
 
   city         City    @relation(fields: [cityId], references: [id])
   pickupHotel  Hotel   @relation("pickupHotel", fields: [pickupHotelId], references: [id])
@@ -98,6 +103,7 @@ model Reservation {
   product      Product @relation(fields: [productId], references: [id])
   discountCode DiscountCode? @relation(fields: [discountCodeId], references: [id])
   claim        Claim?
+  basketReservation BasketReservation? @relation(fields: [basketReservationId], references: [id])
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -168,6 +174,67 @@ enum ClaimStatus {
 enum PricingType {
   HOURLY
   DAILY
+}
+
+enum BasketStatus {
+  ACTIVE
+  CONVERTED
+  EXPIRED
+  ABANDONED
+}
+
+model ShoppingBasket {
+  id          String   @id @default(cuid())
+  userEmail   String
+  sessionId   String?  // For anonymous users
+  status      BasketStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  items       BasketItem[]
+  reservations BasketReservation[]
+}
+
+model BasketItem {
+  id          String   @id @default(cuid())
+  basketId    String
+  productId   String
+  pickupHotelId String
+  dropHotelId   String
+  pickupDate   DateTime
+  dropDate     DateTime
+  quantity    Int      @default(1)
+  priceCents  Int      // Calculated price for this item
+  depositCents Int     // Deposit for this item
+  
+  basket      ShoppingBasket @relation(fields: [basketId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+  pickupHotel Hotel @relation("pickupHotel", fields: [pickupHotelId], references: [id])
+  dropHotel   Hotel @relation("dropHotel", fields: [dropHotelId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BasketReservation {
+  id            String   @id @default(cuid())
+  basketId      String
+  reservationCode String @unique // Shared code for all items in basket
+  userEmail     String
+  userPhone     String?
+  cityId        String
+  totalPriceCents Int
+  totalDepositCents Int
+  status        ReservationStatus @default(PENDING)
+  stripePaymentIntentId String?
+  stripeSetupIntentId   String?
+  
+  basket        ShoppingBasket @relation(fields: [basketId], references: [id])
+  city          City @relation(fields: [cityId], references: [id])
+  reservations  Reservation[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model AdminUser {
