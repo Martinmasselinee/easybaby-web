@@ -173,13 +173,13 @@ export default function HomePage() {
         <div 
           className="w-full h-full bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/ChatGPT Image 31 août 2025, 15_15_40.png')`
+            backgroundImage: `url('/ChatGPT%20Image%2031%20ao%C3%BBt%202025,%2015_15_40.png')`
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-pink-500/30"></div>
       </div>
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 relative z-20">
         <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg">
           {t.title}
         </h1>
@@ -189,7 +189,7 @@ export default function HomePage() {
       </div>
 
       {/* Search Form */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 relative z-20">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             {/* Destination */}
@@ -270,11 +270,11 @@ export default function HomePage() {
 
             {/* Search Button */}
             <div>
-                              <Button
-                  type="submit"
-                  disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
-                  className="w-full bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
-                >
+              <Button
+                type="submit"
+                disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
+              >
                 <Search className="h-5 w-5" />
                 <span>{t.search}</span>
                 <ArrowRight className="h-5 w-5" />
