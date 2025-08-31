@@ -206,8 +206,13 @@ function ProductsContent() {
       <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
           <div className="py-4">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              {/* Search Criteria */}
+            <div className="flex items-center justify-between gap-4">
+              {/* Left side - Back button */}
+              <Button onClick={handleBackToSearch} variant="ghost" size="sm" className="hover:bg-gray-100">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+
+              {/* Center - Search Criteria */}
               <div className="flex items-center space-x-6 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4 text-blue-600" />
@@ -222,38 +227,21 @@ function ProductsContent() {
                 </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative max-w-md w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t.searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
-          {/* Header */}
-          <div className="py-6">
-            <div className="flex flex-col items-start space-y-4 mb-6">
-              <Button onClick={handleBackToSearch} variant="outline" size="sm" className="hover:bg-blue-50">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                {t.backToSearch}
-              </Button>
-              <div className="flex items-center justify-between w-full">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
-                  <p className="text-gray-600">{t.subtitle}</p>
+              {/* Right side - Search Bar and Toggle */}
+              <div className="flex items-center space-x-4">
+                {/* Search Bar */}
+                <div className="relative max-w-md w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder={t.searchPlaceholder}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
 
-                {/* View Toggle - Now aligned with the title */}
+                {/* View Toggle */}
                 <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
                   <Button
                     variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -273,6 +261,18 @@ function ProductsContent() {
                   </Button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
+          {/* Header */}
+          <div className="py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
+              <p className="text-gray-600">{t.subtitle}</p>
             </div>
           </div>
 
@@ -355,9 +355,9 @@ function ProductsContent() {
                   ) : (
                     // Grid View
                     <>
-                      <div className="relative">
+                      <div className="relative -mx-6 -mt-6 mb-4">
                         {/* Product Image Placeholder */}
-                        <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mb-4 flex items-center justify-center">
+                        <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
                           <Package className="h-12 w-12 text-blue-600" />
                         </div>
                         
@@ -385,12 +385,12 @@ function ProductsContent() {
                       )}
 
                       {/* Pricing */}
-                      <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                      <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm text-gray-600">{t.pricePerHour((product.pricePerHour / 100).toFixed(2) + "€")}</span>
-                          <span className="text-sm text-gray-600">{t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}</span>
+                          <span className="text-lg font-bold text-blue-600">{t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}</span>
                         </div>
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-xs text-gray-500">
                           {t.deposit((product.deposit / 100).toFixed(2) + "€")}
                         </div>
                       </div>
