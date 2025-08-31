@@ -11,7 +11,7 @@ export default function MarketingLayout({
       <div className="sticky top-0 z-50 bg-white">
         <PublicHeader />
       </div>
-      <main className="flex-1 flex items-center justify-center w-full">
+      <main className="flex-1 flex items-start justify-center w-full pt-16">
         {children}
       </main>
       <div className="sticky bottom-0 z-50 bg-white border-t">
