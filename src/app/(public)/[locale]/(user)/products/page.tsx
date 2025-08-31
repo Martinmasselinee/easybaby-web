@@ -238,7 +238,7 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Content with transparent padding */}
+      {/* Content with padding within blue zone */}
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
