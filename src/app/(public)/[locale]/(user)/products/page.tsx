@@ -247,31 +247,31 @@ function ProductsContent() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {t.backToSearch}
               </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
-                <p className="text-gray-600">{t.subtitle}</p>
-              </div>
-            </div>
+              <div className="flex items-center justify-between w-full">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
+                  <p className="text-gray-600">{t.subtitle}</p>
+                </div>
 
-            {/* View Toggle - Now inside the main content area */}
-            <div className="flex justify-end mb-6">
-              <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="h-8 px-3"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="h-8 px-3"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
+                {/* View Toggle - Now aligned with the title */}
+                <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="h-8 px-3"
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="h-8 px-3"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
