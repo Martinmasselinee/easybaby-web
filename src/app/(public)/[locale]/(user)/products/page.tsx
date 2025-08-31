@@ -177,9 +177,9 @@ function ProductsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-red-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t.loading}</p>
         </div>
       </div>
@@ -188,7 +188,7 @@ function ProductsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-red-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={handleBackToSearch} variant="outline">
@@ -201,25 +201,25 @@ function ProductsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-red-50">
       {/* Sticky Search Summary */}
       <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
           <div className="py-4">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-2">
               {/* Left side - Back button */}
-              <Button onClick={handleBackToSearch} variant="ghost" size="sm" className="hover:bg-gray-100">
-                <ArrowLeft className="h-4 w-4" />
+              <Button onClick={handleBackToSearch} variant="default" size="sm" className="bg-black hover:bg-gray-800">
+                <ArrowLeft className="h-4 w-4 text-white" />
               </Button>
 
               {/* Center - Search Criteria */}
               <div className="flex items-center space-x-6 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <MapPin className="h-4 w-4 text-pink-600" />
                   <span className="font-medium">{cityName}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <Calendar className="h-4 w-4 text-pink-600" />
                   <span>{formatDate(arrivalDate)} - {formatDate(departureDate)}</span>
                 </div>
                 <div className="text-gray-500">
@@ -237,7 +237,7 @@ function ProductsContent() {
                     placeholder={t.searchPlaceholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
 
@@ -344,7 +344,7 @@ function ProductsContent() {
                           className={`${
                             product.availability.available === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-600 hover:bg-blue-700'
+                              : 'bg-pink-600 hover:bg-pink-700'
                           }`}
                           disabled={product.availability.available === 0}
                         >
@@ -357,8 +357,8 @@ function ProductsContent() {
                     <>
                       <div className="relative -mx-6 -mt-6 mb-4">
                         {/* Product Image Placeholder */}
-                        <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                          <Package className="h-12 w-12 text-blue-600" />
+                        <div className="w-full h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
+                          <Package className="h-12 w-12 text-pink-600" />
                         </div>
                         
                         {/* Availability Badge */}
@@ -388,7 +388,7 @@ function ProductsContent() {
                       <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm text-gray-600">{t.pricePerHour((product.pricePerHour / 100).toFixed(2) + "€")}</span>
-                          <span className="text-lg font-bold text-blue-600">{t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}</span>
+                          <span className="text-lg font-bold text-pink-600">{t.pricePerDay((product.pricePerDay / 100).toFixed(2) + "€")}</span>
                         </div>
                         <div className="text-xs text-gray-500">
                           {t.deposit((product.deposit / 100).toFixed(2) + "€")}
@@ -405,11 +405,11 @@ function ProductsContent() {
 
                       {/* Action Button */}
                       <Button
-                        className={`w-full ${
-                          product.availability.available === 0
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
+                                                  className={`w-full ${
+                            product.availability.available === 0
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-pink-600 hover:bg-pink-700'
+                          }`}
                         disabled={product.availability.available === 0}
                       >
                         {product.availability.available > 0 ? t.select : t.notAvailable}
@@ -429,9 +429,9 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-red-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement...</p>
         </div>
       </div>

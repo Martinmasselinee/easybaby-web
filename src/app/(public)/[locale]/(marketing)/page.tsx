@@ -167,13 +167,23 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="w-full max-w-4xl px-4">
+    <div className="w-full max-w-4xl px-4 relative z-10">
+      {/* Background Image with Overlay */}
+      <div className="fixed inset-0 z-0">
+        <div 
+          className="w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/ChatGPT Image 31 août 2025, 15_15_40.png')`
+          }}
+        />
+        <div className="absolute inset-0 bg-red-500/30 bg-pink-500/20"></div>
+      </div>
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3">
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg">
           {t.title}
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
           {t.subtitle}
         </p>
       </div>
@@ -194,7 +204,7 @@ export default function HomePage() {
                   value={selectedCity}
                   onChange={(e) => handleCityInputChange(e.target.value)}
                   placeholder={t.destinationPlaceholder}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   required
                 />
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -232,7 +242,7 @@ export default function HomePage() {
                   value={arrivalDate}
                   onChange={(e) => setArrivalDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   required
                 />
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -251,7 +261,7 @@ export default function HomePage() {
                   value={departureDate}
                   onChange={(e) => setDepartureDate(e.target.value)}
                   min={arrivalDate || new Date().toISOString().split('T')[0]}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   required
                 />
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -260,11 +270,11 @@ export default function HomePage() {
 
             {/* Search Button */}
             <div>
-              <Button
-                type="submit"
-                disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
-              >
+                              <Button
+                  type="submit"
+                  disabled={!selectedCity || !arrivalDate || !departureDate || isLoading}
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
+                >
                 <Search className="h-5 w-5" />
                 <span>{t.search}</span>
                 <ArrowRight className="h-5 w-5" />
