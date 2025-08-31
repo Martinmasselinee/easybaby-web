@@ -203,7 +203,7 @@ function ProductsContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Sticky Search Summary */}
-      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+      <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -238,45 +238,47 @@ function ProductsContent() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <Button onClick={handleBackToSearch} variant="outline" size="sm" className="hover:bg-blue-50">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                {t.backToSearch}
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
-                <p className="text-gray-600">{t.subtitle}</p>
+      {/* Content with transparent padding */}
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="py-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col items-start space-y-4">
+                <Button onClick={handleBackToSearch} variant="outline" size="sm" className="hover:bg-blue-50">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  {t.backToSearch}
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
+                  <p className="text-gray-600">{t.subtitle}</p>
+                </div>
+              </div>
+
+              {/* View Toggle */}
+              <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="h-8 px-3"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="h-8 px-3"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-
-            {/* View Toggle */}
-            <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="h-8 px-3"
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="h-8 px-3"
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="pb-8">
+          {/* Content */}
+          <div className="pb-8">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-16">
               <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -293,7 +295,7 @@ function ProductsContent() {
           ) : (
             <div className={
               viewMode === 'grid' 
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
                 : "space-y-4"
             }>
               {filteredProducts.map((product) => (
@@ -419,6 +421,7 @@ function ProductsContent() {
               ))}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
