@@ -16,6 +16,25 @@ export interface BasketItem {
   quantity: number;
   priceCents: number;
   depositCents: number;
+  // Relations from API
+  product?: {
+    id: string;
+    name: string;
+    description?: string;
+    pricePerHour: number;
+    pricePerDay: number;
+    deposit: number;
+  };
+  pickupHotel?: {
+    id: string;
+    name: string;
+    address: string;
+  };
+  dropHotel?: {
+    id: string;
+    name: string;
+    address: string;
+  };
 }
 
 export interface Basket {
@@ -58,25 +77,56 @@ function basketReducer(state: BasketState, action: BasketAction): BasketState {
     case 'SET_ERROR':
       return { ...state, error: action.payload };
     case 'SET_BASKET':
-      return { ...state, basket: action.payload };
+      if (!action.payload) return { ...state, basket: null };
+      
+      // Process basket items to extract names from relations
+      const processedBasket = {
+        ...action.payload,
+        items: action.payload.items?.map((item: any) => ({
+          ...item,
+          productName: item.product?.name || item.productName || '',
+          pickupHotelName: item.pickupHotel?.name || item.pickupHotelName || '',
+          dropHotelName: item.dropHotel?.name || item.dropHotelName || '',
+        })) || [],
+      };
+      
+      return { ...state, basket: processedBasket };
     case 'ADD_ITEM':
       if (!state.basket) return state;
+      
+      // Process the basket item to extract names from relations
+      const processedItem = {
+        ...action.payload,
+        productName: action.payload.product?.name || action.payload.productName || '',
+        pickupHotelName: action.payload.pickupHotel?.name || action.payload.pickupHotelName || '',
+        dropHotelName: action.payload.dropHotel?.name || action.payload.dropHotelName || '',
+      };
+      
       return {
         ...state,
         basket: {
           ...state.basket,
-          items: [...state.basket.items, action.payload],
+          items: [...state.basket.items, processedItem],
         },
       };
     case 'UPDATE_ITEM':
       if (!state.basket) return state;
+      
+      // Process the updated item to extract names from relations
+      const processedUpdate = {
+        ...action.payload.updates,
+        productName: action.payload.updates.product?.name || action.payload.updates.productName || '',
+        pickupHotelName: action.payload.updates.pickupHotel?.name || action.payload.updates.pickupHotelName || '',
+        dropHotelName: action.payload.updates.dropHotel?.name || action.payload.updates.dropHotelName || '',
+      };
+      
       return {
         ...state,
         basket: {
           ...state.basket,
           items: state.basket.items.map(item =>
             item.id === action.payload.id
-              ? { ...item, ...action.payload.updates }
+              ? { ...item, ...processedUpdate }
               : item
           ),
         },
@@ -206,8 +256,10 @@ export function BasketProvider({ children }: BasketProviderProps) {
       console.log('Adding item to basket:', item);
       console.log('Current basket state:', state.basket);
 
+      let basketToUse = state.basket;
+
       // If no basket exists, create one first
-      if (!state.basket) {
+      if (!basketToUse) {
         console.log('No basket exists, creating new basket...');
         const createResponse = await fetch('/api/basket', {
           method: 'POST',
@@ -221,14 +273,21 @@ export function BasketProvider({ children }: BasketProviderProps) {
 
         const newBasket = await createResponse.json();
         console.log('Created new basket:', newBasket);
+        
+        // Update state with new basket
         dispatch({ type: 'SET_BASKET', payload: newBasket });
+        
+        // Use the newly created basket
+        basketToUse = newBasket;
       }
 
-      // Now add the item to the basket
-      const currentBasket = state.basket;
-      console.log('Adding item to basket with ID:', currentBasket?.id);
+      console.log('Adding item to basket with ID:', basketToUse?.id);
       
-      const response = await fetch(`/api/basket/${currentBasket!.id}/items`, {
+      if (!basketToUse?.id) {
+        throw new Error('Basket ID is missing');
+      }
+      
+      const response = await fetch(`/api/basket/${basketToUse.id}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -248,7 +307,17 @@ export function BasketProvider({ children }: BasketProviderProps) {
 
       const basketItem = await response.json();
       console.log('Added basket item:', basketItem);
-      dispatch({ type: 'ADD_ITEM', payload: basketItem });
+      
+      // Reload the basket from server to get updated data with product and hotel names
+      const basketResponse = await fetch(`/api/basket/${basketToUse.id}`);
+      if (basketResponse.ok) {
+        const updatedBasket = await basketResponse.json();
+        console.log('Updated basket from server:', updatedBasket);
+        dispatch({ type: 'SET_BASKET', payload: updatedBasket });
+      } else {
+        // Fallback to just adding the item
+        dispatch({ type: 'ADD_ITEM', payload: basketItem });
+      }
     } catch (error) {
       console.error('Error in addItemToBasket:', error);
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
@@ -306,7 +375,15 @@ export function BasketProvider({ children }: BasketProviderProps) {
         throw new Error('Failed to remove basket item');
       }
 
-      dispatch({ type: 'REMOVE_ITEM', payload: id });
+      // Reload the basket from server to get updated data
+      const basketResponse = await fetch(`/api/basket/${state.basket.id}`);
+      if (basketResponse.ok) {
+        const updatedBasket = await basketResponse.json();
+        dispatch({ type: 'SET_BASKET', payload: updatedBasket });
+      } else {
+        // Fallback to just removing the item
+        dispatch({ type: 'REMOVE_ITEM', payload: id });
+      }
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
     } finally {

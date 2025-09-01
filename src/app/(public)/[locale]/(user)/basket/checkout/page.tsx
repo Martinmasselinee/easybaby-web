@@ -199,6 +199,9 @@ function BasketCheckoutContent() {
       setIsSubmitting(true);
       setError(null);
 
+      console.log('Submitting checkout with basket:', state.basket);
+      console.log('Basket items:', state.basket?.items);
+
       const checkoutResponse = await fetch(`/api/basket/${state.basket!.id}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -209,12 +212,16 @@ function BasketCheckoutContent() {
         }),
       });
 
+      console.log('Checkout response status:', checkoutResponse.status);
+
       if (!checkoutResponse.ok) {
         const errorData = await checkoutResponse.json();
+        console.error('Checkout error data:', errorData);
         throw new Error(errorData.error || 'Erreur lors de la création de la commande');
       }
 
       const checkoutData = await checkoutResponse.json();
+      console.log('Checkout success data:', checkoutData);
 
       // Initialize Stripe
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
