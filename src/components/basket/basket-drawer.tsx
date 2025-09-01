@@ -174,7 +174,7 @@ export function BasketDrawer({ isOpen, onClose }: BasketDrawerProps) {
                   className="w-full bg-pink-600 hover:bg-pink-700"
                   asChild
                 >
-                  <Link href={`/${locale}/basket/checkout`}>
+                  <Link href={`/${locale}/basket/checkout`} onClick={onClose}>
                     {t.checkout}
                   </Link>
                 </Button>

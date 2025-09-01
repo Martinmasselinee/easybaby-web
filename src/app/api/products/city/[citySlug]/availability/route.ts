@@ -123,12 +123,8 @@ export async function GET(
       })
     );
 
-    // Filter out products with no availability
-    const availableProducts = productsWithAvailability.filter(
-      product => product.availability.available > 0
-    );
-
-    return NextResponse.json(availableProducts);
+    // Return all products with availability info (including zero availability)
+    return NextResponse.json(productsWithAvailability);
   } catch (error: any) {
     console.error('Error GET /api/products/city/[citySlug]/availability:', error);
     return NextResponse.json(

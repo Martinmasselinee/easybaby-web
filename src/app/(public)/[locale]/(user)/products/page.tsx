@@ -437,24 +437,24 @@ function ProductsContent() {
                         >
                           {getRealTimeAvailability(product) > 0 ? t.select : t.notAvailable}
                         </Button>
-                        <Button
-                          className={`px-3 ${
-                            getRealTimeAvailability(product) === 0
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          }`}
-                          onClick={(e) => handleAddToBasket(product, e)}
-                          disabled={getRealTimeAvailability(product) === 0}
-                        >
-                          <div className="relative">
+                        <div className="relative">
+                          <Button
+                            className={`px-3 ${
+                              getRealTimeAvailability(product) === 0
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                            }`}
+                            onClick={(e) => handleAddToBasket(product, e)}
+                            disabled={getRealTimeAvailability(product) === 0}
+                          >
                             <ShoppingCart className="h-4 w-4" />
-                            {getProductCountInBasket(product.id) > 0 && (
-                              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                                {getProductCountInBasket(product.id)}
-                              </span>
-                            )}
-                          </div>
-                        </Button>
+                          </Button>
+                          {getProductCountInBasket(product.id) > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                              {getProductCountInBasket(product.id)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </>
                   ) : (
@@ -520,24 +520,24 @@ function ProductsContent() {
                         >
                           {getRealTimeAvailability(product) > 0 ? t.select : t.notAvailable}
                         </Button>
-                        <Button
-                          className={`px-3 ${
-                            getRealTimeAvailability(product) === 0
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          }`}
-                          onClick={(e) => handleAddToBasket(product, e)}
-                          disabled={getRealTimeAvailability(product) === 0}
-                        >
-                          <div className="relative">
+                        <div className="relative">
+                          <Button
+                            className={`px-3 ${
+                              getRealTimeAvailability(product) === 0
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                            }`}
+                            onClick={(e) => handleAddToBasket(product, e)}
+                            disabled={getRealTimeAvailability(product) === 0}
+                          >
                             <ShoppingCart className="h-4 w-4" />
-                            {getProductCountInBasket(product.id) > 0 && (
-                              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                                {getProductCountInBasket(product.id)}
-                              </span>
-                            )}
-                          </div>
-                        </Button>
+                          </Button>
+                          {getProductCountInBasket(product.id) > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                              {getProductCountInBasket(product.id)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </>
                   )}

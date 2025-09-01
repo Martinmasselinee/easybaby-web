@@ -75,7 +75,7 @@ export default function ProductDetailPage({
   // Get translations for current locale
   const t = translations[locale as keyof typeof translations] || translations.fr;
   const searchParams = useSearchParams();
-  const citySlug = searchParams.get("city") || "paris";
+  const citySlug = searchParams.get("city") || "";
   
   // Get pre-selected dates from search
   const arrivalDate = searchParams.get("arrival");

@@ -91,8 +91,8 @@ function BasketCheckoutContent() {
   const { state, getBasketTotal, removeBasketItem } = useBasket();
   
   // Form state
-  const [email, setEmail] = useState("m_eline@live.concordia.ca");
-  const [phone, setPhone] = useState("0769033293");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [discountCode, setDiscountCode] = useState("");
   const [discountValid, setDiscountValid] = useState(false);
   const [discountLoading, setDiscountLoading] = useState(false);
@@ -145,9 +145,14 @@ function BasketCheckoutContent() {
       setDiscountLoading(true);
       setDiscountError(null);
 
-      // For now, we'll use a simple validation
-      // In a real app, you'd validate against the backend
-      if (discountCode.toLowerCase() === 'test10') {
+      // Validate discount code against backend
+      const response = await fetch(`/api/hotels/${state.basket!.items[0].pickupHotelId}/discount`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: discountCode }),
+      });
+
+      if (response.ok) {
         setDiscountValid(true);
         setDiscountError(null);
       } else {
@@ -240,8 +245,13 @@ function BasketCheckoutContent() {
   const handleBackToProducts = () => {
     if (state.basket && state.basket.items.length > 0) {
       const firstItem = state.basket.items[0];
+      // Extract city from hotel name (assuming format "Hotel Name - City")
+      const cityName = firstItem.pickupHotelName.includes(' - ') 
+        ? firstItem.pickupHotelName.split(' - ')[1] 
+        : firstItem.pickupHotelName;
+      
       const params = new URLSearchParams({
-        city: firstItem.pickupHotelName.split(' - ')[0] || '', // Extract city from hotel name
+        city: cityName,
         arrival: firstItem.pickupDate.toISOString().split('T')[0],
         departure: firstItem.dropDate.toISOString().split('T')[0]
       });

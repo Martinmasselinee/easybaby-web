@@ -110,8 +110,8 @@ function CheckoutContent() {
   const [error, setError] = useState<string | null>(null);
   
   // Form state
-  const [email, setEmail] = useState("m_eline@live.concordia.ca");
-  const [phone, setPhone] = useState("0769033293");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [discountCode, setDiscountCode] = useState("");
   const [discountValid, setDiscountValid] = useState(false);
   const [discountLoading, setDiscountLoading] = useState(false);
