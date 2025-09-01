@@ -107,6 +107,7 @@ interface BasketContextType {
   removeBasketItem: (id: string) => Promise<void>;
   clearBasket: () => void;
   getBasketItemCount: () => number;
+  getItemPrice: (item: BasketItem) => number;
   getBasketTotal: () => { price: number; deposit: number };
 }
 
@@ -298,13 +299,17 @@ export function BasketProvider({ children }: BasketProviderProps) {
     return state.basket?.items.length || 0;
   };
 
+  const getItemPrice = (item: BasketItem) => {
+    return item.priceCents / 100; // Convert to euros
+  };
+
   const getBasketTotal = () => {
     if (!state.basket) return { price: 0, deposit: 0 };
 
     const totals = state.basket.items.reduce(
       (acc, item) => {
         acc.price += item.priceCents;
-        acc.deposit += item.depositCents;
+        acc.deposit += item.depositCents * item.quantity;
         return acc;
       },
       { price: 0, deposit: 0 }
@@ -325,6 +330,7 @@ export function BasketProvider({ children }: BasketProviderProps) {
     removeBasketItem,
     clearBasket,
     getBasketItemCount,
+    getItemPrice,
     getBasketTotal,
   };
 

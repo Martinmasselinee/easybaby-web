@@ -13,7 +13,7 @@ interface BasketDrawerProps {
 }
 
 export function BasketDrawer({ isOpen, onClose }: BasketDrawerProps) {
-  const { state, removeBasketItem, getBasketTotal } = useBasket();
+  const { state, removeBasketItem, getBasketTotal, getItemPrice } = useBasket();
   const params = useParams<{ locale: string }>();
   const locale = params?.locale || 'fr';
   
@@ -149,7 +149,7 @@ export function BasketDrawer({ isOpen, onClose }: BasketDrawerProps) {
                     
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">{t.pickup}</span>
-                      <span className="font-medium">{formatPrice(item.priceCents)}</span>
+                      <span className="font-medium">{formatPrice(getItemPrice(item) * 100)}</span>
                     </div>
                   </div>
                 ))}

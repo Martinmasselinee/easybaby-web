@@ -88,7 +88,7 @@ function BasketCheckoutContent() {
   // Get translations for current locale
   const t = translations[locale as keyof typeof translations] || translations.fr;
   
-  const { state, getBasketTotal, removeBasketItem } = useBasket();
+  const { state, getBasketTotal, removeBasketItem, getItemPrice } = useBasket();
   
   // Form state
   const [email, setEmail] = useState("");
@@ -243,20 +243,28 @@ function BasketCheckoutContent() {
 
   // Go back to products page with search params
   const handleBackToProducts = () => {
+    console.log('handleBackToProducts called');
+    console.log('state.basket:', state.basket);
+    
     if (state.basket && state.basket.items.length > 0) {
       const firstItem = state.basket.items[0];
-      // Extract city from hotel name (assuming format "Hotel Name - City")
-      const cityName = firstItem.pickupHotelName.includes(' - ') 
-        ? firstItem.pickupHotelName.split(' - ')[1] 
-        : firstItem.pickupHotelName;
+      console.log('firstItem:', firstItem);
+      
+      // Try to get city from URL or use a default
+      const citySlug = searchParams.get('city') || 'paris';
+      console.log('citySlug:', citySlug);
       
       const params = new URLSearchParams({
-        city: cityName,
+        city: citySlug,
         arrival: firstItem.pickupDate.toISOString().split('T')[0],
         departure: firstItem.dropDate.toISOString().split('T')[0]
       });
-      router.push(`/${locale}/products?${params.toString()}`);
+      
+      const url = `/${locale}/products?${params.toString()}`;
+      console.log('Navigating to:', url);
+      router.push(url);
     } else {
+      console.log('No basket or items, going to home');
       router.push(`/${locale}`);
     }
   };
@@ -295,12 +303,12 @@ function BasketCheckoutContent() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Order Summary */}
           <div className="space-y-6">
-            <div className="bg-gray-50 rounded-lg p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">{t.summary}</h2>
               
               <div className="space-y-4">
                 {state.basket?.items.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-4 bg-white">
+                  <div key={item.id} className="border border-gray-200 rounded-lg p-4 bg-white">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900 mb-1">
@@ -333,7 +341,7 @@ function BasketCheckoutContent() {
                     
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">{t.rentalPrice}</span>
-                      <span className="font-medium">{formatPrice(item.priceCents)}</span>
+                      <span className="font-medium">{formatPrice(getItemPrice(item) * 100)}</span>
                     </div>
                   </div>
                 ))}
@@ -357,7 +365,7 @@ function BasketCheckoutContent() {
           <div className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Information */}
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">Informations de contact</h2>
                 
                 <div className="space-y-4">
@@ -390,7 +398,7 @@ function BasketCheckoutContent() {
               </div>
 
               {/* Discount Code */}
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">{t.code}</h2>
                 
                 <div className="flex gap-2">
@@ -421,7 +429,7 @@ function BasketCheckoutContent() {
               </div>
 
               {/* Consent */}
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">Consentement</h2>
                 
                 <div className="space-y-4">

@@ -225,6 +225,15 @@ function ProductsContent() {
       // Use the first available hotel
       const selectedHotel = availableHotels[0];
       
+      // Calculate duration in days
+      const startDate = new Date(dates.pickupDate);
+      const endDate = new Date(dates.dropDate);
+      const durationMs = endDate.getTime() - startDate.getTime();
+      const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
+      
+      // Calculate total price for the duration
+      const totalPriceCents = popupProduct.pricePerDay * durationDays;
+      
       // Create a temporary basket item for local storage
       const basketItem = {
         id: `${popupProduct.id}-${Date.now()}`, // Temporary ID
@@ -237,7 +246,7 @@ function ProductsContent() {
         pickupDate: dates.pickupDate,
         dropDate: dates.dropDate,
         quantity: 1,
-        priceCents: popupProduct.pricePerDay,
+        priceCents: totalPriceCents,
         depositCents: popupProduct.deposit,
       };
 
