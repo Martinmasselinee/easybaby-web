@@ -48,7 +48,7 @@ export async function POST(
     }
 
     // Verify payment with Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const paymentIntent = await stripe().paymentIntents.retrieve(paymentIntentId);
     if (paymentIntent.status !== "succeeded") {
       return NextResponse.json(
         { error: "Payment not completed" },

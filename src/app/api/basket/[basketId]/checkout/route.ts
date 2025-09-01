@@ -104,7 +104,7 @@ export async function POST(
     console.log('Created basket reservation:', basketReservation.id);
 
     // Create Stripe Payment Intent
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await stripe().paymentIntents.create({
       amount: totalPriceCents + totalDepositCents,
       currency: "eur",
       metadata: {

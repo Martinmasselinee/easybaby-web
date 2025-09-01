@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Vérifier la signature du webhook
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      event = stripe().webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
       console.error(`⚠️  Webhook signature verification failed.`, err);
       return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
