@@ -98,10 +98,10 @@ export function AddToBasketPopup({
 
   // Load hotels when popup opens
   useEffect(() => {
-    if (isOpen && !isEditing) {
+    if (isOpen) {
       loadHotels();
     }
-  }, [isOpen, isEditing]);
+  }, [isOpen]);
 
   // Load available hotels
   const loadHotels = async () => {
@@ -175,18 +175,24 @@ export function AddToBasketPopup({
   }, [pickupDate, dropDate, citySlug, product.id, isEditing, t.error, t.invalidDates, t.noHotelsAvailable]);
 
   const handleConfirm = () => {
+    // Validate that hotels are selected
+    if (!pickupHotelId || !dropHotelId) {
+      setError('Veuillez sélectionner les hôtels de retrait et de retour');
+      return;
+    }
+
     if (!isEditing) {
-      // Use current dates and auto-selected hotel
+      // Use current dates and selected hotels
       onConfirm({ 
         pickupDate: currentPickupDate, 
         dropDate: currentDropDate,
-        pickupTime: "10:00",
-        dropTime: "14:00",
+        pickupTime: pickupTime,
+        dropTime: dropTime,
         pickupHotelId: pickupHotelId,
         dropHotelId: dropHotelId
       });
     } else {
-      // Use edited dates and selected hotel
+      // Use edited dates and selected hotels
       onConfirm({ 
         pickupDate, 
         dropDate,
@@ -265,6 +271,67 @@ export function AddToBasketPopup({
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-pink-600" />
                     <span>Retour: {formatDate(currentDropDate)}</span>
+                  </div>
+                </div>
+                
+                {/* Hotel Selection for Current Dates */}
+                <div className="space-y-3 mt-4">
+                  <div>
+                    <Label htmlFor="pickupHotelCurrent">{t.pickupHotel}</Label>
+                    <select
+                      id="pickupHotelCurrent"
+                      value={pickupHotelId}
+                      onChange={(e) => setPickupHotelId(e.target.value)}
+                      className="w-full border rounded-md p-2 mt-1"
+                      required
+                    >
+                      <option value="">{t.selectHotel}</option>
+                      {hotels.map((hotel) => (
+                        <option key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="dropHotelCurrent">{t.dropHotel}</Label>
+                    <select
+                      id="dropHotelCurrent"
+                      value={dropHotelId}
+                      onChange={(e) => setDropHotelId(e.target.value)}
+                      className="w-full border rounded-md p-2 mt-1"
+                      required
+                    >
+                      <option value="">{t.selectHotel}</option>
+                      {hotels.map((hotel) => (
+                        <option key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="pickupTimeCurrent">{t.pickupTime}</Label>
+                    <Input
+                      id="pickupTimeCurrent"
+                      type="time"
+                      value={pickupTime}
+                      onChange={(e) => setPickupTime(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="dropTimeCurrent">{t.dropTime}</Label>
+                    <Input
+                      id="dropTimeCurrent"
+                      type="time"
+                      value={dropTime}
+                      onChange={(e) => setDropTime(e.target.value)}
+                      className="mt-1"
+                    />
                   </div>
                 </div>
               </div>

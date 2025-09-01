@@ -18,7 +18,13 @@ export async function POST(
   try {
     const { basketId } = await params;
     const body = await request.json();
+    
+    console.log('Checkout request for basket:', basketId);
+    console.log('Checkout request body:', body);
+    
     const { userEmail, userPhone, cityId } = checkoutSchema.parse(body);
+
+    console.log('Validated checkout data:', { userEmail, userPhone, cityId });
 
     // Get basket with items
     const basket = await prisma.shoppingBasket.findUnique({
@@ -33,6 +39,8 @@ export async function POST(
         },
       },
     });
+
+    console.log('Found basket:', basket ? { id: basket.id, itemCount: basket.items.length } : null);
 
     if (!basket) {
       return NextResponse.json(
@@ -65,8 +73,12 @@ export async function POST(
       0
     );
 
+    console.log('Calculated totals:', { totalPriceCents, totalDepositCents });
+
     // Generate shared reservation code
     const reservationCode = generateReservationCode();
+
+    console.log('Generated reservation code:', reservationCode);
 
     // Create basket reservation
     const basketReservation = await createBasketReservation(basketId, {
@@ -77,6 +89,8 @@ export async function POST(
       totalDepositCents,
       reservationCode,
     });
+
+    console.log('Created basket reservation:', basketReservation.id);
 
     // Create Stripe Payment Intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -89,6 +103,8 @@ export async function POST(
         userEmail,
       },
     });
+
+    console.log('Created payment intent:', paymentIntent.id);
 
     // Update basket reservation with payment intent
     await prisma.basketReservation.update({
@@ -113,6 +129,14 @@ export async function POST(
     });
   } catch (error) {
     console.error("Checkout error:", error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid data", details: error.errors },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
