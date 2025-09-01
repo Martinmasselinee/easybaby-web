@@ -181,6 +181,11 @@ export function AddToBasketPopup({
       return;
     }
 
+    // Prevent multiple submissions
+    if (isCheckingAvailability) {
+      return;
+    }
+
     if (!isEditing) {
       // Use current dates and selected hotels
       onConfirm({ 

@@ -207,8 +207,7 @@ function BasketCheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userEmail: email, 
-          userPhone: phone,
-          cityId: state.basket!.items[0].pickupHotelId // Use first item's hotel city
+          userPhone: phone
         }),
       });
 

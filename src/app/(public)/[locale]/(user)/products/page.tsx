@@ -93,6 +93,7 @@ function ProductsContent() {
   // Popup state
   const [popupProduct, setPopupProduct] = useState<Product | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isAddingToBasket, setIsAddingToBasket] = useState(false);
 
   // Get count of specific product in basket
   const getProductCountInBasket = (productId: string) => {
@@ -215,6 +216,11 @@ function ProductsContent() {
   }) => {
     if (!popupProduct) return;
 
+    // Prevent multiple submissions
+    if (isAddingToBasket) return;
+    
+    setIsAddingToBasket(true);
+
     try {
       // Get hotel data
       const pickupHotelResponse = await fetch(`/api/hotels/${data.pickupHotelId}`);
@@ -256,9 +262,15 @@ function ProductsContent() {
 
       // Show success message or notification
       console.log("Product added to basket!");
+      
+      // Close popup
+      setIsPopupOpen(false);
+      setPopupProduct(null);
     } catch (error) {
       console.error("Error adding product to basket:", error);
       // Show error message
+    } finally {
+      setIsAddingToBasket(false);
     }
   };
 

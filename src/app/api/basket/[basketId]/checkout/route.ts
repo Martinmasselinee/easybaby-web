@@ -8,7 +8,6 @@ import { stripe } from "@/lib/stripe/stripe-server";
 const checkoutSchema = z.object({
   userEmail: z.string().email(),
   userPhone: z.string().optional(),
-  cityId: z.string(),
 });
 
 export async function POST(
@@ -22,9 +21,9 @@ export async function POST(
     console.log('Checkout request for basket:', basketId);
     console.log('Checkout request body:', body);
     
-    const { userEmail, userPhone, cityId } = checkoutSchema.parse(body);
+    const { userEmail, userPhone } = checkoutSchema.parse(body);
 
-    console.log('Validated checkout data:', { userEmail, userPhone, cityId });
+    console.log('Validated checkout data:', { userEmail, userPhone });
 
     // Get basket with items
     const basket = await prisma.shoppingBasket.findUnique({
@@ -33,8 +32,16 @@ export async function POST(
         items: {
           include: {
             product: true,
-            pickupHotel: true,
-            dropHotel: true,
+            pickupHotel: {
+              include: {
+                city: true,
+              },
+            },
+            dropHotel: {
+              include: {
+                city: true,
+              },
+            },
           },
         },
       },
@@ -62,6 +69,10 @@ export async function POST(
         { status: 400 }
       );
     }
+
+    // Get city ID from the first item's pickup hotel
+    const cityId = basket.items[0].pickupHotel.cityId;
+    console.log('Using city ID from basket:', cityId);
 
     // Calculate totals
     const totalPriceCents = basket.items.reduce(
