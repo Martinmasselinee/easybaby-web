@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { addItemToBasket, getBasketItems, checkBasketAvailability } from "@/lib/db";
+import { addItemToBasket, getBasketItems, checkBasketAvailability, getProductById } from "@/lib/db";
 
 // Schema for adding item to basket
 const addItemSchema = z.object({
@@ -43,9 +43,24 @@ export async function POST(
       );
     }
 
-    // Calculate price and deposit (simplified - should get from product)
-    const priceCents = 5000; // 50€ default
-    const depositCents = 2000; // 20€ default
+    // Get product details to calculate correct price and deposit
+    const product = await getProductById(validatedData.productId);
+    if (!product) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    // Calculate duration in days
+    const startDate = new Date(validatedData.pickupDate);
+    const endDate = new Date(validatedData.dropDate);
+    const durationMs = endDate.getTime() - startDate.getTime();
+    const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
+
+    // Calculate total price for the duration
+    const totalPriceCents = product.pricePerDay * durationDays * validatedData.quantity;
+    const totalDepositCents = product.deposit * validatedData.quantity;
 
     const basketItem = await addItemToBasket(basketId, {
       productId: validatedData.productId,
@@ -54,8 +69,8 @@ export async function POST(
       pickupDate: new Date(validatedData.pickupDate),
       dropDate: new Date(validatedData.dropDate),
       quantity: validatedData.quantity,
-      priceCents: priceCents * validatedData.quantity,
-      depositCents: depositCents * validatedData.quantity,
+      priceCents: totalPriceCents,
+      depositCents: totalDepositCents,
     });
 
     return NextResponse.json(basketItem, { status: 201 });

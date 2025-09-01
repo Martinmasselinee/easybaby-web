@@ -199,15 +199,36 @@ export function BasketProvider({ children }: BasketProviderProps) {
   };
 
   const addItemToBasket = async (item: Omit<BasketItem, 'id'>) => {
-    if (!state.basket) {
-      throw new Error('No active basket');
-    }
-
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
 
-      const response = await fetch(`/api/basket/${state.basket.id}/items`, {
+      console.log('Adding item to basket:', item);
+      console.log('Current basket state:', state.basket);
+
+      // If no basket exists, create one first
+      if (!state.basket) {
+        console.log('No basket exists, creating new basket...');
+        const createResponse = await fetch('/api/basket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userEmail: 'temp@example.com' }), // Temporary email
+        });
+
+        if (!createResponse.ok) {
+          throw new Error('Failed to create basket');
+        }
+
+        const newBasket = await createResponse.json();
+        console.log('Created new basket:', newBasket);
+        dispatch({ type: 'SET_BASKET', payload: newBasket });
+      }
+
+      // Now add the item to the basket
+      const currentBasket = state.basket;
+      console.log('Adding item to basket with ID:', currentBasket?.id);
+      
+      const response = await fetch(`/api/basket/${currentBasket!.id}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -226,8 +247,10 @@ export function BasketProvider({ children }: BasketProviderProps) {
       }
 
       const basketItem = await response.json();
+      console.log('Added basket item:', basketItem);
       dispatch({ type: 'ADD_ITEM', payload: basketItem });
     } catch (error) {
+      console.error('Error in addItemToBasket:', error);
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
       throw error;
     } finally {

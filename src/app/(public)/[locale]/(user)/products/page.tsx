@@ -236,9 +236,8 @@ function ProductsContent() {
       // Calculate total price for the duration
       const totalPriceCents = popupProduct.pricePerDay * durationDays;
       
-      // Create a temporary basket item for local storage
+      // Create basket item
       const basketItem = {
-        id: `${popupProduct.id}-${Date.now()}`, // Temporary ID
         productId: popupProduct.id,
         productName: popupProduct.name,
         pickupHotelId: data.pickupHotelId,
@@ -252,13 +251,8 @@ function ProductsContent() {
         depositCents: popupProduct.deposit,
       };
 
-      // Add to local basket (this will be synced to server later)
-      const currentBasket = JSON.parse(localStorage.getItem('easybaby-basket') || '{"items": []}');
-      currentBasket.items.push(basketItem);
-      localStorage.setItem('easybaby-basket', JSON.stringify(currentBasket));
-
-      // Force a page reload to update the basket icon
-      window.location.reload();
+      // Add to basket using the provider (this will create basket if needed)
+      await addItemToBasket(basketItem);
 
       // Show success message or notification
       console.log("Product added to basket!");
