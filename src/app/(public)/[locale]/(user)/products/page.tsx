@@ -35,7 +35,7 @@ const translations = {
     pricePerDay: (amount: string) => `${amount}/jour`,
     deposit: (amount: string) => `Caution : ${amount}`,
     availableIn: (count: number) => `Disponible dans ${count} hôtel${count !== 1 ? 's' : ''}`,
-    select: "Sélectionner",
+    select: "Réserver maintenant",
     notAvailable: "Indisponible",
     loading: "Chargement des produits...",
     error: "Erreur lors du chargement des produits",
@@ -55,7 +55,7 @@ const translations = {
     pricePerDay: (amount: string) => `${amount}/day`,
     deposit: (amount: string) => `Deposit: ${amount}`,
     availableIn: (count: number) => `Available in ${count} hotel${count !== 1 ? 's' : ''}`,
-    select: "Select",
+    select: "Book Now",
     notAvailable: "Not available",
     loading: "Loading products...",
     error: "Error loading products",
@@ -87,7 +87,7 @@ function ProductsContent() {
   const [cityName, setCityName] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { addItemToBasket, getBasketItemCount } = useBasket();
+  const { addItemToBasket, getBasketItemCount, state } = useBasket();
 
   // Load products for the selected dates
   useEffect(() => {
@@ -204,7 +204,9 @@ function ProductsContent() {
       const dropDate = departureDate ? new Date(departureDate) : new Date();
       dropDate.setDate(dropDate.getDate() + 2);
 
-      await addItemToBasket({
+      // Create a temporary basket item for local storage
+      const basketItem = {
+        id: `${product.id}-${Date.now()}`, // Temporary ID
         productId: product.id,
         productName: product.name,
         pickupHotelId: selectedHotel.id,
@@ -216,7 +218,15 @@ function ProductsContent() {
         quantity: 1,
         priceCents: product.pricePerDay,
         depositCents: product.deposit,
-      });
+      };
+
+      // Add to local basket (this will be synced to server later)
+      const currentBasket = JSON.parse(localStorage.getItem('easybaby-basket') || '{"items": []}');
+      currentBasket.items.push(basketItem);
+      localStorage.setItem('easybaby-basket', JSON.stringify(currentBasket));
+
+      // Force a page reload to update the basket icon
+      window.location.reload();
 
       // Show success message or notification
       console.log("Product added to basket!");
@@ -406,6 +416,17 @@ function ProductsContent() {
                         >
                           {product.availability.available > 0 ? t.select : t.notAvailable}
                         </Button>
+                        <Button
+                          className={`px-3 ${
+                            product.availability.available === 0
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-pink-600 hover:bg-pink-700 text-white'
+                          }`}
+                          onClick={(e) => handleAddToBasket(product, e)}
+                          disabled={product.availability.available === 0}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                        </Button>
                       </div>
                     </>
                   ) : (
@@ -472,9 +493,11 @@ function ProductsContent() {
                           {product.availability.available > 0 ? t.select : t.notAvailable}
                         </Button>
                         <Button
-                          variant="outline"
-                          size="sm"
-                          className="px-3"
+                          className={`px-3 ${
+                            product.availability.available === 0
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-pink-600 hover:bg-pink-700 text-white'
+                          }`}
                           onClick={(e) => handleAddToBasket(product, e)}
                           disabled={product.availability.available === 0}
                         >
