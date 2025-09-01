@@ -277,7 +277,7 @@ export function BasketProvider({ children }: BasketProviderProps) {
         // Update state with new basket
         dispatch({ type: 'SET_BASKET', payload: newBasket });
         
-        // Use the newly created basket
+        // Use the newly created basket directly
         basketToUse = newBasket;
       }
 
