@@ -41,6 +41,12 @@ export function PublicHeader() {
     return segments.join("/");
   };
 
+  const handleBasketToggle = (open: boolean) => {
+    setIsBasketOpen(open);
+    // Dispatch custom event for other components
+    window.dispatchEvent(new CustomEvent('basket-toggle', { detail: { isOpen: open } }));
+  };
+
   return (
     <header className="border-b bg-pink-600">
       <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto w-full flex h-16 items-center justify-between">
@@ -51,7 +57,7 @@ export function PublicHeader() {
         </div>
         <div className="flex items-center gap-4">
           <BasketIcon 
-            onClick={() => setIsBasketOpen(true)} 
+            onClick={() => handleBasketToggle(true)} 
             className="text-white hover:bg-white/20"
           />
           <DropdownMenu>
@@ -75,7 +81,7 @@ export function PublicHeader() {
       
       <BasketDrawer 
         isOpen={isBasketOpen} 
-        onClose={() => setIsBasketOpen(false)} 
+        onClose={() => handleBasketToggle(false)} 
       />
     </header>
   );

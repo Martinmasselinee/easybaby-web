@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Package, Hotel, Grid3X3, List, Search, ShoppingCart } from "lucide-react";
 import { useBasket } from "@/components/basket/basket-provider";
+import { AddToBasketPopup } from "@/components/basket/add-to-basket-popup";
 
 // Type for products with availability
 type Product = {
@@ -88,6 +89,22 @@ function ProductsContent() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { addItemToBasket, getBasketItemCount, state } = useBasket();
+
+  // Popup state
+  const [popupProduct, setPopupProduct] = useState<Product | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  // Get count of specific product in basket
+  const getProductCountInBasket = (productId: string) => {
+    if (!state.basket) return 0;
+    return state.basket.items.filter(item => item.productId === productId).length;
+  };
+
+  // Calculate real-time availability (total - reserved in basket)
+  const getRealTimeAvailability = (product: Product) => {
+    const reservedInBasket = getProductCountInBasket(product.id);
+    return Math.max(0, product.availability.available - reservedInBasket);
+  };
 
   // Load products for the selected dates
   useEffect(() => {
@@ -176,13 +193,24 @@ function ProductsContent() {
   const handleAddToBasket = async (product: Product, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent navigation
     
-    if (product.availability.available === 0) {
+    // Check real-time availability
+    const realTimeAvailability = getRealTimeAvailability(product);
+    if (realTimeAvailability === 0) {
       return; // Product not available
     }
 
+    // Open popup for confirmation
+    setPopupProduct(product);
+    setIsPopupOpen(true);
+  };
+
+  // Handle popup confirmation
+  const handlePopupConfirm = async (dates: { pickupDate: Date; dropDate: Date }) => {
+    if (!popupProduct) return;
+
     try {
       // Get real hotel data for this product
-      const hotelResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${product.id}`);
+      const hotelResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${popupProduct.id}`);
       if (!hotelResponse.ok) {
         throw new Error('Failed to fetch hotel data');
       }
@@ -197,27 +225,20 @@ function ProductsContent() {
       // Use the first available hotel
       const selectedHotel = availableHotels[0];
       
-      // Use the search dates or default to tomorrow
-      const pickupDate = arrivalDate ? new Date(arrivalDate) : new Date();
-      pickupDate.setDate(pickupDate.getDate() + 1);
-      
-      const dropDate = departureDate ? new Date(departureDate) : new Date();
-      dropDate.setDate(dropDate.getDate() + 2);
-
       // Create a temporary basket item for local storage
       const basketItem = {
-        id: `${product.id}-${Date.now()}`, // Temporary ID
-        productId: product.id,
-        productName: product.name,
+        id: `${popupProduct.id}-${Date.now()}`, // Temporary ID
+        productId: popupProduct.id,
+        productName: popupProduct.name,
         pickupHotelId: selectedHotel.id,
         pickupHotelName: selectedHotel.name,
         dropHotelId: selectedHotel.id,
         dropHotelName: selectedHotel.name,
-        pickupDate: pickupDate,
-        dropDate: dropDate,
+        pickupDate: dates.pickupDate,
+        dropDate: dates.dropDate,
         quantity: 1,
-        priceCents: product.pricePerDay,
-        depositCents: product.deposit,
+        priceCents: popupProduct.pricePerDay,
+        depositCents: popupProduct.deposit,
       };
 
       // Add to local basket (this will be synced to server later)
@@ -397,35 +418,42 @@ function ProductsContent() {
                           <span>{t.availableIn(product.availability.hotelsCount)}</span>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          product.availability.available > 0
+                          getRealTimeAvailability(product) > 0
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {product.availability.available > 0 
-                            ? `${product.availability.available} disponible${product.availability.available !== 1 ? 's' : ''}`
+                          {getRealTimeAvailability(product) > 0 
+                            ? `${getRealTimeAvailability(product)} disponible${getRealTimeAvailability(product) !== 1 ? 's' : ''}`
                             : t.notAvailable
                           }
                         </div>
                         <Button
                           className={`${
-                            product.availability.available === 0
+                            getRealTimeAvailability(product) === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-pink-600 hover:bg-pink-700'
                           }`}
-                          disabled={product.availability.available === 0}
+                          disabled={getRealTimeAvailability(product) === 0}
                         >
-                          {product.availability.available > 0 ? t.select : t.notAvailable}
+                          {getRealTimeAvailability(product) > 0 ? t.select : t.notAvailable}
                         </Button>
                         <Button
                           className={`px-3 ${
-                            product.availability.available === 0
+                            getRealTimeAvailability(product) === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-pink-600 hover:bg-pink-700 text-white'
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                           }`}
                           onClick={(e) => handleAddToBasket(product, e)}
-                          disabled={product.availability.available === 0}
+                          disabled={getRealTimeAvailability(product) === 0}
                         >
-                          <ShoppingCart className="h-4 w-4" />
+                          <div className="relative">
+                            <ShoppingCart className="h-4 w-4" />
+                            {getProductCountInBasket(product.id) > 0 && (
+                              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                                {getProductCountInBasket(product.id)}
+                              </span>
+                            )}
+                          </div>
                         </Button>
                       </div>
                     </>
@@ -440,12 +468,12 @@ function ProductsContent() {
                         
                         {/* Availability Badge */}
                         <div className={`absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium ${
-                          product.availability.available > 0
+                          getRealTimeAvailability(product) > 0
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {product.availability.available > 0 
-                            ? `${product.availability.available} disponible${product.availability.available !== 1 ? 's' : ''}`
+                          {getRealTimeAvailability(product) > 0 
+                            ? `${getRealTimeAvailability(product)} disponible${getRealTimeAvailability(product) !== 1 ? 's' : ''}`
                             : t.notAvailable
                           }
                         </div>
@@ -484,24 +512,31 @@ function ProductsContent() {
                       <div className="flex space-x-2">
                         <Button
                           className={`flex-1 ${
-                            product.availability.available === 0
+                            getRealTimeAvailability(product) === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-pink-600 hover:bg-pink-700'
                           }`}
-                          disabled={product.availability.available === 0}
+                          disabled={getRealTimeAvailability(product) === 0}
                         >
-                          {product.availability.available > 0 ? t.select : t.notAvailable}
+                          {getRealTimeAvailability(product) > 0 ? t.select : t.notAvailable}
                         </Button>
                         <Button
                           className={`px-3 ${
-                            product.availability.available === 0
+                            getRealTimeAvailability(product) === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-pink-600 hover:bg-pink-700 text-white'
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                           }`}
                           onClick={(e) => handleAddToBasket(product, e)}
-                          disabled={product.availability.available === 0}
+                          disabled={getRealTimeAvailability(product) === 0}
                         >
-                          <ShoppingCart className="h-4 w-4" />
+                          <div className="relative">
+                            <ShoppingCart className="h-4 w-4" />
+                            {getProductCountInBasket(product.id) > 0 && (
+                              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                                {getProductCountInBasket(product.id)}
+                              </span>
+                            )}
+                          </div>
                         </Button>
                       </div>
                     </>
@@ -512,6 +547,23 @@ function ProductsContent() {
           )}
         </div>
       </div>
+
+      {/* Add to Basket Popup */}
+      {popupProduct && (
+        <AddToBasketPopup
+          isOpen={isPopupOpen}
+          onClose={() => {
+            setIsPopupOpen(false);
+            setPopupProduct(null);
+          }}
+          onConfirm={handlePopupConfirm}
+          product={popupProduct}
+          currentPickupDate={new Date(arrivalDate)}
+          currentDropDate={new Date(departureDate)}
+          citySlug={citySlug}
+          locale={locale}
+        />
+      )}
     </div>
   );
 }
