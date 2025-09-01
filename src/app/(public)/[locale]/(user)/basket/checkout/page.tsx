@@ -25,7 +25,7 @@ const translations = {
     },
     total: "Total",
     deposit: "Caution",
-    depositNotice: "Caution : prélèvement de 0€ maintenant. En cas de non-retour ou dommage, nous pourrons débiter la caution.",
+    depositNotice: "Caution : aucun prélèvement maintenant. En cas de non-retour ou dommage, nous pourrons débiter la caution.",
     email: "Email",
     phone: "Téléphone",
     code: "Code de réduction",
@@ -57,7 +57,7 @@ const translations = {
     },
     total: "Total",
     deposit: "Deposit",
-    depositNotice: "Deposit: €0 charged now. In case of non-return or damage, we may charge the deposit.",
+    depositNotice: "Deposit: no charge now. In case of non-return or damage, we may charge the deposit.",
     email: "Email",
     phone: "Phone",
     code: "Discount code",
@@ -254,10 +254,14 @@ function BasketCheckoutContent() {
       const citySlug = searchParams.get('city') || 'paris';
       console.log('citySlug:', citySlug);
       
+      // Ensure dates are properly converted to Date objects
+      const pickupDate = new Date(firstItem.pickupDate);
+      const dropDate = new Date(firstItem.dropDate);
+      
       const params = new URLSearchParams({
         city: citySlug,
-        arrival: firstItem.pickupDate.toISOString().split('T')[0],
-        departure: firstItem.dropDate.toISOString().split('T')[0]
+        arrival: pickupDate.toISOString().split('T')[0],
+        departure: dropDate.toISOString().split('T')[0]
       });
       
       const url = `/${locale}/products?${params.toString()}`;

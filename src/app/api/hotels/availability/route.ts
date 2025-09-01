@@ -78,6 +78,14 @@ export async function GET(request: NextRequest) {
 
               // Soustraire le nombre de réservations qui se chevauchent
               availableQuantity = Math.max(0, item.quantity - overlappingReservations);
+              
+              console.log(`Hotel ${hotel.name}, Product ${item.productId}:`, {
+                totalQuantity: item.quantity,
+                overlappingReservations,
+                availableQuantity,
+                dateStart: startDate,
+                dateEnd: endDate
+              });
             }
 
             return {

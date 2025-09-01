@@ -9,7 +9,14 @@ import { Calendar, MapPin, Package, X, Check } from 'lucide-react';
 interface AddToBasketPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (dates: { pickupDate: Date; dropDate: Date }) => void;
+  onConfirm: (data: { 
+    pickupDate: Date; 
+    dropDate: Date; 
+    pickupTime: string; 
+    dropTime: string; 
+    pickupHotelId: string; 
+    dropHotelId: string; 
+  }) => void;
   product: {
     id: string;
     name: string;
@@ -34,6 +41,11 @@ export function AddToBasketPopup({
 }: AddToBasketPopupProps) {
   const [pickupDate, setPickupDate] = useState(currentPickupDate);
   const [dropDate, setDropDate] = useState(currentDropDate);
+  const [pickupTime, setPickupTime] = useState("10:00");
+  const [dropTime, setDropTime] = useState("14:00");
+  const [pickupHotelId, setPickupHotelId] = useState("");
+  const [dropHotelId, setDropHotelId] = useState("");
+  const [hotels, setHotels] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
@@ -46,13 +58,19 @@ export function AddToBasketPopup({
       editDates: 'Modifier les dates',
       pickupDate: 'Date de retrait',
       dropDate: 'Date de retour',
+      pickupTime: 'Heure de retrait',
+      dropTime: 'Heure de retour',
+      pickupHotel: 'Hôtel de retrait',
+      dropHotel: 'Hôtel de retour',
+      selectHotel: 'Sélectionner un hôtel',
       available: 'Disponible',
       notAvailable: 'Non disponible',
       checking: 'Vérification de la disponibilité...',
       confirmDates: 'Confirmer les nouvelles dates',
       cancel: 'Annuler',
       error: 'Erreur lors de la vérification de la disponibilité',
-      invalidDates: 'La date de retour doit être après la date de retrait'
+      invalidDates: 'La date de retour doit être après la date de retrait',
+      noHotelsAvailable: 'Aucun hôtel disponible pour ces dates'
     },
     en: {
       title: 'Add to basket',
@@ -60,17 +78,54 @@ export function AddToBasketPopup({
       editDates: 'Edit dates',
       pickupDate: 'Pickup date',
       dropDate: 'Return date',
+      pickupTime: 'Pickup time',
+      dropTime: 'Return time',
+      pickupHotel: 'Pickup hotel',
+      dropHotel: 'Return hotel',
+      selectHotel: 'Select a hotel',
       available: 'Available',
       notAvailable: 'Not available',
       checking: 'Checking availability...',
       confirmDates: 'Confirm new dates',
       cancel: 'Cancel',
       error: 'Error checking availability',
-      invalidDates: 'Return date must be after pickup date'
+      invalidDates: 'Return date must be after pickup date',
+      noHotelsAvailable: 'No hotels available for these dates'
     }
   };
 
   const t = translations[locale as keyof typeof translations] || translations.fr;
+
+  // Load hotels when popup opens
+  useEffect(() => {
+    if (isOpen && !isEditing) {
+      loadHotels();
+    }
+  }, [isOpen, isEditing]);
+
+  // Load available hotels
+  const loadHotels = async () => {
+    try {
+      const response = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${product.id}&dateStart=${currentPickupDate.toISOString()}&dateEnd=${currentDropDate.toISOString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to load hotels');
+      }
+
+      const hotelsData = await response.json();
+      const availableHotels = hotelsData.filter((hotel: any) => hotel.hasAvailableProducts);
+      setHotels(availableHotels);
+      
+      // Auto-select first available hotel
+      if (availableHotels.length > 0) {
+        setPickupHotelId(availableHotels[0].id);
+        setDropHotelId(availableHotels[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading hotels:', err);
+      setError(t.error);
+    }
+  };
 
   // Check availability when dates change
   useEffect(() => {
@@ -93,11 +148,20 @@ export function AddToBasketPopup({
           throw new Error('Failed to check availability');
         }
 
-        const hotels = await response.json();
-        const hasAvailability = hotels.some((hotel: any) => hotel.hasAvailableProducts);
+        const hotelsData = await response.json();
+        const availableHotels = hotelsData.filter((hotel: any) => hotel.hasAvailableProducts);
         
-        setIsAvailable(hasAvailability);
-        setError(null);
+        setHotels(availableHotels);
+        setIsAvailable(availableHotels.length > 0);
+        
+        if (availableHotels.length > 0) {
+          setError(null);
+          // Auto-select first available hotel
+          setPickupHotelId(availableHotels[0].id);
+          setDropHotelId(availableHotels[0].id);
+        } else {
+          setError(t.noHotelsAvailable);
+        }
       } catch (err) {
         setError(t.error);
         setIsAvailable(false);
@@ -108,10 +172,30 @@ export function AddToBasketPopup({
 
     const timeoutId = setTimeout(checkAvailability, 500); // Debounce
     return () => clearTimeout(timeoutId);
-  }, [pickupDate, dropDate, citySlug, product.id, isEditing, t.error, t.invalidDates]);
+  }, [pickupDate, dropDate, citySlug, product.id, isEditing, t.error, t.invalidDates, t.noHotelsAvailable]);
 
   const handleConfirm = () => {
-    onConfirm({ pickupDate, dropDate });
+    if (!isEditing) {
+      // Use current dates and auto-selected hotel
+      onConfirm({ 
+        pickupDate: currentPickupDate, 
+        dropDate: currentDropDate,
+        pickupTime: "10:00",
+        dropTime: "14:00",
+        pickupHotelId: pickupHotelId,
+        dropHotelId: dropHotelId
+      });
+    } else {
+      // Use edited dates and selected hotel
+      onConfirm({ 
+        pickupDate, 
+        dropDate,
+        pickupTime,
+        dropTime,
+        pickupHotelId,
+        dropHotelId
+      });
+    }
     onClose();
   };
 
@@ -205,6 +289,17 @@ export function AddToBasketPopup({
                   </div>
                   
                   <div>
+                    <Label htmlFor="pickupTime">{t.pickupTime}</Label>
+                    <Input
+                      id="pickupTime"
+                      type="time"
+                      value={pickupTime}
+                      onChange={(e) => setPickupTime(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
                     <Label htmlFor="dropDate">{t.dropDate}</Label>
                     <Input
                       id="dropDate"
@@ -214,6 +309,53 @@ export function AddToBasketPopup({
                       min={pickupDate.toISOString().split('T')[0]}
                       className="mt-1"
                     />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="dropTime">{t.dropTime}</Label>
+                    <Input
+                      id="dropTime"
+                      type="time"
+                      value={dropTime}
+                      onChange={(e) => setDropTime(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="pickupHotel">{t.pickupHotel}</Label>
+                    <select
+                      id="pickupHotel"
+                      value={pickupHotelId}
+                      onChange={(e) => setPickupHotelId(e.target.value)}
+                      className="w-full border rounded-md p-2 mt-1"
+                      required
+                    >
+                      <option value="">{t.selectHotel}</option>
+                      {hotels.map((hotel) => (
+                        <option key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="dropHotel">{t.dropHotel}</Label>
+                    <select
+                      id="dropHotel"
+                      value={dropHotelId}
+                      onChange={(e) => setDropHotelId(e.target.value)}
+                      className="w-full border rounded-md p-2 mt-1"
+                      required
+                    >
+                      <option value="">{t.selectHotel}</option>
+                      {hotels.map((hotel) => (
+                        <option key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

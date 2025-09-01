@@ -205,29 +205,31 @@ function ProductsContent() {
   };
 
   // Handle popup confirmation
-  const handlePopupConfirm = async (dates: { pickupDate: Date; dropDate: Date }) => {
+  const handlePopupConfirm = async (data: { 
+    pickupDate: Date; 
+    dropDate: Date; 
+    pickupTime: string; 
+    dropTime: string; 
+    pickupHotelId: string; 
+    dropHotelId: string; 
+  }) => {
     if (!popupProduct) return;
 
     try {
-      // Get real hotel data for this product
-      const hotelResponse = await fetch(`/api/hotels/availability?citySlug=${citySlug}&productId=${popupProduct.id}`);
-      if (!hotelResponse.ok) {
+      // Get hotel data
+      const pickupHotelResponse = await fetch(`/api/hotels/${data.pickupHotelId}`);
+      const dropHotelResponse = await fetch(`/api/hotels/${data.dropHotelId}`);
+      
+      if (!pickupHotelResponse.ok || !dropHotelResponse.ok) {
         throw new Error('Failed to fetch hotel data');
       }
       
-      const hotels = await hotelResponse.json();
-      const availableHotels = hotels.filter((hotel: any) => hotel.hasAvailableProducts);
-      
-      if (availableHotels.length === 0) {
-        throw new Error('No available hotels for this product');
-      }
-
-      // Use the first available hotel
-      const selectedHotel = availableHotels[0];
+      const pickupHotel = await pickupHotelResponse.json();
+      const dropHotel = await dropHotelResponse.json();
       
       // Calculate duration in days
-      const startDate = new Date(dates.pickupDate);
-      const endDate = new Date(dates.dropDate);
+      const startDate = new Date(data.pickupDate);
+      const endDate = new Date(data.dropDate);
       const durationMs = endDate.getTime() - startDate.getTime();
       const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
       
@@ -239,12 +241,12 @@ function ProductsContent() {
         id: `${popupProduct.id}-${Date.now()}`, // Temporary ID
         productId: popupProduct.id,
         productName: popupProduct.name,
-        pickupHotelId: selectedHotel.id,
-        pickupHotelName: selectedHotel.name,
-        dropHotelId: selectedHotel.id,
-        dropHotelName: selectedHotel.name,
-        pickupDate: dates.pickupDate,
-        dropDate: dates.dropDate,
+        pickupHotelId: data.pickupHotelId,
+        pickupHotelName: pickupHotel.name,
+        dropHotelId: data.dropHotelId,
+        dropHotelName: dropHotel.name,
+        pickupDate: data.pickupDate,
+        dropDate: data.dropDate,
         quantity: 1,
         priceCents: totalPriceCents,
         depositCents: popupProduct.deposit,
