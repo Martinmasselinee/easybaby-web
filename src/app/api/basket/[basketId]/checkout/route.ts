@@ -103,19 +103,30 @@ export async function POST(
 
     console.log('Created basket reservation:', basketReservation.id);
 
-    // Create Stripe Payment Intent
-    const paymentIntent = await stripe().paymentIntents.create({
-      amount: totalPriceCents + totalDepositCents,
-      currency: "eur",
-      metadata: {
-        basketId,
-        basketReservationId: basketReservation.id,
-        reservationCode,
-        userEmail,
-      },
-    });
+    // Verify Stripe is available
+    if (!stripe) {
+      throw new Error('Stripe is not initialized');
+    }
 
-    console.log('Created payment intent:', paymentIntent.id);
+    // Create Stripe Payment Intent
+    let paymentIntent;
+    try {
+      console.log('Creating Stripe payment intent with amount:', totalPriceCents + totalDepositCents);
+      paymentIntent = await stripe().paymentIntents.create({
+        amount: totalPriceCents + totalDepositCents,
+        currency: "eur",
+        metadata: {
+          basketId,
+          basketReservationId: basketReservation.id,
+          reservationCode,
+          userEmail,
+        },
+      });
+      console.log('Created payment intent:', paymentIntent.id);
+    } catch (stripeError) {
+      console.error('Stripe payment intent creation failed:', stripeError);
+      throw stripeError;
+    }
 
     // Update basket reservation with payment intent
     await prisma.basketReservation.update({
